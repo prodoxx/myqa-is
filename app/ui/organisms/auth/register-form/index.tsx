@@ -6,7 +6,6 @@ export type RegisterFormProps = {
   className?: string;
   isSubmitting?: boolean;
   initialValues?: {
-    name?: string;
     email?: string;
     password?: string;
   };
@@ -19,18 +18,6 @@ export const RegisterForm = (props: RegisterFormProps) => {
   return (
     <Form method="POST" action="/register" className={props.className}>
       {props.errors?.general ? <span className="text-red-500">{props.errors.general?.toString()}</span> : null}
-
-      <InputField
-        autoComplete="off"
-        disabled={props.isSubmitting}
-        isFullWidth
-        name="name"
-        label="Name"
-        type="text"
-        placeholder="Your Name"
-        defaultValue={props.initialValues?.name}
-        labelClassName="sr-only"
-      />
 
       <InputField
         autoComplete="off"

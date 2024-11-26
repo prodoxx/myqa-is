@@ -1,11 +1,12 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import { useNavigation } from '@remix-run/react';
+import { Link, useNavigation } from '@remix-run/react';
 import { AuthorizationError } from 'remix-auth';
 import { typedjson, useTypedActionData } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import { getErrorMessage } from '~/lib/error-messages';
 import { commitSession, getSession } from '~/session.server';
+import { Button } from '~/ui/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/ui/atoms/card';
 import { Separator } from '~/ui/atoms/separator';
 import { MainLayout } from '~/ui/layouts/main';
@@ -102,6 +103,16 @@ const Login = () => {
           <GoogleLoginForm />
         </CardContent>
       </Card>
+
+      <Button
+        asChild
+        type="submit"
+        size="lg"
+        variant="outline"
+        className="!text-black !bg-white !w-full !mx-auto md:!max-w-xl"
+      >
+        <Link to="/register">Sign Up</Link>
+      </Button>
     </MainLayout>
   );
 };

@@ -13,6 +13,8 @@ import { Button } from '~/ui/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/ui/atoms/card';
 import { MainLayout } from '~/ui/layouts/main';
 import { RegisterForm } from '~/ui/organisms/auth/register-form';
+import { Separator } from '~/ui/atoms/separator';
+import { GoogleLoginForm } from '~/ui/organisms/auth/google-form';
 
 const getValuesFromRequest = async (formData: FormData) => {
   const values = Object.fromEntries(formData);
@@ -95,17 +97,19 @@ const Register = () => {
           <CardDescription className="text-gray-600">Sign Up to Start Earning with Your FAQ</CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex flex-col space-y-4">
           <RegisterForm
             className="flex flex-col space-y-2"
             isSubmitting={transition.state === 'submitting'}
             errors={actionData?.errors}
             initialValues={{
-              name: actionData?.values?.name?.toString() ?? '',
               email: actionData?.values?.email?.toString() ?? '',
               password: actionData?.values?.password?.toString() ?? '',
             }}
           />
+
+          <Separator />
+          <GoogleLoginForm />
         </CardContent>
       </Card>
 
@@ -113,7 +117,7 @@ const Register = () => {
         asChild
         type="submit"
         size="lg"
-        variant="default"
+        variant="outline"
         className="!text-black !bg-white !w-full !mx-auto md:!max-w-xl"
       >
         <Link to="/login">Sign In</Link>
