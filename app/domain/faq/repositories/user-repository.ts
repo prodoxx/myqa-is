@@ -82,8 +82,6 @@ export class UserRepository {
     const result = await prisma.user.upsert({
       create: {
         email,
-        username: email,
-        password: 'noop',
         UserProfile: {
           create: {},
         },
