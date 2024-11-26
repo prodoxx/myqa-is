@@ -1,16 +1,16 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import { Link, useNavigation } from '@remix-run/react';
+import { useNavigation } from '@remix-run/react';
 import { AuthorizationError } from 'remix-auth';
+import { typedjson, useTypedActionData } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import { getErrorMessage } from '~/lib/error-messages';
 import { commitSession, getSession } from '~/session.server';
-import { SiteNav } from '~/ui/molecules/site-nav';
-import { LoginForm } from '~/ui/organisms/auth/login-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/ui/atoms/card';
-import { typedjson, useTypedActionData } from 'remix-typedjson';
+import { Separator } from '~/ui/atoms/separator';
 import { MainLayout } from '~/ui/layouts/main';
-import { Button } from '~/ui/atoms/button';
+import { GoogleLoginForm } from '~/ui/organisms/auth/google-form';
+import { LoginForm } from '~/ui/organisms/auth/login-form';
 
 const getValuesFromRequest = async (request: Request) => {
   const formData = await request.formData();
@@ -87,7 +87,7 @@ const Login = () => {
           <CardDescription className="text-gray-600">Start adding your FAQ now!</CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex flex-col space-y-4">
           <LoginForm
             className="flex flex-col space-y-2"
             isSubmitting={transition.state === 'submitting'}
@@ -97,18 +97,11 @@ const Login = () => {
               password: actionData?.values?.password?.toString() ?? '',
             }}
           />
+
+          <Separator />
+          <GoogleLoginForm />
         </CardContent>
       </Card>
-
-      <Button
-        asChild
-        type="submit"
-        size="lg"
-        variant="default"
-        className="!text-black !bg-white !w-full !mx-auto md:!max-w-xl"
-      >
-        <Link to="/register">Sign Up</Link>
-      </Button>
     </MainLayout>
   );
 };

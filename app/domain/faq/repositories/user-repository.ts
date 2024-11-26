@@ -77,4 +77,25 @@ export class UserRepository {
 
     return await this.rebuildEntity(result);
   }
+
+  static async findOrCreate(email: string) {
+    const result = await prisma.user.upsert({
+      create: {
+        email,
+        username: email,
+        password: 'noop',
+        UserProfile: {
+          create: {},
+        },
+      },
+      update: {
+        email,
+      },
+      where: {
+        email,
+      },
+    });
+
+    return await this.rebuildEntity(result);
+  }
 }
