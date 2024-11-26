@@ -1,5 +1,6 @@
 import type { UserProfile as UserProfileORM } from '@prisma/client';
-import Failure from '~/lib/failure';
+import { ExternalLinkEntity } from './external-link';
+import { AssetEntity } from './asset';
 
 export class UserProfileEntity {
   id?: UserProfileORM['id'];
@@ -8,14 +9,18 @@ export class UserProfileEntity {
   country: UserProfileORM['country'];
   dateOfBirth: UserProfileORM['dateOfBirth'];
   userId: UserProfileORM['userId'];
+  ExternalLinks?: ExternalLinkEntity[];
+  Avatar?: AssetEntity;
 
-  constructor(userProfile: UserProfileORM) {
+  constructor(userProfile: UserProfileORM & { ExternalLinks?: ExternalLinkEntity[]; Avatar?: AssetEntity }) {
     this.id = userProfile?.id;
     this.createdAt = userProfile?.createdAt;
     this.updatedAt = userProfile?.updatedAt;
     this.country = userProfile?.country;
     this.dateOfBirth = userProfile?.dateOfBirth;
     this.userId = userProfile?.userId;
+    this.ExternalLinks = userProfile?.ExternalLinks;
+    this.Avatar = userProfile?.Avatar;
   }
 
   isEqual(userProfile: UserProfileEntity) {
@@ -30,6 +35,8 @@ export class UserProfileEntity {
       country: this.country,
       dateOfBirth: this.dateOfBirth,
       userId: this.userId,
+      ExternalLinks: this.ExternalLinks?.map((c) => c.json()),
+      Avatar: this.Avatar?.json(),
     } as UserProfileDTO;
   }
 }

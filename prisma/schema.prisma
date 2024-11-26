@@ -260,21 +260,39 @@ enum CountryCode {
 }
 
 model User {
-  id          Int           @id @default(autoincrement())
-  username    String?       @unique @db.VarChar(255)
-  password    String?       @db.VarChar(255)
-  email       String        @unique @db.VarChar(255)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id          Int          @id @default(autoincrement())
+  username    String?      @unique @db.VarChar(255)
+  password    String?      @db.VarChar(255)
+  email       String       @unique @db.VarChar(255)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   UserProfile UserProfile?
 }
 
 model UserProfile {
-  id              String                 @id @default(cuid())
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
-  country         CountryCode?
-  dateOfBirth     DateTime?
-  userId          Int                    @unique
-  User            User                   @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  id            String         @id @default(cuid())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  country       CountryCode?
+  dateOfBirth   DateTime?
+  userId        Int            @unique
+  User          User           @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  about         String?
+  Avatar        Asset?
+  ExternalLinks ExternalLink[]
+}
+
+model ExternalLink {
+  id            String      @id @default(cuid())
+  name          String
+  url           String
+  userProfileId String
+  UserProfile   UserProfile @relation(fields: [userProfileId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+}
+
+model Asset {
+  id            String       @id @default(cuid())
+  url           String
+  userProfileId String?      @unique
+  UserProfile   UserProfile? @relation(fields: [userProfileId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
