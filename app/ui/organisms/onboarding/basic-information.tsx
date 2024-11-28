@@ -1,15 +1,11 @@
-import { Form } from '@remix-run/react';
 import { useTypedFetcher } from 'remix-typedjson';
 import { OnboardUserFormErrors } from '~/domain/faq/services/onboard-user';
-import { Avatar } from '~/ui/atoms/avatar';
 import { Button } from '~/ui/atoms/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/ui/atoms/card';
+import { ErrorMessage } from '~/ui/atoms/error-message';
 import { Input } from '~/ui/atoms/input-field';
 import { Label } from '~/ui/atoms/label';
 import { Textarea } from '~/ui/atoms/text-area';
-import { useDropzone } from 'react-dropzone';
-import React from 'react';
-import { ErrorMessage } from '~/ui/atoms/error-message';
 import { ImageInput } from '~/ui/molecules/image-input';
 
 export const BasicInformationForm = () => {

@@ -5,6 +5,12 @@ export class AssetEntity {
   url?: AssetORM['url'];
   userProfileId?: AssetORM['userProfileId'];
 
+  constructor(data: Partial<AssetEntity>) {
+    this.id = data?.id;
+    this.url = data?.url;
+    this.userProfileId = data?.userProfileId;
+  }
+
   json(): AssetDTO {
     return {
       id: this.id,

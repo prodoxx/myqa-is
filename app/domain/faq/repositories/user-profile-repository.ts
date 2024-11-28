@@ -1,6 +1,5 @@
 import prisma from '~/infrastructure/database/index.server';
 import { UserProfileEntity } from '../entities/user-profile';
-import { UserProfile } from '@prisma/client';
 
 export class UserProfileRepository {
   static async rebuildEntity(data: any) {
@@ -13,10 +12,14 @@ export class UserProfileRepository {
     });
   }
 
-  static async onboardUserByUserId(userId: number, updates: Partial<Pick<UserProfile, 'about'>>) {
+  static async onboardUserByUserId(
+    userId: number,
+    updates: Partial<Pick<UserProfileEntity, 'Avatar' | 'about' | 'ExternalLinks'> & { username?: string }>,
+  ) {
     const result = await prisma.userProfile.update({
       data: {
         about: updates?.about,
+        ...(updates?.username ? { User: { update: { username: updates?.username! } } } : {}),
       },
       where: {
         userId,

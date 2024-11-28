@@ -39,6 +39,10 @@ export class UserProfileEntity {
       return OnboardingFlow.BasicInformation;
     }
 
+    if (!this.ExternalLinks?.length) {
+      return OnboardingFlow.SocialLinks;
+    }
+
     return OnboardingFlow.Done;
   }
 

@@ -1,9 +1,18 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  unstable_composeUploadHandlers,
+  unstable_createFileUploadHandler,
+  unstable_createMemoryUploadHandler,
+  unstable_parseMultipartFormData,
+} from '@remix-run/node';
 import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
+import { OnboardUser } from '~/domain/faq/services/onboard-user';
 import { MainLayout } from '~/ui/layouts/main';
 import { OnboardingFlow, OnboardingForm } from '~/ui/organisms/onboarding';
+import { uploadHandler } from '~/utils/file-upload-handler';
 
 export const loader = async (args: LoaderFunctionArgs) => {
   const searchParams = new URL(args.request.url).searchParams;
@@ -28,8 +37,15 @@ export const loader = async (args: LoaderFunctionArgs) => {
   });
 };
 
-export const action = (args: ActionFunctionArgs) => {
-  return null;
+export const action = async (args: ActionFunctionArgs) => {
+  const userId = (
+    await authenticator.isAuthenticated(args.request, {
+      failureRedirect: '/login',
+    })
+  )?.id;
+
+  const updatedUser = await new OnboardUser(userId!, args.request).call();
+  return redirect(`/onboarding?step=${updatedUser.UserProfile.currentOnboardingStep(updatedUser)}`);
 };
 
 const Onboarding = () => {
