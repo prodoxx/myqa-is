@@ -13,11 +13,10 @@ export class UserProfileRepository {
     });
   }
 
-  static async onboardUserByUserId(userId: number, updates: Partial<Pick<UserProfile, 'dateOfBirth' | 'country'>>) {
+  static async onboardUserByUserId(userId: number, updates: Partial<Pick<UserProfile, 'about'>>) {
     const result = await prisma.userProfile.update({
       data: {
-        dateOfBirth: updates?.dateOfBirth,
-        country: updates?.country,
+        about: updates?.about,
       },
       where: {
         userId,

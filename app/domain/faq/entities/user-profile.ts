@@ -1,6 +1,8 @@
 import type { UserProfile as UserProfileORM } from '@prisma/client';
 import { ExternalLinkEntity } from './external-link';
 import { AssetEntity } from './asset';
+import { OnboardingFlow } from '~/ui/organisms/onboarding';
+import { UserEntity } from './user';
 
 export class UserProfileEntity {
   id?: UserProfileORM['id'];
@@ -11,6 +13,7 @@ export class UserProfileEntity {
   userId: UserProfileORM['userId'];
   ExternalLinks?: ExternalLinkEntity[];
   Avatar?: AssetEntity;
+  about?: UserProfileORM['about'];
 
   constructor(userProfile: UserProfileORM & { ExternalLinks?: ExternalLinkEntity[]; Avatar?: AssetEntity }) {
     this.id = userProfile?.id;
@@ -27,6 +30,18 @@ export class UserProfileEntity {
     return this.id === userProfile.id;
   }
 
+  isOnboardingComplete() {
+    return this.about && this.Avatar;
+  }
+
+  currentOnboardingStep(user: UserEntity) {
+    if (!user.username && (!this.Avatar || !this.about)) {
+      return OnboardingFlow.BasicInformation;
+    }
+
+    return OnboardingFlow.Done;
+  }
+
   json(): UserProfileDTO {
     return {
       id: this.id,
@@ -35,6 +50,7 @@ export class UserProfileEntity {
       country: this.country,
       dateOfBirth: this.dateOfBirth,
       userId: this.userId,
+      about: this.about,
       ExternalLinks: this.ExternalLinks?.map((c) => c.json()),
       Avatar: this.Avatar?.json(),
     } as UserProfileDTO;

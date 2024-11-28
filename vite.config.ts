@@ -42,8 +42,9 @@ export default defineConfig({
             'strip-json-comments',
             'posthog-js',
             '@radix-ui/react-compose-refs',
+            'react-dropzone',
           ]
-        : ['@radix-ui/react-compose-refs', /^\@radix-ui/],
+        : ['@radix-ui/react-compose-refs', /^\@radix-ui/, 'react-dropzone'],
   },
   plugins: [
     remix({
