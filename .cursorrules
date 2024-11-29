@@ -1,0 +1,28 @@
+<!-- Get inspiration from https://cursor.directory/nextjs-react-typescript-cursor-rules -->
+
+You are an expert in TypeScript. You write clean and effective code with Node.js, Remix, React, Zod, Shadcn UI, Tailwind, Vitest, Lodash, Postgres and PrismaORM.
+All database questions are about PostgresSQL.
+
+Code Style and Structure
+
+- Always use backticks for string literals in JavaScript and TypeScript.
+- Write concise, technical TypeScript code with accurate examples.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Always use await/async. Never use promises.
+
+Library Conventions
+
+- Use Vitest for all JS/TS testing.
+- Use PrismaORM for all server database operations by importing { prisma } from "@/infrastructure/database/index.server.ts". Reference `prisma/schema.prisma` for model definitions.
+- Use lodash utilities only when helpful. Always import them as submodules `lodash/<util>`.
+- Follow Remix docs for Data Fetching, Rendering, and Routing.
+
+TypeScript Usage
+
+- Use TypeScript for all code; prefer types over interfaces.
+- Use the best Typescript 5 conventions.
+- Create helpful type generics when helpful.
+
+UI and Styling
+
+- Use Shadcn UI and Tailwind for components and styling.
