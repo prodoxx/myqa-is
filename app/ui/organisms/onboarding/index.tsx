@@ -1,4 +1,5 @@
 import { BasicInformationForm } from './basic-information-form';
+import { OnboardingComplete } from './onboarding-completed';
 import { SocialLinksForm } from './social-links-form';
 
 export enum OnboardingFlow {
@@ -23,5 +24,9 @@ export const OnboardingForm = ({ currentStep }: OnboardingFormProps) => {
 
   if (currentStep === OnboardingFlow.CryptoWallet) {
     // show crypto wallet setup
+  }
+
+  if (currentStep === OnboardingFlow.Done) {
+    return <OnboardingComplete />;
   }
 };

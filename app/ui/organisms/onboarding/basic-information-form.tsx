@@ -17,7 +17,7 @@ export const BasicInformationForm = () => {
     <fetcherData.Form action="/onboarding" method="POST" encType="multipart/form-data">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
+          <CardTitle className="text-2xl">Basic Information</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
           <ImageInput name="avatar" error={formErrors?.avatar?.[0]} />
