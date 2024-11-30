@@ -43,6 +43,8 @@ export class UserProfileEntity {
       return OnboardingFlow.SocialLinks;
     }
 
+    // Final check for if the user has connected their wallet
+
     return OnboardingFlow.Done;
   }
 

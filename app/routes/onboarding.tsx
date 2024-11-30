@@ -6,6 +6,7 @@ import {
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
 } from '@remix-run/node';
+import { ShouldRevalidateFunctionArgs } from '@remix-run/react';
 import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
@@ -47,6 +48,18 @@ export const action = async (args: ActionFunctionArgs) => {
   const updatedUser = await new OnboardUser(userId!, args.request).call();
   return redirect(`/onboarding?step=${updatedUser.UserProfile.currentOnboardingStep(updatedUser)}`);
 };
+
+export function shouldRevalidate({
+  actionResult,
+  currentParams,
+  nextParams,
+  nextUrl,
+  currentUrl,
+  defaultShouldRevalidate,
+  ...rest
+}: ShouldRevalidateFunctionArgs) {
+  return currentUrl.searchParams.toString() !== nextUrl.searchParams.toString();
+}
 
 const Onboarding = () => {
   const { currentStep } = useTypedLoaderData<typeof loader>();

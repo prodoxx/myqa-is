@@ -1,24 +1,31 @@
 import type { ExternalLink as ExternalLinkORM } from '@prisma/client';
+import { SocialLink as SocialLinkORM } from '@prisma/client';
+
+const SocialLink = SocialLinkORM;
+
+export { SocialLink };
 
 export class ExternalLinkEntity {
   id?: ExternalLinkORM['id'];
-  name?: ExternalLinkORM['name'];
-  url?: ExternalLinkORM['url'];
+  url: ExternalLinkORM['url'];
   userProfileId?: ExternalLinkORM['userProfileId'];
+  type: ExternalLinkORM['type'];
 
-  constructor(externalLink: ExternalLinkORM) {
+  constructor(
+    externalLink: Pick<ExternalLinkORM, 'url' | 'type'> & Partial<Pick<ExternalLinkORM, 'id' | 'userProfileId'>>,
+  ) {
     this.id = externalLink.id;
-    this.name = externalLink.name;
     this.url = externalLink.url;
     this.userProfileId = externalLink.userProfileId;
+    this.type = externalLink.type;
   }
 
   json(): ExternalLinkDTO {
     return {
       id: this.id,
-      name: this.name,
       url: this.url,
       userProfileId: this.userProfileId,
+      type: this.type,
     } as ExternalLinkDTO;
   }
 }

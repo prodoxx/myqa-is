@@ -1,4 +1,4 @@
-import type { User as UserORM } from '@prisma/client';
+import { type User as UserORM } from '@prisma/client';
 import { UserProfileDTO, UserProfileEntity } from './user-profile';
 
 export class UserEntity {

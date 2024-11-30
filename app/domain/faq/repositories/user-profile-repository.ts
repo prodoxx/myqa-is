@@ -1,5 +1,7 @@
 import prisma from '~/infrastructure/database/index.server';
 import { UserProfileEntity } from '../entities/user-profile';
+import { ExternalLinkRepository } from './external-link-repository';
+import { ExternalLinkDTO } from '../entities/external-link';
 
 export class UserProfileRepository {
   static async rebuildEntity(data: any) {
@@ -9,6 +11,9 @@ export class UserProfileRepository {
 
     return new UserProfileEntity({
       ...data,
+      ExternalLinks: data?.ExternalLinks
+        ? data?.ExternalLinks?.map((c: ExternalLinkDTO) => ExternalLinkRepository.rebuildEntity(c))
+        : [],
     });
   }
 
@@ -20,6 +25,13 @@ export class UserProfileRepository {
       data: {
         about: updates?.about,
         ...(updates?.username ? { User: { update: { username: updates?.username! } } } : {}),
+        ...(updates?.ExternalLinks
+          ? {
+              ExternalLinks: {
+                createMany: { data: updates!.ExternalLinks },
+              },
+            }
+          : {}),
       },
       where: {
         userId,

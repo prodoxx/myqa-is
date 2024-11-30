@@ -19,7 +19,11 @@ export class UserRepository {
     const result = await prisma.user.findFirst({
       where: { id: userId },
       include: {
-        UserProfile: true,
+        UserProfile: {
+          include: {
+            ExternalLinks: true,
+          },
+        },
       },
     });
 

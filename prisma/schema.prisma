@@ -282,10 +282,24 @@ model UserProfile {
   ExternalLinks ExternalLink[]
 }
 
+enum SocialLink {
+  // This isn't really needed. But for the onboarding flow, we need to know that they've passed the onboarding
+  // flow option for adding a link. The alternatives are the track where in the onboarding flow they are and
+  // save that in the database or (on the browser). This method keeps it simpler though as if they use multiple
+  // browsers they might see the onboarding flow unnecessarily.
+  MYFAQ
+  FACEBOOK
+  TWITTER
+  INSTAGRAM
+  YOUTUBE
+  THREADS
+  SNAPCHAT
+}
+
 model ExternalLink {
   id            String      @id @default(cuid())
-  name          String
   url           String
+  type          SocialLink
   userProfileId String
   UserProfile   UserProfile @relation(fields: [userProfileId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }

@@ -1,4 +1,5 @@
-import { BasicInformationForm } from './basic-information';
+import { BasicInformationForm } from './basic-information-form';
+import { SocialLinksForm } from './social-links-form';
 
 export enum OnboardingFlow {
   BasicInformation = 'basic-user-information', // username, profile, bio
@@ -17,7 +18,7 @@ export const OnboardingForm = ({ currentStep }: OnboardingFormProps) => {
   }
 
   if (currentStep === OnboardingFlow.SocialLinks) {
-    // show basic information form
+    return <SocialLinksForm />;
   }
 
   if (currentStep === OnboardingFlow.CryptoWallet) {
