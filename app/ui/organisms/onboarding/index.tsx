@@ -1,32 +1,27 @@
 import { BasicInformationForm } from './basic-information-form';
 import { OnboardingComplete } from './onboarding-completed';
 import { SocialLinksForm } from './social-links-form';
-
-export enum OnboardingFlow {
-  BasicInformation = 'basic-user-information', // username, profile, bio
-  SocialLinks = 'external-social-links', // facebook, ig, youtube, etc
-  CryptoWallet = 'connect-your-wallet',
-  Done = 'onboarding-completed',
-}
+import { OnboardingStep } from '~/entities/user-profile';
 
 export type OnboardingFormProps = {
-  currentStep: OnboardingFlow;
+  currentStep: keyof typeof OnboardingStep;
 };
 
 export const OnboardingForm = ({ currentStep }: OnboardingFormProps) => {
-  if (currentStep === OnboardingFlow.BasicInformation) {
+  console.log({ currentStep });
+  if (currentStep === OnboardingStep.BASIC_INFORMATION) {
     return <BasicInformationForm />;
   }
 
-  if (currentStep === OnboardingFlow.SocialLinks) {
+  if (currentStep === OnboardingStep.SOCIAL_LINKS) {
     return <SocialLinksForm />;
   }
 
-  if (currentStep === OnboardingFlow.CryptoWallet) {
+  if (currentStep === OnboardingStep.CRYPTO_WALLET) {
     // show crypto wallet setup
   }
 
-  if (currentStep === OnboardingFlow.Done) {
+  if (currentStep === OnboardingStep.DONE) {
     return <OnboardingComplete />;
   }
 };

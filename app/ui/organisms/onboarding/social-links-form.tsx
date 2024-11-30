@@ -2,6 +2,7 @@ import { SocialLink as SocialLinkORM } from '@prisma/client';
 import { CircleXIcon } from 'lucide-react';
 import React from 'react';
 import { useTypedFetcher } from 'remix-typedjson';
+import { OnboardingStep } from '~/domain/faq/entities/user-profile';
 import { OnboardUserFormErrors } from '~/domain/faq/services/onboard-user';
 import { Button } from '~/ui/atoms/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/ui/atoms/card';
@@ -46,6 +47,7 @@ export const SocialLinksForm = () => {
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
           <ul className="flex flex-col space-y-4">
+            <input hidden name="onboarding" value={OnboardingStep.SOCIAL_LINKS} onChange={() => {}} />
             <input hidden name="socialLinks" value={JSON.stringify(socialLinks)} onChange={() => {}} />
 
             {socialLinks.map((link, index) => (

@@ -1,8 +1,13 @@
-import type { UserProfile as UserProfileORM } from '@prisma/client';
-import { ExternalLinkEntity } from './external-link';
+import { OnboardingStep as OnboardingStepORM, UserProfile as UserProfileORM } from '@prisma/client';
 import { AssetEntity } from './asset';
-import { OnboardingFlow } from '~/ui/organisms/onboarding';
-import { UserEntity } from './user';
+import { ExternalLinkEntity } from './external-link';
+
+export const OnboardingStep: typeof OnboardingStepORM = {
+  BASIC_INFORMATION: 'BASIC_INFORMATION',
+  SOCIAL_LINKS: 'SOCIAL_LINKS',
+  CRYPTO_WALLET: 'CRYPTO_WALLET',
+  DONE: 'DONE',
+};
 
 export class UserProfileEntity {
   id?: UserProfileORM['id'];
@@ -14,6 +19,7 @@ export class UserProfileEntity {
   ExternalLinks?: ExternalLinkEntity[];
   Avatar?: AssetEntity;
   about?: UserProfileORM['about'];
+  onboarding?: UserProfileORM['onboarding'];
 
   constructor(userProfile: UserProfileORM & { ExternalLinks?: ExternalLinkEntity[]; Avatar?: AssetEntity }) {
     this.id = userProfile?.id;
@@ -24,6 +30,7 @@ export class UserProfileEntity {
     this.userId = userProfile?.userId;
     this.ExternalLinks = userProfile?.ExternalLinks;
     this.Avatar = userProfile?.Avatar;
+    this.onboarding = userProfile?.onboarding;
   }
 
   isEqual(userProfile: UserProfileEntity) {
@@ -31,21 +38,28 @@ export class UserProfileEntity {
   }
 
   isOnboardingComplete() {
-    return this.about && this.Avatar;
+    return this.onboarding === OnboardingStep.DONE;
   }
 
-  currentOnboardingStep(user: UserEntity) {
-    if (!user.username && (!this.Avatar || !this.about)) {
-      return OnboardingFlow.BasicInformation;
+  getNextOnboardingStep() {
+    if (this.isOnboardingComplete()) {
+      return OnboardingStep.DONE;
     }
 
-    if (!this.ExternalLinks?.length) {
-      return OnboardingFlow.SocialLinks;
+    if (this.onboarding === OnboardingStep.BASIC_INFORMATION) {
+      return OnboardingStep.SOCIAL_LINKS; // swap to OnboardingStep.CRYPTO_WALLET when support is added
     }
 
-    // Final check for if the user has connected their wallet
+    // TODO: Enable when we have the crypto wallet setup
+    // if (this.onboarding === OnboardingStep.SOCIAL_LINKS) {
+    //   return OnboardingStep.CRYPTO_WALLET;
+    // }
 
-    return OnboardingFlow.Done;
+    if (this.onboarding === OnboardingStep.SOCIAL_LINKS) {
+      return OnboardingStep.DONE;
+    }
+
+    return OnboardingStep.DONE;
   }
 
   json(): UserProfileDTO {
@@ -57,6 +71,7 @@ export class UserProfileEntity {
       dateOfBirth: this.dateOfBirth,
       userId: this.userId,
       about: this.about,
+      onboarding: this.onboarding,
       ExternalLinks: this.ExternalLinks?.map((c) => c.json()),
       Avatar: this.Avatar?.json(),
     } as UserProfileDTO;

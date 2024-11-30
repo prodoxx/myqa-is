@@ -42,15 +42,18 @@ export const ImageInput = ({ name, className, error }: ImageInput) => {
   }, [acceptedFiles]);
 
   return (
-    <div {...getRootProps({ className: cn('flex flex-col space-y-2 mx-auto', className) })}>
-      <Label htmlFor={name}>Profile Picture</Label>
-      <input hidden type="file" name={name} required ref={hiddenInputRef} />
-      <input hidden {...getInputProps()} />
-      <Avatar fallback="" src={selectedImagePreviewUrl} className="h-36 w-36 border-2 border-gray-200" />
+    <div className="mx-auto">
+      <div {...getRootProps({ className: cn('flex flex-col space-y-2 mb-2', className) })}>
+        <Label htmlFor={name}>Profile Picture</Label>
+        <input hidden type="file" name={name} required ref={hiddenInputRef} />
+        <input hidden {...getInputProps()} />
+        <Avatar fallback="" src={selectedImagePreviewUrl} className="h-36 w-36 border-2 border-gray-200" />
+
+        <ErrorMessage message={error} />
+      </div>
       <Button type="button" variant="outline" className="w-fit" onClick={open}>
         Select Picture
       </Button>
-      <ErrorMessage message={error} />
     </div>
   );
 };

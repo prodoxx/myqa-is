@@ -1,4 +1,5 @@
 import { useTypedFetcher } from 'remix-typedjson';
+import { OnboardingStep } from '~/domain/faq/entities/user-profile';
 import { OnboardUserFormErrors } from '~/domain/faq/services/onboard-user';
 import { Button } from '~/ui/atoms/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/ui/atoms/card';
@@ -20,6 +21,7 @@ export const BasicInformationForm = () => {
           <CardTitle className="text-2xl">Basic Information</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
+          <input name="onboarding" hidden value={OnboardingStep.BASIC_INFORMATION} onClick={() => {}} />
           <ImageInput name="avatar" error={formErrors?.avatar?.[0]} />
 
           <div>

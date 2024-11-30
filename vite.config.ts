@@ -49,7 +49,7 @@ export default defineConfig({
   plugins: [
     remix({
       future: {
-        unstable_singleFetch: true,
+        v3_singleFetch: true,
       },
     }),
     tsconfigPaths(),

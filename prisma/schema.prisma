@@ -269,6 +269,13 @@ model User {
   UserProfile UserProfile?
 }
 
+enum OnboardingStep {
+  BASIC_INFORMATION
+  SOCIAL_LINKS
+  CRYPTO_WALLET
+  DONE
+}
+
 model UserProfile {
   id            String         @id @default(cuid())
   createdAt     DateTime       @default(now())
@@ -280,14 +287,10 @@ model UserProfile {
   about         String?
   Avatar        Asset?
   ExternalLinks ExternalLink[]
+  onboarding    OnboardingStep @default(BASIC_INFORMATION)
 }
 
 enum SocialLink {
-  // This isn't really needed. But for the onboarding flow, we need to know that they've passed the onboarding
-  // flow option for adding a link. The alternatives are the track where in the onboarding flow they are and
-  // save that in the database or (on the browser). This method keeps it simpler though as if they use multiple
-  // browsers they might see the onboarding flow unnecessarily.
-  MYFAQ
   FACEBOOK
   TWITTER
   INSTAGRAM

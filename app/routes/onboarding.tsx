@@ -1,19 +1,12 @@
-import {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  unstable_composeUploadHandlers,
-  unstable_createFileUploadHandler,
-  unstable_createMemoryUploadHandler,
-  unstable_parseMultipartFormData,
-} from '@remix-run/node';
+import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { ShouldRevalidateFunctionArgs } from '@remix-run/react';
 import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
+import { OnboardingStep } from '~/domain/faq/entities/user-profile';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
 import { OnboardUser } from '~/domain/faq/services/onboard-user';
 import { MainLayout } from '~/ui/layouts/main';
-import { OnboardingFlow, OnboardingForm } from '~/ui/organisms/onboarding';
-import { uploadHandler } from '~/utils/file-upload-handler';
+import { OnboardingForm } from '~/ui/organisms/onboarding';
 
 export const loader = async (args: LoaderFunctionArgs) => {
   const searchParams = new URL(args.request.url).searchParams;
@@ -25,16 +18,15 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
   const user = await UserRepository.findByUserId(userId!);
   if (user?.UserProfile?.isOnboardingComplete() && !searchParams?.get('step')) {
-    return redirect(`/onboarding?step=${OnboardingFlow.Done}`);
+    return redirect(`/onboarding?step=${OnboardingStep.DONE}`);
   }
 
-  const onboardingStep = user?.UserProfile?.currentOnboardingStep(user);
-  if (!searchParams.get('step') || searchParams.get('step') !== onboardingStep) {
-    return redirect(`/onboarding?step=${onboardingStep}`);
+  if (!searchParams.get('step') || searchParams.get('step') !== user?.UserProfile?.getNextOnboardingStep()) {
+    return redirect(`/onboarding?step=${user?.UserProfile?.getNextOnboardingStep()}`);
   }
 
   return typedjson({
-    currentStep: onboardingStep,
+    currentStep: user?.UserProfile?.getNextOnboardingStep()!,
   });
 };
 
@@ -46,7 +38,7 @@ export const action = async (args: ActionFunctionArgs) => {
   )?.id;
 
   const updatedUser = await new OnboardUser(userId!, args.request).call();
-  return redirect(`/onboarding?step=${updatedUser.UserProfile.currentOnboardingStep(updatedUser)}`);
+  return redirect(`/onboarding?step=${updatedUser.UserProfile.getNextOnboardingStep()}`);
 };
 
 export function shouldRevalidate({

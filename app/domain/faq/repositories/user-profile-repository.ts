@@ -19,11 +19,14 @@ export class UserProfileRepository {
 
   static async onboardUserByUserId(
     userId: number,
-    updates: Partial<Pick<UserProfileEntity, 'Avatar' | 'about' | 'ExternalLinks'> & { username?: string }>,
+    updates: Partial<
+      Pick<UserProfileEntity, 'Avatar' | 'about' | 'ExternalLinks' | 'onboarding'> & { username?: string }
+    >,
   ) {
     const result = await prisma.userProfile.update({
       data: {
         about: updates?.about,
+        onboarding: updates?.onboarding,
         ...(updates?.username ? { User: { update: { username: updates?.username! } } } : {}),
         ...(updates?.ExternalLinks
           ? {
