@@ -3,6 +3,7 @@ import { AssetEntity } from './asset';
 import { ExternalLinkEntity } from './external-link';
 
 export const OnboardingStep: typeof OnboardingStepORM = {
+  PENDING: 'PENDING',
   BASIC_INFORMATION: 'BASIC_INFORMATION',
   SOCIAL_LINKS: 'SOCIAL_LINKS',
   CRYPTO_WALLET: 'CRYPTO_WALLET',
@@ -44,6 +45,10 @@ export class UserProfileEntity {
   getNextOnboardingStep() {
     if (this.isOnboardingComplete()) {
       return OnboardingStep.DONE;
+    }
+
+    if (this.onboarding === OnboardingStep.PENDING) {
+      return OnboardingStep.BASIC_INFORMATION;
     }
 
     if (this.onboarding === OnboardingStep.BASIC_INFORMATION) {

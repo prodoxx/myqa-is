@@ -274,6 +274,7 @@ enum OnboardingStep {
   SOCIAL_LINKS
   CRYPTO_WALLET
   DONE
+  PENDING
 }
 
 model UserProfile {
@@ -287,7 +288,7 @@ model UserProfile {
   about         String?
   Avatar        Asset?
   ExternalLinks ExternalLink[]
-  onboarding    OnboardingStep @default(BASIC_INFORMATION)
+  onboarding    OnboardingStep @default(PENDING)
 }
 
 enum SocialLink {

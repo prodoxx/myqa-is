@@ -8,7 +8,6 @@ export type OnboardingFormProps = {
 };
 
 export const OnboardingForm = ({ currentStep }: OnboardingFormProps) => {
-  console.log({ currentStep });
   if (currentStep === OnboardingStep.BASIC_INFORMATION) {
     return <BasicInformationForm />;
   }
