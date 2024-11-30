@@ -1,5 +1,5 @@
 import { Link } from '@remix-run/react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, PartyPopper } from 'lucide-react';
 import { Button } from '~/ui/atoms/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/ui/atoms/card';
 

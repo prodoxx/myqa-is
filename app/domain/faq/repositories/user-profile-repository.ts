@@ -36,6 +36,10 @@ export class UserProfileRepository {
       where: {
         userId,
       },
+      include: {
+        Avatar: true,
+        ExternalLinks: true,
+      },
     });
 
     return this.rebuildEntity(result);

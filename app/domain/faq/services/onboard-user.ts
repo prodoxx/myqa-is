@@ -91,6 +91,8 @@ export class OnboardUser {
     updatedUser!.Avatar = avatar!;
     user.UserProfile = updatedUser!;
 
+    console.log(JSON.stringify(user));
+
     return user;
   }
 }

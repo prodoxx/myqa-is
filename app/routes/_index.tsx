@@ -1,4 +1,5 @@
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node';
+import { redirect } from 'remix-typedjson';
 import { MainLayout } from '~/ui/layouts/main';
 
 export const meta: MetaFunction = () => {
@@ -14,7 +15,7 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async (args: LoaderFunctionArgs) => {
-  return null;
+  return redirect('/dashboard');
 };
 
 export default function Index() {
