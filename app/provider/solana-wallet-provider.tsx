@@ -11,6 +11,7 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 
 export function SolanaWalletProvider({ children }: { children: React.ReactNode }) {
   // can be set to 'devnet', 'testnet', or 'mainnet-beta'
+  // TODO: make this dynamic
   const network = WalletAdapterNetwork.Devnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
