@@ -1,0 +1,59 @@
+{
+  "include": [
+    "remix.env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    ".eslintrc.js",
+    "app/lib/**/*",
+    "prisma/seed.mjs",
+    "prisma/seed.mts"
+  ],
+  "compilerOptions": {
+    "sourceMap": true,
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "types": [
+      "@remix-run/node",
+      "vite/client",
+      "vitest/globals"
+    ],
+    "baseUrl": ".",
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "target": "ES2022",
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "~/*": [
+        "./app/*"
+      ],
+      "~/entities/*": [
+        "app/domain/faq/entities/*"
+      ],
+      "~/repositories/*": [
+        "app/domain/faq/repositories/*"
+      ],
+      "~/services/*": [
+        "app/domain/faq/services/*"
+      ],
+      "~/values/*": [
+        "app/domain/faq/values/*"
+      ],
+      "~/mocks": [
+        "app/mocks/*"
+      ]
+    },
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true
+  }
+}

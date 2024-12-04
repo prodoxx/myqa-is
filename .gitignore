@@ -1,12 +1,13 @@
 node_modules
 
-/.cache
-/server/build
-/public/build
+.cache
+server/build
+public/build
+.env.*
 .env
-.env.development
+!.env.example
+!.env.test
 build
-./build
 build
 app/styles
 build/index.js
@@ -17,3 +18,9 @@ coverage
 .env.dev
 **/*/.DS_STORE
 .DS_STORE
+
+.anchor
+target
+**/*.rs.bk
+test-ledger
+.yarn

@@ -1,4 +1,4 @@
-name: Test & Deploy
+name: Test & Deploy Web App
 on:
   push:
     branches:
@@ -7,6 +7,9 @@ on:
 jobs:
   specs:
     runs-on: ubuntu-latest
+     defaults:
+      run:
+        working-directory: app
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.7.0
