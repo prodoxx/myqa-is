@@ -16,6 +16,7 @@ import { getDomainUrl } from './infrastructure/analytics/seo';
 import { PHProvider } from './provider/posthog-provider';
 import { UserProvider } from './provider/user-provider';
 import { TooltipProvider } from './ui/atoms/tooltip';
+import { SolanaWalletProvider } from '~/provider/solana-wallet-provider';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {});
@@ -58,15 +59,17 @@ export default function App() {
       </head>
 
       <body className="h-full w-full flex min-h-screen flex-col bg-muted/40 font-sans">
-        <UserProvider user={data?.user || undefined}>
-          <TooltipProvider>
-            <PHProvider>
-              <Outlet />
-            </PHProvider>
-            <ScrollRestoration />
-            <Scripts />
-          </TooltipProvider>
-        </UserProvider>
+        <SolanaWalletProvider>
+          <UserProvider user={data?.user || undefined}>
+            <TooltipProvider>
+              <PHProvider>
+                <Outlet />
+              </PHProvider>
+            </TooltipProvider>
+          </UserProvider>
+        </SolanaWalletProvider>
+        <ScrollRestoration />
+        <Scripts />
       </body>
     </html>
   );

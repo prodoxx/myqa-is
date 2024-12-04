@@ -39,17 +39,36 @@ If you're familiar with deploying express applications you should be right at ho
 - `server/build/`
 - `public/build/`
 
-### Using a Template
+## Solana Contract Development
 
-When you ran `npx create-remix@latest` there were a few choices for hosting. You can run that again to create a new project, then copy over your `app/` folder to the new project that's pre-configured for your target server.
+First run the setup script:
 
 ```sh
-cd ..
-# create a new project, and pick a pre-configured host
-npx create-remix@latest
-cd my-new-remix-app
-# remove the new project's app (not the old one!)
-rm -rf app
-# copy your app over
-cp -R ../my-old-remix-app/app app
+./scripts/setup-solana-contract-dev.sh
 ```
+
+Make sure to press enter when prompted.
+
+After running the setup script, verify your installation with:
+
+```bash
+solana --version
+anchor --version
+rustc --version
+```
+
+Then install Vscode / Cursor extentions:
+
+- Rust Analyzer
+- Even Better TOML
+
+To Run a validator locally:
+
+```
+cd ~
+mkdir validator
+cd validator
+solana-test-validator
+```
+
+See more information at: https://solana.com/docs/intro/installation
