@@ -3,3 +3,9 @@ cache
 coverage
 node_modules
 prisma
+
+.anchor
+target
+node_modules
+dist
+test-ledger
