@@ -25,10 +25,16 @@ export const SiteNav = ({ className }: { className?: string }) => {
                 {publicKey.toString()}
               </span>
             ) : (
-              <WalletMultiButton />
+              <span className="pointer-events-none text-xs text-gray-400">
+                Wallet Not Connected
+              </span>
             )}
             <Form action="/logout" method="POST">
-              <Button size="lg" variant="default" className="!bg-gray-900 !text-white !w-fit !mx-auto">
+              <Button
+                size="lg"
+                variant="default"
+                className="!bg-gray-900 !text-white !w-fit !mx-auto"
+              >
                 Log out
               </Button>
             </Form>

@@ -12,7 +12,9 @@ export class UserProfileRepository {
     return new UserProfileEntity({
       ...data,
       ExternalLinks: data?.ExternalLinks
-        ? data?.ExternalLinks?.map((c: ExternalLinkDTO) => ExternalLinkRepository.rebuildEntity(c))
+        ? data?.ExternalLinks?.map((c: ExternalLinkDTO) =>
+            ExternalLinkRepository.rebuildEntity(c)
+          )
         : [],
     });
   }
@@ -20,20 +22,28 @@ export class UserProfileRepository {
   static async onboardUserByUserId(
     userId: number,
     updates: Partial<
-      Pick<UserProfileEntity, 'Avatar' | 'about' | 'ExternalLinks' | 'onboarding'> & { username?: string }
-    >,
+      Pick<
+        UserProfileEntity,
+        'Avatar' | 'about' | 'ExternalLinks' | 'onboarding' | 'Wallet'
+      > & { username?: string }
+    >
   ) {
     const result = await prisma.userProfile.update({
       data: {
         about: updates?.about,
         onboarding: updates?.onboarding,
-        ...(updates?.username ? { User: { update: { username: updates?.username! } } } : {}),
+        ...(updates?.username
+          ? { User: { update: { username: updates?.username! } } }
+          : {}),
         ...(updates?.ExternalLinks
           ? {
               ExternalLinks: {
                 createMany: { data: updates!.ExternalLinks },
               },
             }
+          : {}),
+        ...(updates?.Wallet
+          ? { Wallet: { connect: { id: updates?.Wallet?.id } } }
           : {}),
       },
       where: {
@@ -42,6 +52,7 @@ export class UserProfileRepository {
       include: {
         Avatar: true,
         ExternalLinks: true,
+        Wallet: true,
       },
     });
 

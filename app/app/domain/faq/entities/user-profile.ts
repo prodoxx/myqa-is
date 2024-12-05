@@ -4,6 +4,7 @@ import {
 } from '@prisma/client';
 import { AssetEntity } from './asset';
 import { ExternalLinkEntity } from './external-link';
+import { WalletEntity } from './wallet';
 
 export const OnboardingStep: typeof OnboardingStepORM = {
   PENDING: 'PENDING',
@@ -24,11 +25,13 @@ export class UserProfileEntity {
   Avatar?: AssetEntity;
   about?: UserProfileORM['about'];
   onboarding?: UserProfileORM['onboarding'];
+  Wallet?: WalletEntity;
 
   constructor(
     userProfile: UserProfileORM & {
       ExternalLinks?: ExternalLinkEntity[];
       Avatar?: AssetEntity;
+      Wallet?: WalletEntity;
     }
   ) {
     this.id = userProfile?.id;
@@ -40,6 +43,7 @@ export class UserProfileEntity {
     this.ExternalLinks = userProfile?.ExternalLinks;
     this.Avatar = userProfile?.Avatar;
     this.onboarding = userProfile?.onboarding;
+    this.Wallet = userProfile?.Wallet;
   }
 
   isEqual(userProfile: UserProfileEntity) {
@@ -86,6 +90,7 @@ export class UserProfileEntity {
       onboarding: this.onboarding,
       ExternalLinks: this.ExternalLinks?.map((c) => c.json()),
       Avatar: this.Avatar?.json(),
+      Wallet: this.Wallet?.json(),
     } as UserProfileDTO;
   }
 }

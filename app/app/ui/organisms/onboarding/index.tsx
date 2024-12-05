@@ -1,4 +1,5 @@
 import { BasicInformationForm } from './basic-information-form';
+import { CryptoWalletForm } from './crypto-wallet-form';
 import { OnboardingComplete } from './onboarding-completed';
 import { SocialLinksForm } from './social-links-form';
 import { OnboardingStep } from '~/entities/user-profile';
@@ -17,7 +18,7 @@ export const OnboardingForm = ({ currentStep }: OnboardingFormProps) => {
   }
 
   if (currentStep === OnboardingStep.CRYPTO_WALLET) {
-    // show crypto wallet setup
+    return <CryptoWalletForm />;
   }
 
   if (currentStep === OnboardingStep.DONE) {
