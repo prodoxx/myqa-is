@@ -1,4 +1,7 @@
-import { OnboardingStep as OnboardingStepORM, UserProfile as UserProfileORM } from '@prisma/client';
+import {
+  OnboardingStep as OnboardingStepORM,
+  UserProfile as UserProfileORM,
+} from '@prisma/client';
 import { AssetEntity } from './asset';
 import { ExternalLinkEntity } from './external-link';
 
@@ -22,7 +25,12 @@ export class UserProfileEntity {
   about?: UserProfileORM['about'];
   onboarding?: UserProfileORM['onboarding'];
 
-  constructor(userProfile: UserProfileORM & { ExternalLinks?: ExternalLinkEntity[]; Avatar?: AssetEntity }) {
+  constructor(
+    userProfile: UserProfileORM & {
+      ExternalLinks?: ExternalLinkEntity[];
+      Avatar?: AssetEntity;
+    }
+  ) {
     this.id = userProfile?.id;
     this.createdAt = userProfile?.createdAt;
     this.updatedAt = userProfile?.updatedAt;
@@ -55,12 +63,11 @@ export class UserProfileEntity {
       return OnboardingStep.SOCIAL_LINKS; // swap to OnboardingStep.CRYPTO_WALLET when support is added
     }
 
-    // TODO: Enable when we have the crypto wallet setup
-    // if (this.onboarding === OnboardingStep.SOCIAL_LINKS) {
-    //   return OnboardingStep.CRYPTO_WALLET;
-    // }
-
     if (this.onboarding === OnboardingStep.SOCIAL_LINKS) {
+      return OnboardingStep.CRYPTO_WALLET;
+    }
+
+    if (this.onboarding === OnboardingStep.CRYPTO_WALLET) {
       return OnboardingStep.DONE;
     }
 
@@ -83,7 +90,10 @@ export class UserProfileEntity {
   }
 }
 
-export type UserProfileDTO = Omit<UserProfileEntity, 'createdAt' | 'updatedAt'> & {
+export type UserProfileDTO = Omit<
+  UserProfileEntity,
+  'createdAt' | 'updatedAt'
+> & {
   createdAt?: string;
   updatedAt?: string;
 };

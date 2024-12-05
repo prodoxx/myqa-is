@@ -21,12 +21,15 @@ export const loader = async (args: LoaderFunctionArgs) => {
     return redirect(`/onboarding?step=${OnboardingStep.DONE}`);
   }
 
-  if (!searchParams.get('step') || searchParams.get('step') !== user?.UserProfile?.getNextOnboardingStep()) {
-    return redirect(`/onboarding?step=${user?.UserProfile?.getNextOnboardingStep()}`);
+  if (
+    !searchParams.get('step') ||
+    searchParams.get('step') !== user?.UserProfile?.onboarding
+  ) {
+    return redirect(`/onboarding?step=${user?.UserProfile?.onboarding}`);
   }
 
   return typedjson({
-    currentStep: user?.UserProfile?.getNextOnboardingStep()!,
+    currentStep: user?.UserProfile?.onboarding!,
   });
 };
 
@@ -38,7 +41,9 @@ export const action = async (args: ActionFunctionArgs) => {
   )?.id;
 
   const updatedUser = await new OnboardUser(userId!, args.request).call();
-  return redirect(`/onboarding?step=${updatedUser.UserProfile.getNextOnboardingStep()}`);
+  return redirect(
+    `/onboarding?step=${updatedUser.UserProfile.getNextOnboardingStep()}`
+  );
 };
 
 export function shouldRevalidate({
