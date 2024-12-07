@@ -22,14 +22,25 @@ export const loader = async (args: LoaderFunctionArgs) => {
   }
 
   if (
+    searchParams.get('step') !== OnboardingStep.BASIC_INFORMATION &&
+    user?.UserProfile?.onboarding === OnboardingStep.PENDING
+  ) {
+    return redirect(`/onboarding?step=${OnboardingStep.BASIC_INFORMATION}`);
+  }
+
+  if (
     !searchParams.get('step') ||
-    searchParams.get('step') !== user?.UserProfile?.onboarding
+    (searchParams.get('step') !== user?.UserProfile?.onboarding &&
+      user?.UserProfile?.onboarding !== OnboardingStep.PENDING)
   ) {
     return redirect(`/onboarding?step=${user?.UserProfile?.onboarding}`);
   }
 
   return typedjson({
-    currentStep: user?.UserProfile?.onboarding!,
+    currentStep:
+      user?.UserProfile?.onboarding === OnboardingStep.PENDING
+        ? OnboardingStep.BASIC_INFORMATION
+        : user?.UserProfile?.onboarding,
   });
 };
 
