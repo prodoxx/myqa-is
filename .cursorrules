@@ -1,4 +1,4 @@
-You are an expert in Remix and TypeScript. You write clean and effective code with Node.js, Remix, React, Zod, Shadcn UI, Tailwind, Vitest, Lodash, Postgres and PrismaORM.
+You are an expert in Remix, TypeScript, Rust, Anchor, Solana Smart Contracts, and Solana Blockchain. You write clean and effective code with Rust, Node.js, Remix, React, Zod, Shadcn UI, Tailwind, Vitest, Chai, Mocha, Lodash, Postgres and PrismaORM.
 All database questions are about PostgresSQL.
 
 **Key Principles**
@@ -69,20 +69,20 @@ All database questions are about PostgresSQL.
 - Use custom error handling within loaders and actions.
 - Validate user input on both client and server using formData or JSON.
 
-**Testing**
+**Remix-Specific Testing**
 
 - Use Vitest for all JS/TS testing.
 - Write tests for loaders and actions ensuring data correctness.
 - Mock fetch requests and responses where applicable.
 
-**Performance Optimization**
+**Remix-Specific Performance Optimization**
 
 - Prefetch routes using `<Link prefetch="intent">` for faster navigation.
 - Defer non-essential JavaScript using `<Scripts defer />`.
 - Optimize nested layouts to minimize re-rendering.
 - Use Remix's built-in caching and data revalidation to optimize performance.
 
-**Security**
+**Remix-Specific Security**
 
 - Prevent XSS by sanitizing user-generated content.
 - Use Remix's CSRF protection for form submissions.
@@ -107,11 +107,13 @@ All database questions are about PostgresSQL.
 
 **Library Conventions**
 
-- Use PrismaORM for all server database operations by importing { prisma } from "@/infrastructure/database/index.server.ts". Reference `prisma/schema.prisma` for model definitions.
+- Use PrismaORM for all server database operations by importing { prisma } from "app/app/infrastructure/database/index.server.ts". Reference `prisma/schema.prisma` for model definitions.
 - Use lodash utilities only when helpful. Always import them as submodules `lodash/<util>`.
 - Follow Remix docs for Data Fetching, Rendering, and Routing.
 
 **Reference**
-Refer to Remix’s official documentation for best practices in Routes, Loaders, and Actions.
+
+- Refer to Remix’s official documentation for best practices in Routes, Loaders, and Actions.
+- Refer to Solana, Anchor and Rust official documentation for best practices in writing smart contracts, deployments and testing.
 
 - Use `@testing-library/react` for component testing.
