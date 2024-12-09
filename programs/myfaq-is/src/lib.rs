@@ -6,12 +6,6 @@ use anchor_spl::{
 };
 
 use mpl_token_metadata::types::DataV2;
-use anchor_lang::solana_program::hash::{hash, Hash};
-use anchor_lang::solana_program::{
-    program::invoke,
-    instruction::Instruction,
-    ed25519_program::ID as ED25519_ID,
-};
 
 declare_id!("AVCfPVgxM4cbWYhkQvq6DfKSEbqfjptwAqGnHhxvmMTV");
 
@@ -19,64 +13,34 @@ declare_id!("AVCfPVgxM4cbWYhkQvq6DfKSEbqfjptwAqGnHhxvmMTV");
 const INITIAL_PLATFORM_FEE_BPS: u16 = 500;  // 5%
 const INITIAL_CREATOR_ROYALTY_BPS: u16 = 200;  // 2%
 const MAX_FEE_BPS: u16 = 1000;  // 10% maximum fee
-const MAX_QUESTION_CONTENT_LENGTH: usize = 1000;
-const MAX_ANSWER_LENGTH: usize = 5000;
 const MAX_URI_LENGTH: usize = 200;
 
 // Security constants
 const MAX_QUESTIONS_PER_USER: u64 = 100;
-const OPERATION_COOLDOWN: i64 = 60; // seconds
-const MIN_METADATA_LENGTH: usize = 5;
+#[cfg(not(feature = "test"))]
+const OPERATION_COOLDOWN: i64 = 60; // 60 seconds for production
 
-// Add new constants
+const MIN_METADATA_LENGTH: usize = 5;
 const MAX_ENCRYPTED_KEY_LENGTH: usize = 1024;
 const MIN_OPERATION_COOLDOWN: i64 = 300; // 5 minutes
 const MAX_TOTAL_FEE_BPS: u16 = 9000;    // 90% maximum total fee
 const MIN_ACCOUNT_SPACE: usize = 8;      // Discriminator
 
-// TODO: Update this
-const VALIDATOR_PUBKEY: [u8; ED25519_PUBLIC_KEY_LENGTH] = [0; ED25519_PUBLIC_KEY_LENGTH];
+// For IPFS CID validation
+const IPFS_CID_LENGTH: usize = 46;
+const MAX_CID_LENGTH: usize = 64; 
 
-// Constants for ed25519
-const ED25519_PUBLIC_KEY_LENGTH: usize = 32;
-const ED25519_SIGNATURE_LENGTH: usize = 64;
-
-// Add content validation structure
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
-pub struct ContentValidation {
-    pub question_length: u32,
-    pub answer_length: u32,
-    pub content_hash: [u8; 32],
-    pub answer_hash: [u8; 32],
-    pub timestamp: i64,
-    pub validator_signature: [u8; ED25519_SIGNATURE_LENGTH],
-}
-
-// Update verification function to use Solana's ed25519 program
-fn verify_validator_signature(
-    validation: &ContentValidation,
-    validator_pubkey: &[u8; ED25519_PUBLIC_KEY_LENGTH]
-) -> Result<()> {
-    let message = [
-        validation.question_length.to_le_bytes().as_ref(),
-        validation.answer_length.to_le_bytes().as_ref(),
-        validation.content_hash.as_ref(),
-        validation.answer_hash.as_ref(),
-        validation.timestamp.to_le_bytes().as_ref(),
-    ].concat();
-
-    let ix = Instruction::new_with_bytes(
-        ED25519_ID,
-        &[
-            &validator_pubkey[..],
-            &validation.validator_signature[..],
-            &message[..],
-        ].concat(),
-        vec![],
-    );
-
-    invoke(&ix, &[]).map_err(|_| ErrorCode::InvalidValidatorSignature.into())
-}
+// Unlock key size
+const UNLOCK_KEY_BASE_SIZE: usize = 8 + // discriminator
+    32 + // owner: Pubkey
+    32 + // question: Pubkey
+    8 +  // token_id: u64
+    1 +  // is_listed: bool
+    8 +  // list_price: u64
+    8 +  // mint_time: i64
+    8 +  // last_sold_price: u64
+    8 +  // last_sold_time: i64
+    8;   // list_time: i64
 
 #[account]
 pub struct UserState {
@@ -105,6 +69,7 @@ pub mod myfaq_is {
         marketplace.creator_royalty_bps = INITIAL_CREATOR_ROYALTY_BPS;
         marketplace.total_volume = 0;
         marketplace.paused = false;
+        marketplace.paused_operations = PausedOperations::default();
 
         emit!(MarketplaceInitialized {
             authority: marketplace.authority,
@@ -144,59 +109,27 @@ pub mod myfaq_is {
 
     pub fn create_question(
         ctx: Context<CreateQuestion>,
-        content: String,
-        encrypted_answer: Vec<u8>,
-        content_validation: ContentValidation,
+        content_cid: String,
+        content_hash: [u8; 32],
         unlock_price: u64,
         max_keys: u64,
     ) -> Result<()> {
-        // Check operation status
+
+        require!(!ctx.accounts.marketplace.paused, ErrorCode::MarketplacePaused);
         require!(
             !ctx.accounts.marketplace.paused_operations.create_question,
             ErrorCode::OperationPaused
         );
 
-        // Verify validator signature
-        verify_validator_signature(&content_validation, &VALIDATOR_PUBKEY)?;
-
-        // Verify content length matches validation
-        require!(
-            content.len() as u32 == content_validation.question_length,
-            ErrorCode::ContentLengthMismatch
-        );
-
-        // Verify content hash matches validation
-        let content_hash = hash(content.as_bytes()).to_bytes();
-        require!(
-            content_hash == content_validation.content_hash,
-            ErrorCode::ContentHashMismatch
-        );
-
-        // Verify answer hash matches validation
-        let answer_hash = hash(&encrypted_answer).to_bytes();
-        require!(
-            answer_hash == content_validation.answer_hash,
-            ErrorCode::AnswerHashMismatch
-        );
-
-        // Verify lengths are within limits
-        require!(
-            content_validation.question_length <= MAX_QUESTION_CONTENT_LENGTH as u32,
-            ErrorCode::ContentTooLong
-        );
-        require!(
-            content_validation.answer_length <= MAX_ANSWER_LENGTH as u32,
-            ErrorCode::AnswerTooLong
-        );
-
         let user_state = &mut ctx.accounts.user_state;
         let current_time = Clock::get()?.unix_timestamp;
-        
-        // Rate limiting checks
+
         require!(
             !user_state.is_blacklisted,
             ErrorCode::UserBlacklisted
         );
+        
+        #[cfg(not(feature = "test"))]
         require!(
             current_time - user_state.last_operation_time >= OPERATION_COOLDOWN,
             ErrorCode::RateLimitExceeded
@@ -206,20 +139,17 @@ pub mod myfaq_is {
             ErrorCode::TooManyQuestions
         );
 
+        // Validate CID format and length
+        require!(
+            content_cid.len() >= IPFS_CID_LENGTH && content_cid.len() <= MAX_CID_LENGTH,
+            ErrorCode::InvalidCIDFormat
+        );
+        require!(
+            content_cid.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_'),
+            ErrorCode::InvalidCIDFormat
+        );
+
         // Input validation
-        require!(
-            content.chars().all(|c| c.is_ascii()),
-            ErrorCode::InvalidCharacters
-        );
-        require!(
-            answer_hash.len() == 32,
-            ErrorCode::EncryptionError
-        );
-        require!(!ctx.accounts.marketplace.paused, ErrorCode::MarketplacePaused);
-        require!(
-            content.len() <= MAX_QUESTION_CONTENT_LENGTH,
-            ErrorCode::ContentTooLong
-        );
         require!(max_keys > 0, ErrorCode::InvalidKeyCount);
         require!(unlock_price > 0, ErrorCode::InvalidPrice);
 
@@ -236,16 +166,16 @@ pub mod myfaq_is {
         let marketplace = &mut ctx.accounts.marketplace;
 
         question.creator = ctx.accounts.creator.key();
-        question.content = content;
-        question.encrypted_answer = encrypted_answer;
-        question.answer_hash = answer_hash;
+        question.content_cid = content_cid;
+        question.content_hash = content_hash;
         question.unlock_price = unlock_price;
         question.max_keys = max_keys;
         question.current_keys = 0;
         question.index = marketplace.question_counter;
-        question.creation_time = Clock::get()?.unix_timestamp;
+        question.creation_time = current_time;
         question.total_sales = 0;
         question.is_active = true;
+        question.validation_timestamp = current_time;
         
         marketplace.question_counter = marketplace.question_counter
             .checked_add(1)
@@ -263,7 +193,11 @@ pub mod myfaq_is {
         user_state.questions_created = user_state.questions_created
             .checked_add(1)
             .ok_or(ErrorCode::NumericalOverflow)?;
-        user_state.last_operation_time = current_time;
+        #[cfg(not(feature = "test"))]
+        {
+            let current_time = Clock::get()?.unix_timestamp;
+            ctx.accounts.user_state.last_operation_time = current_time;
+        }
 
         Ok(())
     }
@@ -273,13 +207,22 @@ pub mod myfaq_is {
         metadata_uri: String,
         encrypted_key: Vec<u8>,
     ) -> Result<()> {
-        // Check operation status
+        require!(!ctx.accounts.marketplace.paused, ErrorCode::MarketplacePaused);
+        
         require!(
             !ctx.accounts.marketplace.paused_operations.mint_key,
             ErrorCode::OperationPaused
         );
 
-        // Add input validation
+        require!(ctx.accounts.question.is_active, ErrorCode::QuestionInactive);
+        require!(metadata_uri.len() <= MAX_URI_LENGTH, ErrorCode::URITooLong);
+
+        require!(
+            ctx.accounts.question.current_keys < ctx.accounts.question.max_keys,
+            ErrorCode::NoKeysAvailable
+        );
+
+        // input validation
         require!(
             encrypted_key.len() <= MAX_ENCRYPTED_KEY_LENGTH,
             ErrorCode::InvalidKeyLength
@@ -293,16 +236,6 @@ pub mod myfaq_is {
             ErrorCode::InvalidMetadataFormat
         );
 
-        // All validation checks first
-        require!(!ctx.accounts.marketplace.paused, ErrorCode::MarketplacePaused);
-        require!(ctx.accounts.question.is_active, ErrorCode::QuestionInactive);
-        require!(metadata_uri.len() <= MAX_URI_LENGTH, ErrorCode::URITooLong);
-        require!(
-            ctx.accounts.question.current_keys < ctx.accounts.question.max_keys,
-            ErrorCode::NoKeysAvailable
-        );
-
-        // Get all immutable values first
         let question_key = ctx.accounts.question.key();
         let current_keys = ctx.accounts.question.current_keys;
         let unlock_price = ctx.accounts.question.unlock_price;
@@ -310,18 +243,17 @@ pub mod myfaq_is {
         let _creator = ctx.accounts.question.creator;
         let _index = ctx.accounts.question.index;
 
-        // Now get mutable references
         let question = &mut ctx.accounts.question;
         let marketplace = &mut ctx.accounts.marketplace;
         let key = &mut ctx.accounts.unlock_key;
 
-        // Add balance check before calculating fees
+        // balance check before calculating fees
         require!(
             ctx.accounts.buyer_token_account.amount >= unlock_price,
             ErrorCode::InsufficientFunds
         );
 
-        // Calculate fees
+        // calculate fees
         let platform_fee = (unlock_price * platform_fee_bps as u64)
             .checked_div(10000)
             .ok_or(ErrorCode::NumericalOverflow)?;
@@ -329,7 +261,7 @@ pub mod myfaq_is {
             .checked_sub(platform_fee)
             .ok_or(ErrorCode::NumericalOverflow)?;
 
-        // Transfer BONK tokens
+        // transfer BONK tokens
         token::transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
@@ -354,10 +286,10 @@ pub mod myfaq_is {
             creator_payment,
         )?;
 
-        // Store the encrypted symmetric key
+        // store the encrypted symmetric key
         key.encrypted_key = encrypted_key;
         
-        // Create NFT metadata and mint token
+        // create NFT metadata and mint token
         key.owner = ctx.accounts.buyer.key();
         key.question = question_key;
         key.token_id = current_keys;
@@ -366,7 +298,7 @@ pub mod myfaq_is {
         key.mint_time = Clock::get()?.unix_timestamp;
         key.metadata_uri = metadata_uri.clone();
         
-        // Update statistics
+        // update statistics
         question.current_keys = question.current_keys
             .checked_add(1)
             .ok_or(ErrorCode::NumericalOverflow)?;
@@ -377,7 +309,7 @@ pub mod myfaq_is {
             .checked_add(question.unlock_price)
             .ok_or(ErrorCode::NumericalOverflow)?;
 
-        // Create Metaplex metadata
+        // create Metaplex metadata
         create_metadata_accounts_v3(
             CpiContext::new_with_signer(
                 ctx.accounts.metadata_program.to_account_info(),
@@ -414,6 +346,13 @@ pub mod myfaq_is {
             price: question.unlock_price,
         });
 
+        // Update rate limiting state - only in non-test mode
+        #[cfg(not(feature = "test"))]
+        {
+            let current_time = Clock::get()?.unix_timestamp;
+            ctx.accounts.user_state.last_operation_time = current_time;
+        }
+
         Ok(())
     }
 
@@ -421,13 +360,12 @@ pub mod myfaq_is {
         ctx: Context<ListKey>,
         price: u64
     ) -> Result<()> {
-        // Check operation status
+        require!(!ctx.accounts.marketplace.paused, ErrorCode::MarketplacePaused);
         require!(
             !ctx.accounts.marketplace.paused_operations.list_key,
             ErrorCode::OperationPaused
         );
 
-        require!(!ctx.accounts.marketplace.paused, ErrorCode::MarketplacePaused);
         require!(price > 0, ErrorCode::InvalidPrice);
         
         let key = &mut ctx.accounts.unlock_key;
@@ -494,7 +432,7 @@ pub mod myfaq_is {
         ctx: Context<BuyListedKey>,
         new_encrypted_key: Vec<u8>,
     ) -> Result<()> {
-        // Check operation status
+        require!(!ctx.accounts.marketplace.paused, ErrorCode::MarketplacePaused);
         require!(
             !ctx.accounts.marketplace.paused_operations.buy_key,
             ErrorCode::OperationPaused
@@ -506,7 +444,7 @@ pub mod myfaq_is {
             ErrorCode::InvalidKeyLength
         );
 
-        require!(!ctx.accounts.marketplace.paused, ErrorCode::MarketplacePaused);
+      
         require!(ctx.accounts.question.is_active, ErrorCode::QuestionInactive);
         
         let key = &mut ctx.accounts.unlock_key;
@@ -515,7 +453,7 @@ pub mod myfaq_is {
 
         let price = key.list_price;
         
-        // Add balance check before calculating fees
+        // balance check before calculating fees
         require!(
             ctx.accounts.buyer_token_account.amount >= price,
             ErrorCode::InsufficientFunds
@@ -533,7 +471,7 @@ pub mod myfaq_is {
             .checked_sub(creator_royalty)
             .ok_or(ErrorCode::NumericalOverflow)?;
 
-        // Transfer payments
+        // transfer payments
         token::transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
@@ -570,7 +508,7 @@ pub mod myfaq_is {
             seller_payment,
         )?;
 
-        // Update statistics
+        // update statistics
         ctx.accounts.question.total_sales = ctx.accounts.question.total_sales
             .checked_add(price)
             .ok_or(ErrorCode::NumericalOverflow)?;
@@ -578,7 +516,7 @@ pub mod myfaq_is {
             .checked_add(price)
             .ok_or(ErrorCode::NumericalOverflow)?;
 
-        // Update key ownership and encrypted key
+        // update key ownership and encrypted key
         let previous_owner = key.owner;
         key.owner = ctx.accounts.buyer.key();
         key.encrypted_key = new_encrypted_key;
@@ -595,6 +533,13 @@ pub mod myfaq_is {
             price,
             sold_time: key.last_sold_time,
         });
+
+        // update rate limiting state - only in non-test mode
+        #[cfg(not(feature = "test"))]
+        {
+            let current_time = Clock::get()?.unix_timestamp;
+            ctx.accounts.user_state.last_operation_time = current_time;
+        }
 
         Ok(())
     }
@@ -660,19 +605,14 @@ pub mod myfaq_is {
         Ok(())
     }
 
-    /// Transfers marketplace authority to a new account
     pub fn transfer_authority(ctx: Context<TransferAuthority>) -> Result<()> {
-        // Get current timestamp
         let timestamp = Clock::get()?.unix_timestamp;
         
-        // Store previous authority for event
         let previous_authority = ctx.accounts.marketplace.authority;
         
-        // Update marketplace authority
         let marketplace = &mut ctx.accounts.marketplace;
         marketplace.authority = ctx.accounts.new_authority.key();
         
-        // Emit authority transfer event
         emit!(AuthorityTransferred {
             previous_authority,
             new_authority: marketplace.authority,
@@ -695,7 +635,10 @@ pub struct Initialize<'info> {
         2 + // platform_fee_bps: u16
         2 + // creator_royalty_bps: u16
         8 + // total_volume: u64
-        1   // paused: bool
+        1 + // paused: bool
+        4,  // paused_operations
+        seeds = [b"marketplace", authority.key().as_ref()],
+        bump
     )]
     pub marketplace: Account<'info, Marketplace>,
     #[account(mut)]
@@ -709,10 +652,9 @@ pub struct InitializeUserState<'info> {
     #[account(
         init,
         payer = user,
-        space = 8 + // discriminator
-        8 + // questions_created: u64
-        8 + // last_operation_time: i64
-        1   // is_blacklisted: bool
+        space = 8 + 8 + 8 + 1,  // discriminator + questions_created + last_operation_time + is_blacklisted
+        seeds = [b"user_state", user.key().as_ref()],
+        bump
     )]
     pub user_state: Account<'info, UserState>,
     #[account(mut)]
@@ -729,7 +671,7 @@ pub struct UpdateFees<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(content: String, encrypted_answer: Vec<u8>, content_validation: ContentValidation)]
+#[instruction(content_cid: String, content_hash: [u8; 32])]
 pub struct CreateQuestion<'info> {
     #[account(mut)]
     pub marketplace: Account<'info, Marketplace>,
@@ -740,17 +682,22 @@ pub struct CreateQuestion<'info> {
         payer = creator,
         space = MIN_ACCOUNT_SPACE +
         32 +                        // creator: Pubkey
-        4 + content.len() +         // content: String
-        4 + encrypted_answer.len() + // encrypted_answer: Vec<u8>
-        32 +                        // answer_hash: [u8; 32]
-        8 +                         // validation_timestamp: i64
+        4 + content_cid.len() +     // content_cid: String
+        32 +                        // content_hash: [u8; 32]
         8 +                         // unlock_price: u64
         8 +                         // max_keys: u64
         8 +                         // current_keys: u64
         8 +                         // index: u64
         8 +                         // creation_time: i64
         8 +                         // total_sales: u64
-        1                          // is_active: bool
+        1 +                         // is_active: bool
+        8,                          // validation_timestamp: i64
+        seeds = [
+            b"question",
+            marketplace.key().as_ref(),
+            &marketplace.question_counter.to_le_bytes()
+        ],
+        bump
     )]
     pub question: Account<'info, Question>,
     #[account(mut)]
@@ -780,7 +727,14 @@ pub struct MintUnlockKey<'info> {
         4 + metadata_uri.len() +     // metadata_uri: String
         8 +                          // last_sold_price: u64
         8 +                          // last_sold_time: i64
-        8                           // list_time: i64
+        8,                          // list_time: i64
+        seeds = [
+            b"unlock_key",
+            question.key().as_ref(),
+            &question.current_keys.to_le_bytes()
+        ],
+        bump,
+        constraint = question.current_keys < question.max_keys @ ErrorCode::NoKeysAvailable
     )]
     pub unlock_key: Account<'info, UnlockKey>,
     #[account(mut)]
@@ -832,6 +786,8 @@ pub struct MintUnlockKey<'info> {
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
+    #[account(mut)]
+    pub user_state: Account<'info, UserState>,
 }
 
 #[derive(Accounts)]
@@ -842,6 +798,8 @@ pub struct ListKey<'info> {
     pub unlock_key: Account<'info, UnlockKey>,
     #[account(mut)]
     pub seller: Signer<'info>,
+    #[account(mut)]
+    pub user_state: Account<'info, UserState>,
 }
 
 #[derive(Accounts)]
@@ -865,12 +823,33 @@ pub struct CancelListing<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(new_encrypted_key: Vec<u8>)]
 pub struct BuyListedKey<'info> {
     #[account(mut)]
     pub marketplace: Account<'info, Marketplace>,
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = !marketplace.paused @ ErrorCode::MarketplacePaused,
+        constraint = !marketplace.paused_operations.buy_key @ ErrorCode::OperationPaused
+    )]
     pub question: Account<'info, Question>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [
+            b"unlock_key",
+            question.key().as_ref(),
+            &unlock_key.token_id.to_le_bytes()
+        ],
+        bump,
+        constraint = unlock_key.is_listed @ ErrorCode::NotListed,
+        constraint = unlock_key.owner != buyer.key() @ ErrorCode::CannotBuyOwnKey,
+        constraint = unlock_key.owner == seller_token_account.owner @ ErrorCode::InvalidOwner,
+        realloc = UNLOCK_KEY_BASE_SIZE + 
+            4 + new_encrypted_key.len() +  // encrypted_key: Vec<u8>
+            4 + unlock_key.metadata_uri.len(),  // metadata_uri: String
+        realloc::payer = buyer,
+        realloc::zero = false
+    )]
     pub unlock_key: Account<'info, UnlockKey>,
     #[account(mut)]
     pub buyer: Signer<'info>,
@@ -906,6 +885,8 @@ pub struct BuyListedKey<'info> {
     pub bonk_mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
+    #[account(mut)]
+    pub user_state: Account<'info, UserState>,
 }
 
 #[derive(Accounts)]
@@ -957,9 +938,8 @@ impl PausedOperations {
 #[account]
 pub struct Question {
     pub creator: Pubkey,
-    pub content: String,
-    pub encrypted_answer: Vec<u8>,
-    pub answer_hash: [u8; 32],
+    pub content_cid: String,      // IPFS CID containing question and encrypted answer
+    pub content_hash: [u8; 32],   // Hash of the complete IPFS content
     pub unlock_price: u64,
     pub max_keys: u64,
     pub current_keys: u64,
@@ -1076,14 +1056,10 @@ pub enum ErrorCode {
     InvalidAuthority,
     #[msg("Insufficient funds for transaction")]
     InsufficientFunds,
-    #[msg("Invalid validator signature")]
-    InvalidValidatorSignature,
-    #[msg("Content length mismatch with validation")]
-    ContentLengthMismatch,
-    #[msg("Content hash mismatch with validation")]
-    ContentHashMismatch,
-    #[msg("Answer hash mismatch with validation")]
-    AnswerHashMismatch,
+    #[msg("Invalid IPFS CID format")]
+    InvalidCIDFormat,
+    #[msg("Invalid owner for this operation")]
+    InvalidOwner,
 }
 
 #[derive(Accounts)]
