@@ -43,8 +43,14 @@ export default defineConfig({
             'posthog-js',
             '@radix-ui/react-compose-refs',
             'react-dropzone',
+            'react-currency-input-field',
           ]
-        : ['@radix-ui/react-compose-refs', /^\@radix-ui/, 'react-dropzone'],
+        : [
+            '@radix-ui/react-compose-refs',
+            /^\@radix-ui/,
+            'react-dropzone',
+            'react-currency-input-field',
+          ],
   },
   plugins: [
     remix({
@@ -56,8 +62,12 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      'msw/native': resolve(resolve(__dirname, './node_modules/msw/lib/native/index.mjs')),
-      'msw/browser': resolve(resolve(__dirname, './node_modules/msw/lib/browser/index.mjs')),
+      'msw/native': resolve(
+        resolve(__dirname, './node_modules/msw/lib/native/index.mjs')
+      ),
+      'msw/browser': resolve(
+        resolve(__dirname, './node_modules/msw/lib/browser/index.mjs')
+      ),
     },
   },
   build: {
