@@ -1,15 +1,25 @@
 {
   "license": "ISC",
   "scripts": {
+    "start:localnet": "npm run clean:validator && dotenv -- tsx scripts/start-localnet.ts",
+    "deploy:devnet": "tsx deploy/scripts/deploy-devnet.ts",
+    "stop:validator": "pkill -f solana-test-validator || true",
+    "clean": "rm -rf target .anchor",
+    "clean:deploy": "npm run clean && rm -f deploy/deployment-info.json",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "clean:validator": "rm -f validator.log && npm run stop:validator && sleep 2"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/mpl-token-metadata": "^3.3.0",
     "@project-serum/anchor": "^0.26.0",
     "@solana/spl-token": "^0.4.9",
-    "@solana/web3.js": "^1.95.8"
+    "@solana/web3.js": "^1.95.8",
+    "commander": "^11.1.0",
+    "dotenv": "^16.4.7",
+    "dotenv-cli": "^7.4.4",
+    "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
