@@ -24,3 +24,6 @@ target
 **/*.rs.bk
 test-ledger
 .yarn
+
+*.log
+*.json
