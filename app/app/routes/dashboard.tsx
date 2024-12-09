@@ -11,7 +11,7 @@ export const meta: MetaFunction = () => {
     },
     {
       name: 'description',
-      content: 'Your AI trip planner',
+      content: '',
     },
   ];
 };

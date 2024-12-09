@@ -5,6 +5,7 @@ import {
 import { AssetEntity } from './asset';
 import { ExternalLinkEntity } from './external-link';
 import { WalletEntity } from './wallet';
+import { QuestionEntity } from './question';
 
 export const OnboardingStep: typeof OnboardingStepORM = {
   PENDING: 'PENDING',
@@ -26,12 +27,14 @@ export class UserProfileEntity {
   about?: UserProfileORM['about'];
   onboarding?: UserProfileORM['onboarding'];
   Wallet?: WalletEntity;
+  Questions?: QuestionEntity[];
 
   constructor(
     userProfile: UserProfileORM & {
       ExternalLinks?: ExternalLinkEntity[];
       Avatar?: AssetEntity;
       Wallet?: WalletEntity;
+      Questions: QuestionEntity[];
     }
   ) {
     this.id = userProfile?.id;
@@ -44,6 +47,7 @@ export class UserProfileEntity {
     this.Avatar = userProfile?.Avatar;
     this.onboarding = userProfile?.onboarding;
     this.Wallet = userProfile?.Wallet;
+    this.Questions = userProfile?.Questions;
   }
 
   isEqual(userProfile: UserProfileEntity) {
@@ -91,6 +95,7 @@ export class UserProfileEntity {
       ExternalLinks: this.ExternalLinks?.map((c) => c.json()),
       Avatar: this.Avatar?.json(),
       Wallet: this.Wallet?.json(),
+      Questions: this.Questions?.map((c) => c.json()),
     } as UserProfileDTO;
   }
 }

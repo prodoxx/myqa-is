@@ -290,6 +290,7 @@ model UserProfile {
   ExternalLinks ExternalLink[]
   onboarding    OnboardingStep @default(PENDING)
   Wallet        Wallet?
+  Questions     Question[]
 }
 
 enum SocialLink {
@@ -321,4 +322,12 @@ model Wallet {
   key           String
   userProfileId String?      @unique
   UserProfile   UserProfile? @relation(fields: [userProfileId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+}
+
+model Question {
+  id             String      @id @default(cuid())
+  title          String
+  lockedAnswerId String
+  userProfileId  String
+  UserProfile    UserProfile @relation(fields: [userProfileId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
