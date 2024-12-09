@@ -7,7 +7,7 @@ use anchor_spl::{
 
 use mpl_token_metadata::types::DataV2;
 
-declare_id!("AVCfPVgxM4cbWYhkQvq6DfKSEbqfjptwAqGnHhxvmMTV");
+declare_id!("9JAQRjJrrADocbboPiaRNRNpkbGKZKgxoJpsEkJEDn2e");
 
 // Fee constants as basis points (1 basis point = 0.01%)
 const INITIAL_PLATFORM_FEE_BPS: u16 = 500;  // 5%
@@ -70,11 +70,13 @@ pub mod myfaq_is {
         marketplace.total_volume = 0;
         marketplace.paused = false;
         marketplace.paused_operations = PausedOperations::default();
+        marketplace.bonk_mint = ctx.accounts.bonk_mint.key();
 
         emit!(MarketplaceInitialized {
             authority: marketplace.authority,
             platform_fee_bps: INITIAL_PLATFORM_FEE_BPS,
             creator_royalty_bps: INITIAL_CREATOR_ROYALTY_BPS,
+            bonk_mint: marketplace.bonk_mint,
         });
 
         Ok(())
@@ -234,6 +236,12 @@ pub mod myfaq_is {
         require!(
             metadata_uri.len() >= MIN_METADATA_LENGTH,
             ErrorCode::InvalidMetadataFormat
+        );
+
+        // Update BONK token validation
+        require!(
+            ctx.accounts.bonk_mint.key() == ctx.accounts.marketplace.bonk_mint,
+            ErrorCode::InvalidBonkMint
         );
 
         let question_key = ctx.accounts.question.key();
@@ -636,11 +644,14 @@ pub struct Initialize<'info> {
         2 + // creator_royalty_bps: u16
         8 + // total_volume: u64
         1 + // paused: bool
-        4,  // paused_operations
+        4 + // paused_operations
+        32, // bonk_mint: Pubkey
         seeds = [b"marketplace", authority.key().as_ref()],
         bump
     )]
     pub marketplace: Account<'info, Marketplace>,
+    /// CHECK: Validated in instruction
+    pub bonk_mint: UncheckedAccount<'info>,
     #[account(mut)]
     pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -905,6 +916,7 @@ pub struct Marketplace {
     pub total_volume: u64,
     pub paused: bool,
     pub paused_operations: PausedOperations,
+    pub bonk_mint: Pubkey,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
@@ -970,6 +982,7 @@ pub struct MarketplaceInitialized {
     pub authority: Pubkey,
     pub platform_fee_bps: u16,
     pub creator_royalty_bps: u16,
+    pub bonk_mint: Pubkey,
 }
 
 #[event]
@@ -1060,6 +1073,8 @@ pub enum ErrorCode {
     InvalidCIDFormat,
     #[msg("Invalid owner for this operation")]
     InvalidOwner,
+    #[msg("Invalid BONK token mint address")]
+    InvalidBonkMint,
 }
 
 #[derive(Accounts)]

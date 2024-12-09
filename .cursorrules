@@ -43,7 +43,7 @@ All database questions are about PostgresSQL.
 - Use `const` for immutable variables.
 - Use template strings for string interpolation.
 - Always use await/async. Never use promises.
-- use all lower-case when writing comments or documentation
+- Use all lower-case when writing comments or documentation
 
 **Remix-Specific Guidelines**
 

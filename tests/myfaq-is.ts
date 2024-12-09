@@ -24,6 +24,8 @@ import {
 import { assert } from 'chai';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 
+const TEST_BONK_DECIMALS = 6; // Match BONK token decimals
+
 describe('myfaq-is', function () {
   // set timeout to 30 seconds for all tests in this suite
   this.timeout(30000);
@@ -57,9 +59,10 @@ describe('myfaq-is', function () {
   // constants for testing
   const CONTENT_CID = 'QmT8JtG98Pu6YqHrRxiANrqjaC8ydz3F4uuQvRfQqC3T45';
   const CONTENT_HASH = Array(32).fill(1);
-  const UNLOCK_PRICE = new anchor.BN(1000000); // 1 BONK
+  const UNLOCK_PRICE = new anchor.BN(1_000_000); // 1 BONK (6 decimals)
   const MAX_KEYS = new anchor.BN(10);
   const TOKEN_METADATA_PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
+  const LIST_PRICE = new anchor.BN(2_000_000); // 2 BONK (6 decimals)
 
   before(async () => {
     try {
@@ -71,8 +74,7 @@ describe('myfaq-is', function () {
 
         await provider.connection.confirmTransaction({
           signature,
-          blockhash: latestBlockhash.blockhash,
-          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+          ...latestBlockhash,
         });
       }
 
@@ -87,16 +89,17 @@ describe('myfaq-is', function () {
       await program.methods
         .initialize()
         .accounts({
-          marketplace: marketplace,
+          marketplace,
           authority: authority.publicKey,
+          bonkMint: bonkMint.publicKey,
           systemProgram: SystemProgram.programId,
           rent: SYSVAR_RENT_PUBKEY,
         })
         .signers([authority])
         .rpc();
 
-      // create BONK token mint
-      await createMint(provider.connection, authority, authority.publicKey, null, 6, bonkMint);
+      // create BONK token mint with correct decimals
+      await createMint(provider.connection, authority, authority.publicKey, null, TEST_BONK_DECIMALS, bonkMint);
 
       // create associated token accounts
       userTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, user.publicKey);
@@ -335,8 +338,7 @@ describe('myfaq-is', function () {
         // wait for confirmation
         await provider.connection.confirmTransaction({
           signature,
-          blockhash: latestBlockhash.blockhash,
-          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+          ...latestBlockhash,
         });
 
         // make sure marketplace is not paused
@@ -931,8 +933,8 @@ describe('myfaq-is', function () {
 
   describe('Listings', () => {
     let unlockKeyPda: PublicKey;
-    const LIST_PRICE = new anchor.BN(2000000); // 2 BONK
-    const UPDATED_PRICE = new anchor.BN(3000000); // 3 BONK
+    const LIST_PRICE = new anchor.BN(2_000_000); // 2 BONK (6 decimals)
+    const UPDATED_PRICE = new anchor.BN(3_000_000); // 3 BONK (6 decimals)
     const CONTENT_CID = 'QmT8JtG98Pu6YqHrRxiANrqjaC8ydz3F4uuQvRfQqC3T45';
     const CONTENT_HASH = Array(32).fill(1);
 
@@ -1274,7 +1276,7 @@ describe('myfaq-is', function () {
   describe('Buy Unlock Keys', () => {
     let unlockKeyPda: PublicKey;
     let questionPda: PublicKey;
-    const LIST_PRICE = new anchor.BN(2000000); // 2 BONK
+    const LIST_PRICE = new anchor.BN(2_000_000); // 2 BONK (6 decimals)
     const ENCRYPTED_KEY = Buffer.from('encrypted_key_data');
     const NEW_ENCRYPTED_KEY = Buffer.from('new_encrypted_key_data');
     const METADATA_URI = 'https://example.com/metadata.json';
@@ -1729,5 +1731,10 @@ describe('myfaq-is', function () {
         throw error;
       }
     });
+  });
+
+  it('Initializes with correct BONK mint', async () => {
+    const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
+    assert.ok(marketplaceAccount.bonkMint.equals(bonkMint.publicKey));
   });
 });
