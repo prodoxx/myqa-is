@@ -44,12 +44,14 @@ export default defineConfig({
             '@radix-ui/react-compose-refs',
             'react-dropzone',
             'react-currency-input-field',
+            'vaul',
           ]
         : [
             '@radix-ui/react-compose-refs',
             /^\@radix-ui/,
             'react-dropzone',
             'react-currency-input-field',
+            'vaul',
           ],
   },
   plugins: [
