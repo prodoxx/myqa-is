@@ -2,10 +2,10 @@ import {
   OnboardingStep as OnboardingStepORM,
   UserProfile as UserProfileORM,
 } from '@prisma/client';
-import { AssetEntity } from './asset';
-import { ExternalLinkEntity } from './external-link';
-import { WalletEntity } from './wallet';
-import { QuestionEntity } from './question';
+import { AssetDTO, AssetEntity } from './asset';
+import { ExternalLinkDTO, ExternalLinkEntity } from './external-link';
+import { WalletDTO, WalletEntity } from './wallet';
+import { QuestionDTO, QuestionEntity } from './question';
 
 export const OnboardingStep: typeof OnboardingStepORM = {
   PENDING: 'PENDING',
@@ -102,8 +102,17 @@ export class UserProfileEntity {
 
 export type UserProfileDTO = Omit<
   UserProfileEntity,
-  'createdAt' | 'updatedAt'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'ExternalLinks'
+  | 'Avatar'
+  | 'Wallet'
+  | 'Questions'
 > & {
   createdAt?: string;
   updatedAt?: string;
+  ExternalLinks: ExternalLinkDTO[];
+  Avatar: AssetDTO;
+  Wallet: WalletDTO;
+  Questions: QuestionDTO[];
 };

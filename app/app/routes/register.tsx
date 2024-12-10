@@ -1,6 +1,10 @@
 import { redirect } from '@remix-run/node';
 import { Link, useNavigation } from '@remix-run/react';
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node';
 import { AuthorizationError } from 'remix-auth';
 import { typedjson, useTypedActionData } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
@@ -10,7 +14,13 @@ import { loginSchema } from '~/presentation/requests/login';
 import { registerSchema } from '~/presentation/requests/register';
 import { commitSession, getSession } from '~/session.server';
 import { Button } from '~/ui/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/ui/atoms/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/ui/atoms/card';
 import { MainLayout } from '~/ui/layouts/main';
 import { RegisterForm } from '~/ui/organisms/auth/register-form';
 import { Separator } from '~/ui/atoms/separator';
@@ -25,11 +35,12 @@ const getValuesFromRequest = async (formData: FormData) => {
 export const meta: MetaFunction = () => {
   return [
     {
-      title: 'Join MyFAQ.is',
+      title: "Join MyFAQ.is | Your Fan's Preferred Way to Get to Know You",
     },
     {
       name: 'description',
-      content: 'Create your account',
+      content:
+        'Discover the stories behind your favorite creators on MyFAQ.is. Unlock deep, personal questions by supporting creators you love',
     },
   ];
 };
@@ -53,7 +64,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       password,
     });
 
-    const newUser = await new RegisterUser(validated.name, validated.email, validated.password).call();
+    const newUser = await new RegisterUser(
+      validated.name,
+      validated.email,
+      validated.password
+    ).call();
     const session = await getSession(request.headers.get('cookie'));
     // and store the user data
     session.set(authenticator.sessionKey, newUser?.json());
@@ -94,7 +109,9 @@ const Register = () => {
       <Card className="w-full md:max-w-xl border-none shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl text-black">Sign Up Now</CardTitle>
-          <CardDescription className="text-gray-600">Sign Up to Start Earning with Your FAQ</CardDescription>
+          <CardDescription className="text-gray-600">
+            Sign Up to Start Earning with Your FAQ
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="flex flex-col space-y-4">

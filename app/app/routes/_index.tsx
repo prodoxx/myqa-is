@@ -5,11 +5,12 @@ import { MainLayout } from '~/ui/layouts/main';
 export const meta: MetaFunction = () => {
   return [
     {
-      title: 'MyFAQ.is | MyFAQ.is',
+      title: "MyFAQ.is | Your Fan's Preferred Way to Get to Know You",
     },
     {
       name: 'description',
-      content: 'Your AI trip planner',
+      content:
+        'Discover the stories behind your favorite creators on MyFAQ.is. Unlock deep, personal questions by supporting creators you love',
     },
   ];
 };

@@ -22,7 +22,7 @@ export const NewQuestionForm = () => {
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl">Create a new question</CardTitle>
-          <span className='text-gray-500'>
+          <span className="text-gray-500">
             A new question will be created and minted on the blockchain. Your
             fans can then pay to unlock your question's answer.
           </span>
@@ -39,7 +39,12 @@ export const NewQuestionForm = () => {
           </div>
 
           <div>
-            <CurrencyInput prefix="ETH" decimalsLimit={100000} allowNegativeValue={false}  />;
+            <CurrencyInput
+              prefix="ETH"
+              decimalsLimit={100000}
+              allowNegativeValue={false}
+            />
+            ;
           </div>
         </CardContent>
         <CardFooter className="flex space-x-4">
@@ -50,7 +55,7 @@ export const NewQuestionForm = () => {
             asChild
             variant="ghost"
           >
-            <Link to="/profile">Cancel</Link>
+            <Link to="/dashboard">Cancel</Link>
           </Button>
 
           <Button type="submit" disabled={isSubmitting} className="w-1/2">

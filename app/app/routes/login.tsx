@@ -1,4 +1,8 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Link, useNavigation } from '@remix-run/react';
 import { AuthorizationError } from 'remix-auth';
@@ -7,7 +11,13 @@ import { authenticator } from '~/auth.server';
 import { getErrorMessage } from '~/lib/error-messages';
 import { commitSession, getSession } from '~/session.server';
 import { Button } from '~/ui/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/ui/atoms/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/ui/atoms/card';
 import { Separator } from '~/ui/atoms/separator';
 import { MainLayout } from '~/ui/layouts/main';
 import { GoogleLoginForm } from '~/ui/organisms/auth/google-form';
@@ -23,11 +33,12 @@ const getValuesFromRequest = async (request: Request) => {
 export const meta: MetaFunction = () => {
   return [
     {
-      title: 'Sign in to your MyFaq',
+      title: "Log in to MyFAQ.is | Your Fan's Preferred Way to Get to Know You",
     },
     {
       name: 'description',
-      content: 'Sign in to your account start your FAQ',
+      content:
+        'Discover the stories behind your favorite creators on MyFAQ.is. Unlock deep, personal questions by supporting creators you love',
     },
   ];
 };
@@ -85,7 +96,9 @@ const Login = () => {
       <Card className="w-full md:max-w-xl border-none shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl text-black">Sign In Now</CardTitle>
-          <CardDescription className="text-gray-600">Start adding your FAQ now!</CardDescription>
+          <CardDescription className="text-gray-600">
+            Start adding your FAQ now!
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="flex flex-col space-y-4">

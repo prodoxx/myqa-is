@@ -185,6 +185,9 @@ dependencies:
   react-dropzone:
     specifier: ^14.3.5
     version: 14.3.5(react@18.3.1)
+  react-icons:
+    specifier: ^5.4.0
+    version: 5.4.0(react@18.3.1)
   react-payment-inputs:
     specifier: ^1.1.9
     version: 1.2.0(react@18.3.1)(styled-components@6.1.13)
@@ -17953,6 +17956,14 @@ packages:
       attr-accept: 2.2.5
       file-selector: 2.1.2
       prop-types: 15.8.1
+      react: 18.3.1
+    dev: false
+
+  /react-icons@5.4.0(react@18.3.1):
+    resolution: {integrity: sha512-7eltJxgVt7X64oHh6wSWNwwbKTCtMfK35hcjvJS0yxEAhPM8oUKdS3+kqaW1vicIltw+kR2unHaa12S9pPALoQ==}
+    peerDependencies:
+      react: '*'
+    dependencies:
       react: 18.3.1
     dev: false
 
