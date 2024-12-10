@@ -43,7 +43,7 @@ export class BlobStorage {
       return `${process.env.DIGITAL_OCEAN_ENDPOINT_URL!.replace(
         `${process.env.DIGITAL_OCEAN_REGION}.`,
         `${process.env.DIGITAL_OCEAN_REGION}.cdn.`,
-      )}/avatars/${this.filename}`;
+      )}/images/${this.filename}`;
     } catch (error) {
       console.error(error);
       throw new Failure('internal_error', 'Failed to upload file to storage');
