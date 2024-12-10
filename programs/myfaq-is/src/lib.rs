@@ -333,7 +333,7 @@ pub mod myfaq_is {
                 &[&[b"mint_authority", &[ctx.bumps.mint_authority]]],
             ),
             DataV2 {
-                name: "QA Key".to_string(),
+                name: format!("QA Key #{} - Q{}", key.token_id, question.index),
                 symbol: "QAK".to_string(),
                 uri: metadata_uri,
                 seller_fee_basis_points: 0,

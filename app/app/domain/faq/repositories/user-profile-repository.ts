@@ -63,7 +63,6 @@ export class UserProfileRepository {
       include: {
         Avatar: true,
         ExternalLinks: true,
-        Wallet: true,
       },
     });
 
