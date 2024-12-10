@@ -65,6 +65,7 @@ export const ExternalLinkList = ({ links }: ExternalLinkListProps) => {
     <ol className="flex py-4 space-x-4 mx-auto">
       {links?.map((link) => (
         <Link
+          key={link.url}
           target="_blank"
           to={externalLinkLogoMap[link.type]?.getLink(link.url)}
           className="hover:scale-105 hover:transition-all"

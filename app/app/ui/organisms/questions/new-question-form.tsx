@@ -17,25 +17,8 @@ import CurrencyInput, {
   CurrencyInputOnChangeValues,
 } from 'react-currency-input-field';
 import React from 'react';
-
-const getCryptoPrice = async (symbol: string) => {
-  try {
-    const response = await axios.get(
-      'https://api.binance.com/api/v3/ticker/price',
-      {
-        params: {
-          symbol: symbol,
-        },
-      }
-    );
-
-    console.log(`${symbol} price: $${response.data.price}`);
-    return Number(response.data.price);
-  } catch (error) {
-    console.error('Error fetching price:', error);
-    return null;
-  }
-};
+import { Bonk } from '~/ui/atoms/bonk';
+import { getCryptoPrice, SupportedCoins } from '~/infrastructure/crypto';
 
 export const NewQuestionForm = () => {
   const fetcherData = useTypedFetcher();
@@ -57,10 +40,10 @@ export const NewQuestionForm = () => {
 
   React.useEffect(() => {
     const getAndSetPrice = async () => {
-      const result = await getCryptoPrice('BONKUSDT');
+      const result = await getCryptoPrice(SupportedCoins.BONKUSDT);
       if (result) {
-        setBonkPrice(result);
-        setLastUpdate(new Date().getTime());
+        setBonkPrice(result.price);
+        setLastUpdate(result.date);
       }
     };
     getAndSetPrice();
@@ -89,7 +72,7 @@ export const NewQuestionForm = () => {
 
           <div className="flex flex-col space-y-2">
             <div className="flex flex-row items-center rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors focus-within:ring-1 focus-within:ring-ring focus-within:border-ring">
-              <img src={bonk} alt="BONK" className="h-16 w-16 mr-2" />
+              <Bonk />
               <CurrencyInput
                 prefix="BONK "
                 decimalsLimit={10}
