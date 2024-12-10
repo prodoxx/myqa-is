@@ -1,9 +1,14 @@
 import type { ExternalLink as ExternalLinkORM } from '@prisma/client';
 import { SocialLink as SocialLinkORM } from '@prisma/client';
 
-const SocialLink = SocialLinkORM;
-
-export { SocialLink };
+export const SocialLink: typeof SocialLinkORM = {
+  FACEBOOK: 'FACEBOOK',
+  TWITTER: 'TWITTER',
+  INSTAGRAM: 'INSTAGRAM',
+  YOUTUBE: 'YOUTUBE',
+  THREADS: 'THREADS',
+  SNAPCHAT: 'SNAPCHAT',
+};
 
 export class ExternalLinkEntity {
   id?: ExternalLinkORM['id'];
@@ -12,7 +17,8 @@ export class ExternalLinkEntity {
   type: ExternalLinkORM['type'];
 
   constructor(
-    externalLink: Pick<ExternalLinkORM, 'url' | 'type'> & Partial<Pick<ExternalLinkORM, 'id' | 'userProfileId'>>,
+    externalLink: Pick<ExternalLinkORM, 'url' | 'type'> &
+      Partial<Pick<ExternalLinkORM, 'id' | 'userProfileId'>>
   ) {
     this.id = externalLink.id;
     this.url = externalLink.url;

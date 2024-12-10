@@ -11,7 +11,7 @@ export const meta: MetaFunction = () => {
     },
     {
       name: 'description',
-      content: '',
+      content: "MyFAQ.is | Your Fan's Preferred Way to Get to Know You",
     },
   ];
 };
@@ -24,7 +24,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
     return redirect('/onboarding');
   }
 
-  return null;
+  return redirect(`/${user?.username}`);
 };
 
 export default function Index() {
