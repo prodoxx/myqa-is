@@ -12,7 +12,7 @@ import { UserProfileEntity } from '../entities/user-profile';
 import { AssetRepository } from '../repositories/asset-repository';
 import { UserProfileRepository } from '../repositories/user-profile-repository';
 import { UserRepository } from '../repositories/user-repository';
-import { WalletRepository } from '../repositories/wallet-repository';
+import prisma from '~/infrastructure/database/index.server';
 
 export const onboardUserSchema = z.object({
   onboarding: z.nativeEnum(OnboardingStep),
@@ -80,14 +80,18 @@ export class OnboardUser {
     return entity;
   }
 
-  async updateWallet(userProfile: UserProfileEntity, key?: string | null) {
+  async updateWallet(userId: number, key?: string | null) {
     if (!key) {
       return;
     }
 
-    return await WalletRepository.upsertByUserProfileId(userProfile.id!, {
-      key,
-      userProfileId: userProfile.id!,
+    return prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        walletPublicKey: key,
+      },
     });
   }
 
@@ -108,18 +112,18 @@ export class OnboardUser {
 
   async call() {
     const user = await UserRepository.findByUserId(this.userId);
-    assert(user, 404, 'User does not exist');
+    assert(user?.id, 404, 'User does not exist');
 
     const data = await this.validateParams();
-    const [avatar, wallet] = await Promise.all([
+    const [avatar, updatedUser] = await Promise.all([
       this.updateAvatar(user.UserProfile, data.avatar),
-      this.updateWallet(user.UserProfile, data.publicKey),
+      this.updateWallet(user.id, data.publicKey),
     ]);
 
     // Set the current step as the current onboarding
     user.UserProfile.onboarding = data.onboarding;
 
-    const updatedUser = await UserProfileRepository.onboardUserByUserId(
+    const updatedUserProfile = await UserProfileRepository.onboardUserByUserId(
       this.userId,
       {
         onboarding: user.UserProfile.getNextOnboardingStep(),
@@ -127,13 +131,12 @@ export class OnboardUser {
         Avatar: avatar,
         about: data?.about,
         ExternalLinks: this.getExternalLinks(data?.externalLinks),
-        Wallet: wallet,
       }
     );
 
-    updatedUser!.Avatar = avatar!;
-    user.UserProfile = updatedUser!;
-    user.UserProfile.Wallet = wallet!;
+    updatedUserProfile!.Avatar = avatar!;
+    user.UserProfile = updatedUserProfile!;
+    user.walletPublicKey = updatedUser?.walletPublicKey;
 
     return user;
   }

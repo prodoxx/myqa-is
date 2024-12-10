@@ -9,6 +9,7 @@ export class UserEntity {
   createdAt?: UserORM['createdAt'];
   updatedAt?: UserORM['updatedAt'];
   UserProfile: UserProfileEntity;
+  walletPublicKey?: UserORM['walletPublicKey'];
 
   constructor(user: UserORM & { UserProfile: UserProfileEntity }) {
     this.id = user.id;
@@ -30,12 +31,16 @@ export class UserEntity {
       email: this.email,
       id: this.id,
       username: this.username,
+      walletPublicKey: this.walletPublicKey,
       UserProfile: this.UserProfile?.json(),
     } as UserDTO;
   }
 }
 
-export type UserDTO = Pick<UserEntity, 'email' | 'id' | 'username'> & {
+export type UserDTO = Pick<
+  UserEntity,
+  'email' | 'id' | 'username' | 'walletPublicKey'
+> & {
   createdAt?: string;
   updatedAt?: string;
   UserProfile: UserProfileDTO;
