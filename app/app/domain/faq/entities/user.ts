@@ -19,6 +19,7 @@ export class UserEntity {
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
     this.UserProfile = user.UserProfile;
+    this.walletPublicKey = user.walletPublicKey;
   }
 
   isEqual(user: UserEntity) {

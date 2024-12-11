@@ -4,6 +4,7 @@ import { clusterApiUrl, PublicKey } from '@solana/web3.js';
 declare global {
   interface Window {
     ENV: {
+      CONNECTED_PUBLIC_KEY: string;
       SOLANA_NETWORK: string;
       SOLANA_RPC_URL: string;
       MARKETPLACE_PROGRAM_ID: string;

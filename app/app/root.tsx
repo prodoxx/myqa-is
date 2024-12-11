@@ -28,6 +28,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       path: new URL(request.url).pathname,
     },
     ENV: {
+      CONNECTED_PUBLIC_KEY: user?.walletPublicKey,
       SOLANA_NETWORK: process.env.SOLANA_NETWORK || 'devnet',
       SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || '',
       MARKETPLACE_PROGRAM_ID: process.env.MARKETPLACE_PROGRAM_ID,
