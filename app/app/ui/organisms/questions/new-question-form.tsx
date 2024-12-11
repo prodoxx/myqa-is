@@ -96,9 +96,9 @@ export const NewQuestionForm = () => {
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
           <div>
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="question">Question</Label>
             <Input
-              id="title"
+              id="question"
               disabled={isLoading || isSubmitting}
               className="!text-lg h-14"
               {...register('question')}
@@ -152,14 +152,10 @@ export const NewQuestionForm = () => {
             {typeof price !== 'undefined' ? (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500 font-medium">
-                  {price.formatted}≈USDT
+                  {price.formatted.replace('BONK ', '') ?? 0} ≈ ${' '}
                   {priceOfBonkInUSD?.toFixed(2) === '0.00'
                     ? priceOfBonkInUSD?.toFixed(6)
                     : priceOfBonkInUSD?.toFixed(2)}
-                </span>
-                <span className="text-sm text-gray-500">
-                  Last update: {new Date(lastUpdate).toDateString()} at{' '}
-                  {new Date(lastUpdate).toLocaleTimeString()}
                 </span>
               </div>
             ) : null}
@@ -172,7 +168,7 @@ export const NewQuestionForm = () => {
             disabled={isLoading || isSubmitting}
             className="w-1/2"
             variant="ghost"
-            // onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/dashboard')}
           >
             Cancel
           </Button>
@@ -180,7 +176,7 @@ export const NewQuestionForm = () => {
           <Button
             size="lg"
             type="submit"
-            disabled={isLoading || isSubmitting}
+            isLoading={isLoading || isSubmitting}
             className="w-1/2"
           >
             Create question

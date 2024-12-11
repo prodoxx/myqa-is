@@ -5,8 +5,8 @@ import { MarketplaceClient } from '~/lib/marketplace';
 import { bigIntReplacer } from '~/utils/big-int-replacer';
 
 const schema = z.object({
-  question: z.string().min(10).min(1),
-  answer: z.string().min(20).max(5000),
+  question: z.string().min(10),
+  answer: z.string().min(1).max(5000),
   maxKeys: z.number().min(0).max(100_000),
   unlockPriceInBonk: z.bigint().min(BigInt(1)),
 });
