@@ -60,7 +60,7 @@ export const action: ActionFunction = async ({ request }) => {
     const qa = await prisma.qA.create({
       data: {
         question,
-        unlockPriceInBonk,
+        unlockPriceInBonk: Number(unlockPriceInBonk),
         maxKeys,
         questionHash,
         onChainId,
