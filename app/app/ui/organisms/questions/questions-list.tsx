@@ -1,8 +1,7 @@
 import { XIcon } from 'lucide-react';
-import { QuestionDTO } from '~/domain/faq/entities/question';
+import { QaDTO } from '~/domain/faq/entities/question';
 import { CryptoPrice } from '~/infrastructure/crypto';
 import { cn } from '~/lib/utils';
-import { Bonk } from '~/ui/atoms/bonk';
 import { Button } from '~/ui/atoms/button';
 import { BonkPricing } from '~/ui/molecules/bonk-pricing';
 import {
@@ -10,14 +9,13 @@ import {
   DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from '~/ui/molecules/drawer';
 
 export type QuestionsListProps = {
-  questions?: QuestionDTO[];
+  questions?: QaDTO[];
   cryptoPrice: CryptoPrice | null;
 };
 
@@ -44,16 +42,18 @@ export const QuestionsList = ({
           >
             <div className="flex flex-col">
               <h3 className="font-bold text-inherit text-left">
-                {question.title}
+                {question.question}
               </h3>
 
               {cryptoPrice ? (
                 <BonkPricing
                   toUsd={Intl.NumberFormat('en-US').format(
-                    cryptoPrice.price * QUESTION_PRICE
+                    Number(question.unlockPriceInBonk) * cryptoPrice.price
                   )}
                 >
-                  {Intl.NumberFormat('en-US').format(QUESTION_PRICE)}
+                  {Intl.NumberFormat('en-US').format(
+                    question.unlockPriceInBonk
+                  )}
                 </BonkPricing>
               ) : null}
             </div>

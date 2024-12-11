@@ -104,18 +104,18 @@ export class UserRepository {
   static async findByUsername(username: string) {
     const result = await prisma.user.findFirst({
       where: {
-        username
+        username,
       },
       include: {
         UserProfile: {
           include: {
             Avatar: true,
             ExternalLinks: true,
-            Questions: true,
-          }
-        }
-      }
-    })
+            QAs: true,
+          },
+        },
+      },
+    });
 
     return await this.rebuildEntity(result);
   }

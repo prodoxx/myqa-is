@@ -61,7 +61,7 @@ const UserProfile = () => {
 
       <div className="max-w-4xl w-full 2xl:w-[1080px]">
         <QuestionsList
-          questions={data?.user?.UserProfile?.Questions}
+          questions={data?.user?.UserProfile?.QAs}
           cryptoPrice={data?.bonkPrice}
         />
       </div>

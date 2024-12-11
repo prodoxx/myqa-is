@@ -5,7 +5,7 @@ import {
 import { AssetDTO, AssetEntity } from './asset';
 import { ExternalLinkDTO, ExternalLinkEntity } from './external-link';
 import { WalletDTO, WalletEntity } from './wallet';
-import { QuestionDTO, QuestionEntity } from './question';
+import { QaDTO, QAEntity } from './qa';
 
 export const OnboardingStep: typeof OnboardingStepORM = {
   PENDING: 'PENDING',
@@ -19,7 +19,6 @@ export class UserProfileEntity {
   id?: UserProfileORM['id'];
   createdAt: UserProfileORM['createdAt'];
   updatedAt: UserProfileORM['updatedAt'];
-  country: UserProfileORM['country'];
   dateOfBirth: UserProfileORM['dateOfBirth'];
   userId: UserProfileORM['userId'];
   ExternalLinks?: ExternalLinkEntity[];
@@ -27,27 +26,26 @@ export class UserProfileEntity {
   about?: UserProfileORM['about'];
   onboarding?: UserProfileORM['onboarding'];
   Wallet?: WalletEntity;
-  Questions?: QuestionEntity[];
+  QAs?: QAEntity[];
 
   constructor(
     userProfile: UserProfileORM & {
       ExternalLinks?: ExternalLinkEntity[];
       Avatar?: AssetEntity;
       Wallet?: WalletEntity;
-      Questions: QuestionEntity[];
+      QAs: QAEntity[];
     }
   ) {
     this.id = userProfile?.id;
     this.createdAt = userProfile?.createdAt;
     this.updatedAt = userProfile?.updatedAt;
-    this.country = userProfile?.country;
     this.dateOfBirth = userProfile?.dateOfBirth;
     this.userId = userProfile?.userId;
     this.ExternalLinks = userProfile?.ExternalLinks;
     this.Avatar = userProfile?.Avatar;
     this.onboarding = userProfile?.onboarding;
     this.Wallet = userProfile?.Wallet;
-    this.Questions = userProfile?.Questions;
+    this.QAs = userProfile?.QAs;
   }
 
   isEqual(userProfile: UserProfileEntity) {
@@ -87,7 +85,6 @@ export class UserProfileEntity {
       id: this.id,
       createdAt: this.createdAt.toString(),
       updatedAt: this.updatedAt.toString(),
-      country: this.country,
       dateOfBirth: this.dateOfBirth,
       userId: this.userId,
       about: this.about,
@@ -95,24 +92,19 @@ export class UserProfileEntity {
       ExternalLinks: this.ExternalLinks?.map((c) => c.json()),
       Avatar: this.Avatar?.json(),
       Wallet: this.Wallet?.json(),
-      Questions: this.Questions?.map((c) => c.json()),
+      QAs: this.QAs?.map((c) => c.json()),
     } as UserProfileDTO;
   }
 }
 
 export type UserProfileDTO = Omit<
   UserProfileEntity,
-  | 'createdAt'
-  | 'updatedAt'
-  | 'ExternalLinks'
-  | 'Avatar'
-  | 'Wallet'
-  | 'Questions'
+  'createdAt' | 'updatedAt' | 'ExternalLinks' | 'Avatar' | 'Wallet' | 'QAs'
 > & {
   createdAt?: string;
   updatedAt?: string;
   ExternalLinks: ExternalLinkDTO[];
   Avatar: AssetDTO;
   Wallet: WalletDTO;
-  Questions: QuestionDTO[];
+  QAs: QaDTO[];
 };

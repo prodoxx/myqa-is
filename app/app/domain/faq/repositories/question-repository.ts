@@ -1,5 +1,5 @@
 import prisma from '~/infrastructure/database/index.server';
-import { QuestionEntity } from '../entities/question';
+import { QAEntity } from '../entities/question';
 
 export class QuestionRepository {
   static async rebuildEntity(data: any) {
@@ -7,12 +7,12 @@ export class QuestionRepository {
       return undefined;
     }
 
-    return new QuestionEntity(data);
+    return new QAEntity(data);
   }
 
-  static async create(data: QuestionEntity) {
-    const result = await prisma.question.create({
-      data,
+  static async create(data: QAEntity) {
+    const result = await prisma.qA.create({
+      data: data as any,
     });
 
     return this.rebuildEntity(result);

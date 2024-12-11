@@ -17,7 +17,7 @@ export const BonkPricing = ({
       <span className="font-medium text-lg text-gray-700">BONK {children}</span>
       {toUsd ? (
         <span className="text-xs text-gray-500 ml-1 inline-flex flex-end">
-          ≈ USDT {toUsd}
+          ≈ ${toUsd}
           {lastUpdate ? (
             <Tooltip>
               <TooltipTrigger>

@@ -1,11 +1,10 @@
 import prisma from '~/infrastructure/database/index.server';
-import { UserProfileEntity } from '../entities/user-profile';
-import { ExternalLinkRepository } from './external-link-repository';
 import { ExternalLinkDTO } from '../entities/external-link';
+import { QaDTO } from '../entities/question';
+import { UserProfileEntity } from '../entities/user-profile';
 import { AssetRepository } from './asset-repository';
-import { QuestionDTO } from '../entities/question';
+import { ExternalLinkRepository } from './external-link-repository';
 import { QuestionRepository } from './question-repository';
-import { WalletRepository } from './wallet-repository';
 
 export class UserProfileRepository {
   static async rebuildEntity(data: any) {
@@ -25,8 +24,11 @@ export class UserProfileRepository {
       Avatar: data?.Avatar
         ? await AssetRepository.rebuildEntity(data?.Avatar)
         : undefined,
-      Questions: data?.Questions ? await Promise.all(data?.Questions?.map((c: QuestionDTO) => QuestionRepository.rebuildEntity(c))) : [],
-      Wallet: data?.Wallet ? await WalletRepository.rebuildEntity(data?.Wallet) : undefined
+      QAs: data?.QAs
+        ? await Promise.all(
+            data?.QAs?.map((c: QaDTO) => QuestionRepository.rebuildEntity(c))
+          )
+        : [],
     });
   }
 
@@ -63,6 +65,7 @@ export class UserProfileRepository {
       include: {
         Avatar: true,
         ExternalLinks: true,
+        QAs: true,
       },
     });
 
