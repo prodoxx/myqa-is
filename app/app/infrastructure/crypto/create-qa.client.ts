@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type WalletContextState } from '@solana/wallet-adapter-react';
+import axios from 'axios';
 import { z } from 'zod';
 import { MarketplaceClient } from '~/lib/marketplace';
 import { bigIntReplacer } from '~/utils/big-int-replacer';
@@ -30,17 +31,14 @@ export async function createQuestionAndAnswer({
 }) {
   try {
     // Step 1: Pin to IPFS
-    const pinResponse = await fetch('/api/v1/ipfs/pin', {
-      method: 'POST',
-      body: JSON.stringify({
-        question,
-        answer,
-      }),
-    });
-
     const {
-      data: { cid, questionHash, contentHash },
-    } = await pinResponse.json();
+      data: {
+        data: { cid, questionHash, contentHash },
+      },
+    } = await axios.post('/api/v1/ipfs/pin', {
+      question,
+      answer,
+    });
 
     // Step 2: Create on-chain
     try {
@@ -53,28 +51,25 @@ export async function createQuestionAndAnswer({
       });
 
       // Step 3: Create answer record
-      const createAnswerResponse = await fetch('/api/v1/create-answer', {
-        method: 'POST',
-        body: JSON.stringify(
-          {
-            cid,
-            onChainId,
-            question,
-            unlockPrice: unlockPriceInBonk,
-            maxKeys,
-            questionHash,
-          },
-          bigIntReplacer
-        ),
-      });
+      const { data: createAnswerData } = await axios.post(
+        '/api/v1/create-answer',
+        {
+          cid,
+          onChainId,
+          question,
+          unlockPrice: unlockPriceInBonk,
+          maxKeys,
+          questionHash,
+        },
+        {
+          transformRequest: [(data) => JSON.stringify(data, bigIntReplacer)],
+        }
+      );
 
-      return await createAnswerResponse.json();
+      return createAnswerData;
     } catch (blockchainError) {
       // If blockchain transaction fails, clean up IPFS pin
-      await fetch('/api/v1/ipfs/unpin', {
-        method: 'POST',
-        body: JSON.stringify({ cid }),
-      });
+      await axios.post('/api/v1/ipfs/unpin', { cid });
       throw blockchainError;
     }
   } catch (error) {

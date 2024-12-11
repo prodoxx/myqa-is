@@ -1,12 +1,12 @@
 import type { ActionFunction } from '@remix-run/node';
-import pinataSDK from '@pinata/sdk';
+import { PinataSDK } from 'pinata-web3';
 import { typedjson } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 
-const pinata = new pinataSDK(
-  process.env.PINATA_API_KEY!,
-  process.env.PINATA_SECRET_KEY!
-);
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT,
+  pinataGateway: process.env.PINATA_GATEWAY_URL,
+});
 
 export const action: ActionFunction = async ({ request }) => {
   if (request.method !== 'POST') {

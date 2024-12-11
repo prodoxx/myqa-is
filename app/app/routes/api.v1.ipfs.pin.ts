@@ -1,5 +1,5 @@
 import type { ActionFunction } from '@remix-run/node';
-import pinataSDK from '@pinata/sdk';
+import { PinataSDK } from 'pinata-web3';
 import { typedjson } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import {
@@ -10,10 +10,10 @@ import {
 import {} from '~/utils/encryption.server';
 import prisma from '~/infrastructure/database/index.server';
 
-const pinata = new pinataSDK(
-  process.env.PINATA_API_KEY!,
-  process.env.PINATA_SECRET_KEY!
-);
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT,
+  pinataGateway: process.env.PINATA_GATEWAY_URL,
+});
 
 const MAX_QUESTION_LENGTH = 1000;
 const MAX_ANSWER_LENGTH = 5000;
@@ -80,15 +80,15 @@ export const action: ActionFunction = async ({ request }) => {
     const contentHash = hashContent(JSON.stringify(ipfsContent));
     const questionHash = hashContent(question);
 
-    const result = await pinata.pinJSONToIPFS(ipfsContent, {
-      pinataMetadata: {
+    const result = await pinata.upload.json(ipfsContent, {
+      metadata: {
         name: `MyFAQ-${Date.now()}`,
-        creatorAddress: user.walletPublicKey!,
-        questionHash: questionHash.toString('hex'),
+        keyValues: {
+          creatorAddress: user.walletPublicKey!,
+          questionHash: questionHash.toString('hex'),
+        },
       },
-      pinataOptions: {
-        cidVersion: 1,
-      },
+      cidVersion: 1,
     });
 
     try {
