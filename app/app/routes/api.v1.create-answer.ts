@@ -15,6 +15,7 @@ export const action: ActionFunction = async ({ request }) => {
 
   const { cid, onChainId, question, unlockPrice, maxKeys, questionHash } =
     await request.json();
+  const unlockPriceInBonk = BigInt(unlockPrice.value);
 
   // TODO: add validations
 
@@ -41,7 +42,7 @@ export const action: ActionFunction = async ({ request }) => {
     const qa = await prisma.qA.create({
       data: {
         question,
-        unlockPriceInBonk: unlockPrice,
+        unlockPriceInBonk,
         maxKeys,
         questionHash,
         onChainId,

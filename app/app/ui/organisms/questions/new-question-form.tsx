@@ -1,7 +1,17 @@
-import axios from 'axios';
-import { Link } from '@remix-run/react';
-import bonk from '~/assets/images/bonk.png';
-import { useTypedFetcher } from 'remix-typedjson';
+import { Form, useNavigate } from '@remix-run/react';
+import omit from 'lodash/omit';
+import React from 'react';
+import CurrencyInput, {
+  CurrencyInputOnChangeValues,
+} from 'react-currency-input-field';
+import { useRemixForm } from 'remix-hook-form';
+import { getCryptoPrice, SupportedCoins } from '~/infrastructure/crypto';
+import {
+  createQuestionAndAnswer,
+  CreateQuestionAndAnswerFormData,
+  createQuestionAndAnswerFormDataResolver,
+} from '~/infrastructure/crypto/create-qa.client';
+import { Bonk } from '~/ui/atoms/bonk';
 import { Button } from '~/ui/atoms/button';
 import {
   Card,
@@ -10,20 +20,12 @@ import {
   CardHeader,
   CardTitle,
 } from '~/ui/atoms/card';
+import { ErrorMessage } from '~/ui/atoms/error-message';
 import { Input } from '~/ui/atoms/input-field';
 import { Label } from '~/ui/atoms/label';
 import { Textarea } from '~/ui/atoms/text-area';
-import CurrencyInput, {
-  CurrencyInputOnChangeValues,
-} from 'react-currency-input-field';
-import React from 'react';
-import { Bonk } from '~/ui/atoms/bonk';
-import { getCryptoPrice, SupportedCoins } from '~/infrastructure/crypto';
 
 export const NewQuestionForm = () => {
-  const fetcherData = useTypedFetcher();
-  const isSubmitting = fetcherData.state === 'submitting';
-
   const [price, setPrice] = React.useState<
     CurrencyInputOnChangeValues | undefined
   >(undefined);
@@ -49,8 +51,32 @@ export const NewQuestionForm = () => {
     getAndSetPrice();
   }, [price]);
 
+  const navigate = useNavigate();
+  const {
+    handleSubmit,
+    formState: { errors, isLoading, isSubmitting },
+    setValue,
+    register,
+  } = useRemixForm<CreateQuestionAndAnswerFormData>({
+    defaultValues: {
+      maxKeys: 1,
+    },
+    mode: 'onSubmit',
+    resolver: createQuestionAndAnswerFormDataResolver,
+    submitHandlers: {
+      onValid: async (values) => {
+        try {
+          await createQuestionAndAnswer(values);
+          navigate('/dashboard', { replace: true });
+        } catch (error) {
+          console.error('Failed to create');
+        }
+      },
+    },
+  });
+
   return (
-    <fetcherData.Form>
+    <Form onSubmit={handleSubmit}>
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl">Create a new question</CardTitle>
@@ -62,26 +88,57 @@ export const NewQuestionForm = () => {
         <CardContent className="flex flex-col space-y-4">
           <div>
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" />
+            <Input
+              id="title"
+              disabled={isLoading || isSubmitting}
+              className="!text-lg h-14"
+              {...register('question')}
+            />
+            <ErrorMessage message={errors.question?.message} />
           </div>
 
           <div>
             <Label htmlFor="answer">Answer</Label>
-            <Textarea id="answer" name="answer" />
+            <Textarea
+              id="answer"
+              disabled={isLoading || isSubmitting}
+              className="!text-lg"
+              {...register('answer')}
+            />
+            <ErrorMessage message={errors.answer?.message} />
           </div>
 
           <div className="flex flex-col space-y-2">
-            <div className="flex flex-row items-center rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors focus-within:ring-1 focus-within:ring-ring focus-within:border-ring">
+            <Label htmlFor="answer">Max Keys</Label>
+            <Input
+              className="!text-lg h-14 disabled:cursor-not-allowed disabled:opacity-50"
+              type="number"
+              disabled={isLoading || isSubmitting}
+              {...register('maxKeys', { valueAsNumber: true })}
+            />
+            <ErrorMessage message={errors.maxKeys?.message} />
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <Label htmlFor="unlockPriceInBonk">Price to Unlock</Label>
+            <div className="flex flex-row items-center rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors focus-within:ring-1 focus-within:ring-ring focus-within:border-ring disabled:cursor-not-allowed disabled:opacity-50">
               <Bonk />
               <CurrencyInput
                 prefix="BONK "
                 decimalsLimit={10}
                 allowNegativeValue={false}
                 value={price?.float as any}
-                onValueChange={(_, __, values) => setPrice(values)}
-                className="peer h-16 w-full bg-transparent text-2xl placeholder:text-muted-foreground focus:!outline-none !outline-none !border-none !ring-0"
+                disabled={isLoading || isSubmitting}
+                onValueChange={(_, __, values) => {
+                  setPrice(values);
+                  setValue('unlockPriceInBonk', BigInt(values?.float!));
+                }}
+                className="peer h-16 w-full bg-transparent text-2xl placeholder:text-muted-foreground focus:!outline-none !outline-none !border-none !ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+                {...omit(register('unlockPriceInBonk'), ['onChange', 'onBlur'])}
               />
             </div>
+
+            <ErrorMessage message={errors.unlockPriceInBonk?.message} />
 
             {typeof price !== 'undefined' ? (
               <div className="flex justify-between">
@@ -101,26 +158,26 @@ export const NewQuestionForm = () => {
         </CardContent>
         <CardFooter className="flex space-x-4">
           <Button
-            type="button"
-            disabled={isSubmitting}
-            className="w-1/2"
-            asChild
-            variant="ghost"
             size="lg"
+            type="button"
+            disabled={isLoading || isSubmitting}
+            className="w-1/2"
+            variant="ghost"
+            onClick={() => navigate('/dashboard')}
           >
-            <Link to="/dashboard">Cancel</Link>
+            Cancel
           </Button>
 
           <Button
             size="lg"
             type="submit"
-            disabled={isSubmitting}
+            disabled={isLoading || isSubmitting}
             className="w-1/2"
           >
             Create question
           </Button>
         </CardFooter>
       </Card>
-    </fetcherData.Form>
+    </Form>
   );
 };
