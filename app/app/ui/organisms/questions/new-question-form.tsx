@@ -15,6 +15,7 @@ import {
   createQuestionAndAnswerFormDataResolver,
   createQuestionAndAnswer,
 } from '~/infrastructure/crypto/create-qa.client';
+import { Alert, AlertDescription, AlertTitle } from '~/ui/atoms/alert';
 import { Bonk } from '~/ui/atoms/bonk';
 import { Button } from '~/ui/atoms/button';
 import {
@@ -61,6 +62,7 @@ export const NewQuestionForm = () => {
   }, [price]);
 
   const navigate = useNavigate();
+  const [submitError, setSubmitError] = React.useState('');
   const {
     handleSubmit,
     formState: { errors, isLoading, isSubmitting },
@@ -75,6 +77,7 @@ export const NewQuestionForm = () => {
     submitHandlers: {
       onValid: async (values) => {
         try {
+          setSubmitError('');
           await createQuestionAndAnswer({
             values,
             marketplace,
@@ -83,8 +86,12 @@ export const NewQuestionForm = () => {
           navigate('/dashboard', { replace: true });
         } catch (error) {
           console.error('Failed to create');
+          setSubmitError(
+            'There was an error creating your question. Please retry.'
+          );
         }
       },
+      onInvalid: () => {},
     },
   });
 
@@ -99,6 +106,13 @@ export const NewQuestionForm = () => {
           </span>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
+          {submitError ? (
+            <Alert variant="destructive">
+              <AlertTitle>Failed</AlertTitle>
+              <AlertDescription>{submitError}</AlertDescription>
+            </Alert>
+          ) : null}
+
           <div>
             <Label htmlFor="question">Question</Label>
             <Input
