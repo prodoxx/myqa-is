@@ -10,6 +10,7 @@ import {
   SolflareWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import { useMemo } from 'react';
+
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 export function SolanaProvider({

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { WalletContextState } from '@solana/wallet-adapter-react';
+import { type WalletContextState } from '@solana/wallet-adapter-react';
 import { z } from 'zod';
 import { MarketplaceClient } from '~/lib/marketplace';
 import { bigIntReplacer } from '~/utils/big-int-replacer';

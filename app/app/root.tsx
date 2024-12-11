@@ -93,12 +93,6 @@ export default function App() {
         </SolanaProvider>
         <ScrollRestoration />
         <Scripts />
-        <script
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: `document.ENV = ${JSON.stringify(data.ENV)}`,
-          }}
-        />
       </body>
     </html>
   );

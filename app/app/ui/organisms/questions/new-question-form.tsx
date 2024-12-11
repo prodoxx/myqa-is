@@ -1,37 +1,36 @@
+// import { useNavigate } from '@remix-run/react';
+import { Label } from '@radix-ui/react-label';
 import { Form, useNavigate } from '@remix-run/react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { noop } from 'lodash';
 import omit from 'lodash/omit';
 import React from 'react';
 import CurrencyInput, {
-  CurrencyInputOnChangeValues,
+  type CurrencyInputOnChangeValues,
 } from 'react-currency-input-field';
 import { useRemixForm } from 'remix-hook-form';
 import { useMarketplace } from '~/hooks/use-marketplace.client';
 import { getCryptoPrice, SupportedCoins } from '~/infrastructure/crypto';
 import {
-  createQuestionAndAnswer,
   CreateQuestionAndAnswerFormData,
   createQuestionAndAnswerFormDataResolver,
+  createQuestionAndAnswer,
 } from '~/infrastructure/crypto/create-qa.client';
 import { Bonk } from '~/ui/atoms/bonk';
 import { Button } from '~/ui/atoms/button';
 import {
   Card,
-  CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardContent,
+  CardFooter,
 } from '~/ui/atoms/card';
 import { ErrorMessage } from '~/ui/atoms/error-message';
 import { Input } from '~/ui/atoms/input-field';
-import { Label } from '~/ui/atoms/label';
 import { Textarea } from '~/ui/atoms/text-area';
 
 export const NewQuestionForm = () => {
   const marketplace = useMarketplace();
   const wallet = useWallet();
-
   const [price, setPrice] = React.useState<
     CurrencyInputOnChangeValues | undefined
   >(undefined);
@@ -74,8 +73,8 @@ export const NewQuestionForm = () => {
         try {
           await createQuestionAndAnswer({
             values,
-            marketplace: marketplace as any,
-            wallet: {} as any,
+            marketplace,
+            wallet,
           });
           navigate('/dashboard', { replace: true });
         } catch (error) {
@@ -191,3 +190,5 @@ export const NewQuestionForm = () => {
     </Form>
   );
 };
+
+export default NewQuestionForm;
