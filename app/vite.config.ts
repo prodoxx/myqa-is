@@ -45,6 +45,7 @@ export default defineConfig({
             'react-dropzone',
             'react-currency-input-field',
             'vaul',
+            '@project-serum/anchor',
           ]
         : [
             '@radix-ui/react-compose-refs',
@@ -52,6 +53,7 @@ export default defineConfig({
             'react-dropzone',
             'react-currency-input-field',
             'vaul',
+            '@project-serum/anchor',
           ],
   },
   plugins: [

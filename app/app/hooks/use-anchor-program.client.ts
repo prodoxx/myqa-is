@@ -14,7 +14,7 @@ export function useAnchorProgram() {
   const { connection } = useConnection();
   const wallet = useWallet();
 
-  return useMemo(() => {
+  const result = useMemo(() => {
     if (!wallet) {
       throw new Error('Wallet is required');
     }
@@ -34,4 +34,6 @@ export function useAnchorProgram() {
       provider,
     };
   }, [connection, wallet]);
+
+  return result;
 }

@@ -1,11 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { nanoid } from 'nanoid';
+import { WalletContextState } from '@solana/wallet-adapter-react';
 import { z } from 'zod';
+import { MarketplaceClient } from '~/lib/marketplace';
 import { bigIntReplacer } from '~/utils/big-int-replacer';
-
-const createQuestionOnChain = async (args: any) => {
-  return nanoid();
-};
 
 const schema = z.object({
   question: z.string().min(10).min(1),
@@ -18,11 +15,14 @@ export type CreateQuestionAndAnswerFormData = z.infer<typeof schema>;
 export const createQuestionAndAnswerFormDataResolver = zodResolver(schema);
 
 export async function createQuestionAndAnswer({
-  question,
-  answer,
-  unlockPriceInBonk,
-  maxKeys,
-}: CreateQuestionAndAnswerFormData) {
+  values: { question, answer, unlockPriceInBonk, maxKeys },
+  marketplace,
+  wallet,
+}: {
+  values: CreateQuestionAndAnswerFormData;
+  marketplace: MarketplaceClient;
+  wallet: WalletContextState;
+}) {
   try {
     // Step 1: Pin to IPFS
     const pinResponse = await fetch('/api/v1/ipfs/pin', {
@@ -39,12 +39,15 @@ export async function createQuestionAndAnswer({
 
     // Step 2: Create on-chain
     try {
-      const onChainId = await createQuestionOnChain({
-        question,
-        questionHash,
-        unlockPrice: unlockPriceInBonk,
+      const onChainId = await marketplace.createQuestion({
+        contentCid: cid,
+        contentMetadataHash: contentHash,
         maxKeys,
+        unlockPrice: Number(unlockPriceInBonk),
+        wallet,
       });
+
+      console.log(onChainId);
 
       // Step 3: Create answer record
       const createAnswerResponse = await fetch('/api/v1/create-answer', {

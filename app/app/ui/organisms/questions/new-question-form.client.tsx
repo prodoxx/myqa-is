@@ -1,10 +1,13 @@
 import { Form, useNavigate } from '@remix-run/react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { noop } from 'lodash';
 import omit from 'lodash/omit';
 import React from 'react';
 import CurrencyInput, {
   CurrencyInputOnChangeValues,
 } from 'react-currency-input-field';
 import { useRemixForm } from 'remix-hook-form';
+import { useMarketplace } from '~/hooks/use-marketplace.client';
 import { getCryptoPrice, SupportedCoins } from '~/infrastructure/crypto';
 import {
   createQuestionAndAnswer,
@@ -26,6 +29,9 @@ import { Label } from '~/ui/atoms/label';
 import { Textarea } from '~/ui/atoms/text-area';
 
 export const NewQuestionForm = () => {
+  const marketplace = useMarketplace();
+  const wallet = useWallet();
+
   const [price, setPrice] = React.useState<
     CurrencyInputOnChangeValues | undefined
   >(undefined);
@@ -66,7 +72,11 @@ export const NewQuestionForm = () => {
     submitHandlers: {
       onValid: async (values) => {
         try {
-          await createQuestionAndAnswer(values);
+          await createQuestionAndAnswer({
+            values,
+            marketplace: marketplace as any,
+            wallet: {} as any,
+          });
           navigate('/dashboard', { replace: true });
         } catch (error) {
           console.error('Failed to create');
@@ -163,7 +173,7 @@ export const NewQuestionForm = () => {
             disabled={isLoading || isSubmitting}
             className="w-1/2"
             variant="ghost"
-            onClick={() => navigate('/dashboard')}
+            // onClick={() => navigate('/dashboard')}
           >
             Cancel
           </Button>

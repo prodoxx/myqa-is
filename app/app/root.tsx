@@ -79,7 +79,10 @@ export default function App() {
       </head>
 
       <body className="h-full w-full flex min-h-screen flex-col bg-muted/40 font-sans">
-        <SolanaProvider>
+        <SolanaProvider
+          SOLANA_NETWORK={data.ENV.SOLANA_NETWORK}
+          RPC_ENDPOINT={data.ENV.SOLANA_RPC_URL}
+        >
           <UserProvider user={data?.user || undefined}>
             <TooltipProvider>
               <PHProvider>
@@ -90,6 +93,12 @@ export default function App() {
         </SolanaProvider>
         <ScrollRestoration />
         <Scripts />
+        <script
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: `document.ENV = ${JSON.stringify(data.ENV)}`,
+          }}
+        />
       </body>
     </html>
   );

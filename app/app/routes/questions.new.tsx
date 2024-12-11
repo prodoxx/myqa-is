@@ -2,9 +2,8 @@ import { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { typedjson } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
-import { Card } from '~/ui/atoms/card';
 import { MainLayout } from '~/ui/layouts/main';
-import { NewQuestionForm } from '~/ui/organisms/questions/new-question-form';
+import { NewQuestionForm } from '~/ui/organisms/questions/new-question-form.client';
 
 export const meta: MetaFunction = () => {
   return [
