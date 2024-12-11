@@ -25,7 +25,7 @@ export const action: ActionFunction = async ({ request }) => {
       return typedjson({ error: 'No CID provided' }, { status: 400 });
     }
 
-    await pinata.unpin(cid);
+    pinata.unpin([cid]);
 
     return typedjson({ success: true });
   } catch (error) {
