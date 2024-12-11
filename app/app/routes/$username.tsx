@@ -39,23 +39,31 @@ const UserProfile = () => {
     <MainLayout className="items-center space-y-4">
       <Card className="max-w-4xl w-full 2xl:w-[1080px] border-slate-300">
         <CardContent className="flex flex-col p-4 space-y-4">
-          <div className="mx-auto text-center flex flex-col">
-            <Avatar
-              src={data.user?.UserProfile?.Avatar?.url!}
-              fallback={data.user?.username?.[0]!}
-              className="h-40 w-40 mx-auto mb-4"
-            />
-            <h1 className="font-bold text-xl">{data?.user?.username}</h1>
-            <span className="text-gray-500 font-lg">
-              {data?.user?.UserProfile?.about ?? 'No description available'}
-            </span>
+          <>
+            <div className="mx-auto text-center flex flex-col">
+              <Avatar
+                src={data.user?.UserProfile?.Avatar?.url!}
+                fallback={data.user?.username?.[0]!}
+                className="h-40 w-40 mx-auto mb-4"
+              />
+              <h1 className="font-bold text-xl">{data?.user?.username}</h1>
+              <span className="text-gray-500 font-lg">
+                {data?.user?.UserProfile?.about ?? 'No description available'}
+              </span>
 
-            <ExternalLinkList links={data?.user?.UserProfile?.ExternalLinks} />
-          </div>
+              <ExternalLinkList
+                links={data?.user?.UserProfile?.ExternalLinks}
+              />
+            </div>
 
-          <Button variant="default" asChild className="w-fit mx-auto">
-            <Link to="/questions/new">Create a new question</Link>
-          </Button>
+            <Button
+              variant="default"
+              asChild
+              className="w-fit mx-auto bg-purple-500 hover:bg-purple-600"
+            >
+              <Link to="/questions/new">Create a new question</Link>
+            </Button>
+          </>
         </CardContent>
       </Card>
 
