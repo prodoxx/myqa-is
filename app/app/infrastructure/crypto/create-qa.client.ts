@@ -5,10 +5,15 @@ import { MarketplaceClient } from '~/lib/marketplace';
 import { bigIntReplacer } from '~/utils/big-int-replacer';
 
 const schema = z.object({
-  question: z.string().min(10),
-  answer: z.string().min(1).max(5000),
-  maxKeys: z.number().min(0).max(100_000),
-  unlockPriceInBonk: z.bigint().min(BigInt(1)),
+  question: z.string().min(10, 'A longer question is required'),
+  answer: z.string().min(1, 'An answer to the question is required').max(5000),
+  maxKeys: z
+    .number({ message: 'A minimum of 1 is required' })
+    .min(1)
+    .max(100_000),
+  unlockPriceInBonk: z
+    .bigint({ message: 'A minimum of 1 BONK is required' })
+    .min(BigInt(1)),
 });
 
 export type CreateQuestionAndAnswerFormData = z.infer<typeof schema>;

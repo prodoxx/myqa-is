@@ -1,7 +1,27 @@
 import type { ActionFunction } from '@remix-run/node';
 import { typedjson } from 'remix-typedjson';
+import { z, ZodError } from 'zod';
 import { authenticator } from '~/auth.server';
 import prisma from '~/infrastructure/database/index.server';
+
+const createQuestionSchema = z.object({
+  cid: z.string().min(1),
+  onChainId: z.string().min(1),
+  question: z.string().min(10),
+  unlockPrice: z.object({
+    type: z.string().min(1),
+    value: z.number().min(1),
+  }),
+  maxKeys: z
+    .number({ message: 'A minimum of 1 is required' })
+    .min(1)
+    .max(100_000),
+  questionHash: z.string().min(1),
+});
+
+type CreateAnswerFieldErrors = z.inferFlattenedErrors<
+  typeof createQuestionSchema
+>['fieldErrors'];
 
 export const action: ActionFunction = async ({ request }) => {
   if (request.method !== 'POST') {
@@ -14,10 +34,8 @@ export const action: ActionFunction = async ({ request }) => {
   }
 
   const { cid, onChainId, question, unlockPrice, maxKeys, questionHash } =
-    await request.json();
+    await createQuestionSchema.parseAsync(await request.json());
   const unlockPriceInBonk = BigInt(unlockPrice.value);
-
-  // TODO: add validations
 
   try {
     const userProfile = await prisma.userProfile.findUnique({
@@ -60,6 +78,15 @@ export const action: ActionFunction = async ({ request }) => {
 
     return typedjson({ success: true, data: qa });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return typedjson(
+        {
+          error: 'The required fields are mismatched',
+          fieldErrors: error.flatten().fieldErrors as CreateAnswerFieldErrors,
+        },
+        { status: 400 }
+      );
+    }
     return typedjson({ error: 'Failed to create answer' }, { status: 500 });
   }
 };
