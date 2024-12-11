@@ -1,11 +1,5 @@
 import { web3 } from '@project-serum/anchor';
-import {
-  executeCommand,
-  updateProgramId,
-  LOCALNET_URL,
-  createTestBonkToken,
-  PROGRAM_NAME,
-} from '../deploy/scripts/utils';
+import { executeCommand, LOCALNET_URL, createTestBonkToken, PROGRAM_NAME } from '../deploy/scripts/utils';
 import fs from 'fs';
 import { spawn } from 'child_process';
 import * as anchor from '@project-serum/anchor';
@@ -181,20 +175,51 @@ async function deploy() {
     const deployed = await deployProgram({ connection, programId, provider });
     if (!deployed) throw new Error('Program deployment failed');
 
-    // Generate and save payer keypair
-    const payerKeypair = web3.Keypair.generate();
+    // load or generate payer keypair
+    let payerKeypair: web3.Keypair;
     const payerKeypairFile = path.join(configDir, 'localnet-payer-keypair.json');
-    fs.writeFileSync(payerKeypairFile, JSON.stringify(Array.from(payerKeypair.secretKey)), 'utf-8');
+
+    if (fs.existsSync(payerKeypairFile)) {
+      console.log('Using existing payer keypair...');
+      const secretKey = Buffer.from(JSON.parse(fs.readFileSync(payerKeypairFile, 'utf-8')));
+      payerKeypair = web3.Keypair.fromSecretKey(secretKey);
+    } else {
+      console.log('Creating new payer keypair...');
+      payerKeypair = web3.Keypair.generate();
+      fs.writeFileSync(payerKeypairFile, JSON.stringify(Array.from(payerKeypair.secretKey)), 'utf-8');
+    }
 
     await ensureAccountFunded(connection, payerKeypair.publicKey, 5 * web3.LAMPORTS_PER_SOL);
-    const { mint: testBonkMint, mintAuthority: testBonkMintAuthority } = await createTestBonkToken(
-      connection,
-      payerKeypair,
-    );
 
-    // Save BONK mint authority keypair
+    let testBonkMint: web3.PublicKey;
+    let testBonkMintAuthority: web3.Keypair;
+
+    // check if BONK mint authority already exists
     const bonkMintAuthorityFile = path.join(configDir, 'localnet-bonk-mint-authority-keypair.json');
-    fs.writeFileSync(bonkMintAuthorityFile, JSON.stringify(Array.from(testBonkMintAuthority.secretKey)), 'utf-8');
+    if (fs.existsSync(bonkMintAuthorityFile)) {
+      console.log('Using existing BONK mint authority...');
+      const secretKey = Buffer.from(JSON.parse(fs.readFileSync(bonkMintAuthorityFile, 'utf-8')));
+      testBonkMintAuthority = web3.Keypair.fromSecretKey(secretKey);
+
+      // load existing mint from deployment info
+      const deploymentInfoFile = path.join(configDir, 'localnet-deployment-info.json');
+      if (fs.existsSync(deploymentInfoFile)) {
+        const existingDeployInfo = JSON.parse(fs.readFileSync(deploymentInfoFile, 'utf-8'));
+        testBonkMint = new web3.PublicKey(existingDeployInfo.bonkMint);
+      } else {
+        // If deployment info doesn't exist, create new mint
+        const result = await createTestBonkToken(connection, payerKeypair);
+        testBonkMint = result.mint;
+      }
+    } else {
+      console.log('Creating new test BONK token...');
+      const result = await createTestBonkToken(connection, payerKeypair);
+      testBonkMint = result.mint;
+      testBonkMintAuthority = result.mintAuthority;
+
+      // save BONK mint authority keypair
+      fs.writeFileSync(bonkMintAuthorityFile, JSON.stringify(Array.from(testBonkMintAuthority.secretKey)), 'utf-8');
+    }
 
     // initialize the program
     const program = new anchor.Program(require(`../target/idl/${PROGRAM_NAME}.json`), programId, provider);
