@@ -5,10 +5,15 @@ import { MarketplaceClient } from '~/lib/marketplace';
 import { bigIntReplacer } from '~/utils/big-int-replacer';
 
 const schema = z.object({
-  question: z.string().min(10).min(1),
-  answer: z.string().min(20).max(5000),
-  maxKeys: z.number().min(0).max(100_000),
-  unlockPriceInBonk: z.bigint().min(BigInt(1)),
+  question: z.string().min(10, 'A longer question is required'),
+  answer: z.string().min(1, 'An answer to the question is required').max(5000),
+  maxKeys: z
+    .number({ message: 'A minimum of 1 is required' })
+    .min(1)
+    .max(100_000),
+  unlockPriceInBonk: z
+    .bigint({ message: 'A minimum of 1 BONK is required' })
+    .min(BigInt(1)),
 });
 
 export type CreateQuestionAndAnswerFormData = z.infer<typeof schema>;
@@ -47,8 +52,6 @@ export async function createQuestionAndAnswer({
         wallet,
       });
 
-      console.log(onChainId);
-
       // Step 3: Create answer record
       const createAnswerResponse = await fetch('/api/v1/create-answer', {
         method: 'POST',
@@ -67,7 +70,6 @@ export async function createQuestionAndAnswer({
 
       return await createAnswerResponse.json();
     } catch (blockchainError) {
-      console.log(blockchainError);
       // If blockchain transaction fails, clean up IPFS pin
       await fetch('/api/v1/ipfs/unpin', {
         method: 'POST',

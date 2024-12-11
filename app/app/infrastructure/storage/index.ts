@@ -9,15 +9,6 @@ export class BlobStorage {
   constructor(filename: string, file: File) {
     this.filename = filename;
     this.file = file;
-    console.log({
-      forcePathStyle: true,
-      region: process.env.DIGITAL_OCEAN_REGION!,
-      endpoint: process.env.DIGITAL_OCEAN_ENDPOINT_URL!,
-      credentials: {
-        accessKeyId: process.env.DIGITAL_OCEAN_API_ID!,
-        secretAccessKey: process.env.DIGITAL_OCEAN_API_KEY!,
-      },
-    });
     this.s3 = new S3Client({
       forcePathStyle: true,
       region: process.env.DIGITAL_OCEAN_REGION!,

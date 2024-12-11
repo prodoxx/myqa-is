@@ -16,11 +16,6 @@ import { env } from 'node:process';
 
 const ABORT_DELAY = 5_000;
 
-if (env.NODE_ENV === 'development') {
-  mswServer.listen();
-  console.log('LOADED MSW...');
-}
-
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,

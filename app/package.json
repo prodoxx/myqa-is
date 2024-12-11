@@ -102,6 +102,7 @@
     "remix-hook-form": "v5.1.1",
     "remix-sitemap": "^3.2.0",
     "remix-typedjson": "^0.4.1",
+    "remix-utils": "^7.7.0",
     "source-map-support": "^0.5.21",
     "styled-components": "^6.1.11",
     "superagent": "^7.1.3",

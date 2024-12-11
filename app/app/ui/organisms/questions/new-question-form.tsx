@@ -1,6 +1,7 @@
 import { Label } from '@radix-ui/react-label';
 import { Form, useNavigate } from '@remix-run/react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import debounce from 'lodash/debounce';
 import omit from 'lodash/omit';
 import React from 'react';
 import CurrencyInput, {
@@ -14,6 +15,7 @@ import {
   createQuestionAndAnswerFormDataResolver,
   createQuestionAndAnswer,
 } from '~/infrastructure/crypto/create-qa.client';
+import { Alert, AlertDescription, AlertTitle } from '~/ui/atoms/alert';
 import { Bonk } from '~/ui/atoms/bonk';
 import { Button } from '~/ui/atoms/button';
 import {
@@ -37,9 +39,6 @@ export const NewQuestionForm = () => {
   const [bonkPrice, setBonkPrice] = React.useState<number | undefined>(
     undefined
   );
-  const [lastUpdate, setLastUpdate] = React.useState<number>(
-    new Date().getTime()
-  );
   const priceOfBonkInUSD =
     typeof price !== 'undefined' && typeof bonkPrice !== 'undefined'
       ? bonkPrice * price.float!
@@ -50,13 +49,16 @@ export const NewQuestionForm = () => {
       const result = await getCryptoPrice(SupportedCoins.BONKUSDT);
       if (result) {
         setBonkPrice(result.price);
-        setLastUpdate(result.date);
       }
     };
-    getAndSetPrice();
+    const debouncedGetAndSetPrice = debounce(getAndSetPrice, 1_000);
+    debouncedGetAndSetPrice();
+
+    return debouncedGetAndSetPrice.cancel;
   }, [price]);
 
   const navigate = useNavigate();
+  const [submitError, setSubmitError] = React.useState('');
   const {
     handleSubmit,
     formState: { errors, isLoading, isSubmitting },
@@ -71,6 +73,7 @@ export const NewQuestionForm = () => {
     submitHandlers: {
       onValid: async (values) => {
         try {
+          setSubmitError('');
           await createQuestionAndAnswer({
             values,
             marketplace,
@@ -79,8 +82,12 @@ export const NewQuestionForm = () => {
           navigate('/dashboard', { replace: true });
         } catch (error) {
           console.error('Failed to create');
+          setSubmitError(
+            'There was an error creating your question. Please retry.'
+          );
         }
       },
+      onInvalid: () => {},
     },
   });
 
@@ -95,10 +102,17 @@ export const NewQuestionForm = () => {
           </span>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
+          {submitError ? (
+            <Alert variant="destructive">
+              <AlertTitle>Failed</AlertTitle>
+              <AlertDescription>{submitError}</AlertDescription>
+            </Alert>
+          ) : null}
+
           <div>
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="question">Question</Label>
             <Input
-              id="title"
+              id="question"
               disabled={isLoading || isSubmitting}
               className="!text-lg h-14"
               {...register('question')}
@@ -152,14 +166,10 @@ export const NewQuestionForm = () => {
             {typeof price !== 'undefined' ? (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500 font-medium">
-                  {price.formatted}≈USDT
+                  {price.formatted.replace('BONK ', '') ?? 0} ≈ ${' '}
                   {priceOfBonkInUSD?.toFixed(2) === '0.00'
                     ? priceOfBonkInUSD?.toFixed(6)
                     : priceOfBonkInUSD?.toFixed(2)}
-                </span>
-                <span className="text-sm text-gray-500">
-                  Last update: {new Date(lastUpdate).toDateString()} at{' '}
-                  {new Date(lastUpdate).toLocaleTimeString()}
                 </span>
               </div>
             ) : null}
@@ -172,7 +182,7 @@ export const NewQuestionForm = () => {
             disabled={isLoading || isSubmitting}
             className="w-1/2"
             variant="ghost"
-            // onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/dashboard')}
           >
             Cancel
           </Button>
@@ -180,7 +190,7 @@ export const NewQuestionForm = () => {
           <Button
             size="lg"
             type="submit"
-            disabled={isLoading || isSubmitting}
+            isLoading={isLoading || isSubmitting}
             className="w-1/2"
           >
             Create question
