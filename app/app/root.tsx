@@ -16,7 +16,7 @@ import { getDomainUrl } from './infrastructure/analytics/seo';
 import { PHProvider } from './provider/posthog-provider';
 import { UserProvider } from './provider/user-provider';
 import { TooltipProvider } from './ui/atoms/tooltip';
-import { SolanaWalletProvider } from '~/provider/solana-wallet-provider';
+import { SolanaProvider } from '~/ui/organisms/providers/solana-provider';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {});
@@ -26,6 +26,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     requestInfo: {
       origin: getDomainUrl(request),
       path: new URL(request.url).pathname,
+    },
+    ENV: {
+      SOLANA_NETWORK: process.env.SOLANA_NETWORK || 'devnet',
+      SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || '',
+      MARKETPLACE_PROGRAM_ID: process.env.MARKETPLACE_PROGRAM_ID,
+      MARKETPLACE_AUTHORITY_PUBLIC_KEY:
+        process.env.MARKETPLACE_AUTHORITY_PUBLIC_KEY,
     },
   });
 };
@@ -72,7 +79,7 @@ export default function App() {
       </head>
 
       <body className="h-full w-full flex min-h-screen flex-col bg-muted/40 font-sans">
-        <SolanaWalletProvider>
+        <SolanaProvider>
           <UserProvider user={data?.user || undefined}>
             <TooltipProvider>
               <PHProvider>
@@ -80,7 +87,7 @@ export default function App() {
               </PHProvider>
             </TooltipProvider>
           </UserProvider>
-        </SolanaWalletProvider>
+        </SolanaProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
