@@ -39,9 +39,6 @@ export const NewQuestionForm = () => {
   const [bonkPrice, setBonkPrice] = React.useState<number | undefined>(
     undefined
   );
-  const [lastUpdate, setLastUpdate] = React.useState<number>(
-    new Date().getTime()
-  );
   const priceOfBonkInUSD =
     typeof price !== 'undefined' && typeof bonkPrice !== 'undefined'
       ? bonkPrice * price.float!
@@ -52,7 +49,6 @@ export const NewQuestionForm = () => {
       const result = await getCryptoPrice(SupportedCoins.BONKUSDT);
       if (result) {
         setBonkPrice(result.price);
-        setLastUpdate(result.date);
       }
     };
     const debouncedGetAndSetPrice = debounce(getAndSetPrice, 1_000);

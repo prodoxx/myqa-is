@@ -47,8 +47,6 @@ export async function createQuestionAndAnswer({
         wallet,
       });
 
-      console.log(onChainId);
-
       // Step 3: Create answer record
       const createAnswerResponse = await fetch('/api/v1/create-answer', {
         method: 'POST',
@@ -67,7 +65,6 @@ export async function createQuestionAndAnswer({
 
       return await createAnswerResponse.json();
     } catch (blockchainError) {
-      console.log(blockchainError);
       // If blockchain transaction fails, clean up IPFS pin
       await fetch('/api/v1/ipfs/unpin', {
         method: 'POST',

@@ -14,7 +14,6 @@ export const getCryptoPrice = async (symbol: string, apiKey?: string) => {
         ...(apiKey ? { headers: { 'X-MBX-APIKEY': apiKey } } : {}),
       }
     );
-    console.log(`${symbol} price: $${response.data.price}`);
     return { price: Number(response.data.price), date: currentDate };
   } catch (error) {
     console.error('Error fetching price:', error);
