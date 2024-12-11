@@ -9,9 +9,10 @@ import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 import '@solana/wallet-adapter-react-ui/styles.css';
+import { initializeMarketplace } from '~/config/marketplace.client';
 
 export function SolanaProvider({
   children,
@@ -22,6 +23,12 @@ export function SolanaProvider({
   SOLANA_NETWORK: string;
   RPC_ENDPOINT: string;
 }) {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      initializeMarketplace();
+    }
+  }, []);
+
   const wallets = useMemo(
     () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
     [SOLANA_NETWORK]

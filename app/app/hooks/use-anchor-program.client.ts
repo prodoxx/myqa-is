@@ -8,9 +8,11 @@ import {
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useMemo } from 'react';
 import { IDL } from '~/lib/types/myfaq_is';
-import { MARKETPLACE_PROGRAM } from '~/config/marketplace.client';
+import { getMarketplaceConfig } from '~/config/marketplace.client';
 
 export function useAnchorProgram() {
+  const { MARKETPLACE_PROGRAM } = getMarketplaceConfig();
+
   const { connection } = useConnection();
   const wallet = useWallet();
 

@@ -3,6 +3,7 @@ import { typedjson } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
 import { MainLayout } from '~/ui/layouts/main';
+import { ClientOnly } from '~/ui/molecules/client-only';
 import { NewQuestionForm } from '~/ui/organisms/questions/new-question-form';
 
 export const meta: MetaFunction = () => {
@@ -31,7 +32,9 @@ export const loader = async (args: LoaderFunctionArgs) => {
 export default function Page() {
   return (
     <MainLayout>
-      <NewQuestionForm />
+      <ClientOnly fallback={<div>Loading...</div>}>
+        <NewQuestionForm />
+      </ClientOnly>
     </MainLayout>
   );
 }

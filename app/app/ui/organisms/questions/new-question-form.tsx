@@ -1,4 +1,3 @@
-// import { useNavigate } from '@remix-run/react';
 import { Label } from '@radix-ui/react-label';
 import { Form, useNavigate } from '@remix-run/react';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -30,6 +29,7 @@ import { Textarea } from '~/ui/atoms/text-area';
 
 export const NewQuestionForm = () => {
   const marketplace = useMarketplace();
+
   const wallet = useWallet();
   const [price, setPrice] = React.useState<
     CurrencyInputOnChangeValues | undefined
