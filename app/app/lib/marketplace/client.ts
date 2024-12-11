@@ -46,19 +46,28 @@ export class MarketplaceClient {
   public async getMarketplaceState(): Promise<MarketplaceState> {
     if (!this.marketplaceState) {
       const marketplacePda = await this.getMarketplacePda();
-      const marketplaceAccount =
-        await this.program.account.marketplace.fetch(marketplacePda);
 
-      this.marketplaceState = {
-        authority: marketplaceAccount.authority,
-        questionCounter: marketplaceAccount.questionCounter,
-        platformFeeBps: marketplaceAccount.platformFeeBps,
-        creatorRoyaltyBps: marketplaceAccount.creatorRoyaltyBps,
-        totalVolume: marketplaceAccount.totalVolume,
-        paused: marketplaceAccount.paused,
-        pausedOperations: marketplaceAccount.pausedOperations,
-        bonkMint: marketplaceAccount.bonkMint,
-      } as MarketplaceState;
+      try {
+        const marketplaceAccount =
+          await this.program.account.marketplace.fetch(marketplacePda);
+
+        this.marketplaceState = {
+          authority: marketplaceAccount.authority,
+          questionCounter: marketplaceAccount.questionCounter,
+          platformFeeBps: marketplaceAccount.platformFeeBps,
+          creatorRoyaltyBps: marketplaceAccount.creatorRoyaltyBps,
+          totalVolume: marketplaceAccount.totalVolume,
+          paused: marketplaceAccount.paused,
+          pausedOperations: marketplaceAccount.pausedOperations,
+          bonkMint: marketplaceAccount.bonkMint,
+        } as MarketplaceState;
+      } catch (error) {
+        console.error('Failed to fetch marketplace account:', error);
+        throw new Error(
+          `Marketplace not initialized at ${marketplacePda.toString()}. ` +
+            'Please ensure the marketplace has been properly initialized.'
+        );
+      }
     }
     return this.marketplaceState;
   }
@@ -93,7 +102,7 @@ export class MarketplaceClient {
         contentMetadataHash.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
       );
 
-      // Get PDAs
+      // get PDAs
       const [userStatePda] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from('user_state'), publicKey.toBuffer()],
         this.program.programId
@@ -102,10 +111,10 @@ export class MarketplaceClient {
       const marketplacePda = await this.getMarketplacePda();
       const marketplaceState = await this.getMarketplaceState();
 
-      // Get the next question counter
+      // get the next question counter
       const questionCounter = marketplaceState.questionCounter;
 
-      // Derive the question PDA
+      // derive the question PDA
       const [questionPda] = web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('question'),
@@ -134,10 +143,13 @@ export class MarketplaceClient {
           systemProgram: web3.SystemProgram.programId,
           rent: web3.SYSVAR_RENT_PUBKEY,
         })
-        .rpc();
+        .transaction();
+
+      // sign and send the transaction using the wallet
+      const signature = await wallet.sendTransaction(tx, this.connection);
 
       // wait for confirmation
-      await this.confirmTx(tx);
+      await this.confirmTx(signature);
 
       // invalidate marketplace state cache
       this.marketplaceState = null;
@@ -162,6 +174,7 @@ export class MarketplaceClient {
     try {
       await this.program.account.userState.fetch(userStatePda);
     } catch (error) {
+      // send transaction
       const tx = await this.program.methods
         .initializeUserState()
         .accounts({
@@ -169,9 +182,12 @@ export class MarketplaceClient {
           user: publicKey,
           systemProgram: web3.SystemProgram.programId,
         })
-        .rpc();
+        .transaction();
 
-      await this.confirmTx(tx);
+      // sign and send the transaction using the wallet
+      const signature = await wallet.sendTransaction(tx, this.connection);
+
+      await this.confirmTx(signature);
     }
   }
 }
