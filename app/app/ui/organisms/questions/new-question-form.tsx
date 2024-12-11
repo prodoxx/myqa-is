@@ -1,6 +1,7 @@
 import { Label } from '@radix-ui/react-label';
 import { Form, useNavigate } from '@remix-run/react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import debounce from 'lodash/debounce';
 import omit from 'lodash/omit';
 import React from 'react';
 import CurrencyInput, {
@@ -53,7 +54,10 @@ export const NewQuestionForm = () => {
         setLastUpdate(result.date);
       }
     };
-    getAndSetPrice();
+    const debouncedGetAndSetPrice = debounce(getAndSetPrice, 1_000);
+    debouncedGetAndSetPrice();
+
+    return debouncedGetAndSetPrice.cancel;
   }, [price]);
 
   const navigate = useNavigate();
