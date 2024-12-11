@@ -10,7 +10,7 @@ const createQuestionSchema = z.object({
   question: z.string().min(10),
   unlockPrice: z.object({
     type: z.string().min(1),
-    value: z.number().min(1),
+    value: z.string().min(1),
   }),
   maxKeys: z
     .number({ message: 'A minimum of 1 is required' })
