@@ -27,3 +27,5 @@ test-ledger
 
 *.log
 *.json
+
+!app/app/lib/idl/*
