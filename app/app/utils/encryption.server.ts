@@ -29,3 +29,24 @@ export function decryptContent(encryptedContent: string, key: string): string {
   decrypted += decipher.final('utf8');
   return decrypted;
 }
+
+export async function generateUnlockKeyEncryptionKey({
+  message,
+  signature,
+  transactionSignature,
+  questionId,
+}: {
+  message: string;
+  signature: string;
+  transactionSignature: string;
+  questionId: string;
+}): Promise<string> {
+  const hash = createHash('sha256')
+    .update(message) // the original message
+    .update(signature) // the message signature
+    .update(transactionSignature) // the on-chain tx signature (can't be replayed)
+    .update(questionId)
+    .digest('hex');
+
+  return hash.slice(0, 64);
+}

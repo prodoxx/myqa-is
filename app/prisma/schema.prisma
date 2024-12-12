@@ -93,6 +93,11 @@ enum PinStatus {
   UNPINNED
 }
 
+enum PinType {
+  QUESTION
+  ANSWER
+}
+
 model IpfsPin {
   id           String    @id @default(cuid())
   cid          String    @unique
@@ -101,6 +106,7 @@ model IpfsPin {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   userId       Int
+  type         PinType   @default(QUESTION)
   User         User      @relation(fields: [userId], references: [id])
   qa           QA?
   qaId         Int?

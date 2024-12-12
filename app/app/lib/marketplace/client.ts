@@ -9,11 +9,19 @@ import {
   getAssociatedTokenAddress,
 } from '@solana/spl-token';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
+import { decryptContent } from '~/utils/encryption.server';
+import axios from 'axios';
 
 export interface MintUnlockKeyParams {
   questionId: string;
   metadataUri: string;
   encryptedKey: Uint8Array;
+  wallet: WalletContextState;
+}
+
+export interface DecryptContentParams {
+  questionId: string;
+  encryptedContent: string;
   wallet: WalletContextState;
 }
 
@@ -205,14 +213,113 @@ export class MarketplaceClient {
     }
   }
 
+  private async generateDecryptionMaterial(
+    wallet: WalletContextState,
+    questionId: string
+  ): Promise<{ message: string; signature: string; txSignature: string }> {
+    if (!wallet.signMessage || !wallet.signTransaction) {
+      throw new Error('Wallet does not support required signing operations');
+    }
+
+    // 1. create and sign the message
+    const message = `Unlock question #${questionId} at timestamp ${Date.now()}`;
+    const messageBytes = new TextEncoder().encode(message);
+    const signature = await wallet.signMessage(messageBytes);
+
+    // 2. create and sign a dummy transaction to get an unforgeable signature
+    const recentBlockhash = await this.connection.getLatestBlockhash();
+    const tx = new web3.Transaction({
+      feePayer: wallet.publicKey,
+      ...recentBlockhash,
+    }).add(
+      web3.SystemProgram.transfer({
+        fromPubkey: wallet.publicKey!,
+        toPubkey: wallet.publicKey!,
+        lamports: 0,
+      })
+    );
+
+    const signedTx = await wallet.signTransaction(tx);
+    const txSignature = signedTx.signatures[0].signature?.toString('hex') || '';
+
+    return {
+      message,
+      signature: Buffer.from(signature).toString('hex'),
+      txSignature,
+    };
+  }
+
+  // @note: this will be used in the future
+  public async decryptContent({
+    questionId,
+    encryptedContent,
+    wallet,
+  }: DecryptContentParams): Promise<string> {
+    try {
+      // get all required signatures
+      const decryptionMaterial = await this.generateDecryptionMaterial(
+        wallet,
+        questionId
+      );
+
+      // get the decryption key from the server
+      const response = await fetch('/api/v1/decrypt-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionId,
+          ...decryptionMaterial,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get decryption key');
+      }
+
+      const { decryptionKey } = await response.json();
+
+      // use the key to decrypt the content locally
+      return decryptContent(encryptedContent, decryptionKey);
+    } catch (error) {
+      console.error('Failed to decrypt content:', error);
+      throw error;
+    }
+  }
+
   public async mintUnlockKey({
     questionId,
-    metadataUri,
-    encryptedKey,
     wallet,
   }: MintUnlockKeyParams): Promise<string> {
+    let data: any;
     try {
       const publicKey = await this.ensureWalletConnected(wallet);
+
+      // Get all required signatures
+      const decryptionMaterial = await this.generateDecryptionMaterial(
+        wallet,
+        questionId
+      );
+
+      // First make API call to get metadata and encrypted key
+      const response = await fetch('/api/v1/mint-unlock-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionId,
+          tokenId: (
+            await this.currentKeysCount(parseInt(questionId))
+          ).toString(),
+          ...decryptionMaterial,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to prepare unlock key');
+      }
+
+      ({ data } = await response.json());
+
+      // Continue with on-chain minting...
       const marketplacePda = await this.getMarketplacePda();
       const marketplaceState = await this.getMarketplaceState();
 
@@ -226,11 +333,11 @@ export class MarketplaceClient {
         this.program.programId
       );
 
-      // Get question account to get current keys count
+      // get question account to get current keys count
       const questionAccount =
         await this.program.account.question.fetch(questionPda);
 
-      // Get unlock key PDA
+      // get unlock key PDA
       const [unlockKeyPda] = web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('unlock_key'),
@@ -240,13 +347,13 @@ export class MarketplaceClient {
         this.program.programId
       );
 
-      // Get mint authority PDA
+      // get mint authority PDA
       const [mintAuthority] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from('mint_authority')],
         this.program.programId
       );
 
-      // Get token accounts
+      // get token accounts
       const buyerTokenAccount = await getAssociatedTokenAddress(
         marketplaceState.bonkMint,
         publicKey
@@ -262,10 +369,10 @@ export class MarketplaceClient {
         marketplaceState.authority
       );
 
-      // Create NFT mint
+      // create NFT mint
       const nftMint = web3.Keypair.generate();
 
-      // Get metadata PDA
+      // get metadata PDA
       const [metadata] = web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('metadata'),
@@ -275,18 +382,20 @@ export class MarketplaceClient {
         new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID)
       );
 
-      // Ensure user state is initialized
+      // ensure user state is initialized
       await this.ensureUserStateInitialized(wallet);
 
-      // Get user state PDA
+      // get user state PDA
       const [userStatePda] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from('user_state'), publicKey.toBuffer()],
         this.program.programId
       );
 
-      // Send transaction
+      const metadataUri = `ipfs://${data.cid}`;
+
+      // send transaction
       const tx = await this.program.methods
-        .mintUnlockKey(metadataUri, Buffer.from(encryptedKey))
+        .mintUnlockKey(metadataUri, data.encryptionKey)
         .accounts({
           marketplace: marketplacePda,
           question: questionPda,
@@ -309,18 +418,28 @@ export class MarketplaceClient {
         })
         .transaction();
 
-      // Sign and send transaction
+      // sign and send transaction
       const signature = await wallet.sendTransaction(tx, this.connection, {
         signers: [nftMint],
       });
 
-      // Wait for confirmation
+      // wait for confirmation
       await this.confirmTx(signature);
 
-      // Return the token ID (current keys count)
+      // return the token ID (current keys count)
       return questionAccount.currentKeys.toString();
     } catch (error) {
-      console.error('Failed to mint unlock key:', error);
+      // clean up IPFS pin if we have metadata URI and the transaction failed
+      if (data?.metadataUri) {
+        try {
+          await axios.post('/api/v1/ipfs/unpin', {
+            cid: data.metadataUri,
+            type: 'ANSWER',
+          });
+        } catch (cleanupError) {
+          console.error('Failed to clean up IPFS pin:', cleanupError);
+        }
+      }
       throw error;
     }
   }

@@ -19,7 +19,7 @@ export const action: ActionFunction = async ({ request }) => {
     return typedjson({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { cid } = await request.json();
+  const { cid, type } = await request.json();
 
   try {
     const pin = await prisma.ipfsPin.findFirst({
@@ -27,6 +27,7 @@ export const action: ActionFunction = async ({ request }) => {
         cid,
         userId: user.id,
         status: 'PINNED',
+        type,
       },
     });
 
@@ -41,8 +42,12 @@ export const action: ActionFunction = async ({ request }) => {
       );
     }
 
-    if (pin.qaId) {
+    if (pin.qaId && type === 'ANSWER') {
       return typedjson({ error: 'Pin has an answer' }, { status: 400 });
+    }
+
+    if (pin.qaId && type === 'QUESTION') {
+      return typedjson({ error: 'Pin has a question' }, { status: 400 });
     }
 
     // TODO: make this a transaction

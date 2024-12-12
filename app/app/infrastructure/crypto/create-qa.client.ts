@@ -35,7 +35,7 @@ export async function createQuestionAndAnswer({
       data: {
         data: { cid, questionHash, contentHash, encryptedAnswer },
       },
-    } = await axios.post('/api/v1/ipfs/pin', {
+    } = await axios.post('/api/v1/ipfs/pin-question', {
       question,
       answer,
     });
@@ -70,7 +70,7 @@ export async function createQuestionAndAnswer({
       return createAnswerData;
     } catch (blockchainError) {
       // If blockchain transaction fails, clean up IPFS pin
-      await axios.post('/api/v1/ipfs/unpin', { cid });
+      await axios.post('/api/v1/ipfs/unpin', { cid, type: 'QUESTION' });
       throw blockchainError;
     }
   } catch (error) {
