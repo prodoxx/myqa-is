@@ -1,4 +1,5 @@
 import type { QA as QaORM } from '@prisma/client';
+import { IpfsPinEntity } from './ipfs-pin';
 
 export class QAEntity {
   id?: QaORM['id'];
@@ -10,6 +11,7 @@ export class QAEntity {
   questionHash: QaORM['questionHash'];
   encryptedAnswer: QaORM['encryptedAnswer'];
   unlockPriceInBonk: QaORM['unlockPriceInBonk'];
+  IpfsPin: IpfsPinEntity;
 
   constructor(
     question: Pick<
@@ -23,7 +25,9 @@ export class QAEntity {
       | 'encryptedAnswer'
       | 'unlockPriceInBonk'
     > &
-      Partial<Pick<QaORM, 'id'>>
+      Partial<Pick<QaORM, 'id'>> & {
+        IpfsPin: IpfsPinEntity;
+      }
   ) {
     this.id = question.id;
     this.question = question.question;
@@ -34,6 +38,7 @@ export class QAEntity {
     this.questionHash = question.questionHash;
     this.encryptedAnswer = question.encryptedAnswer;
     this.unlockPriceInBonk = question.unlockPriceInBonk;
+    this.IpfsPin = question.IpfsPin;
   }
 
   json(): QaDTO {
