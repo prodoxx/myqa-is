@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '~/ui/atoms/button';
 import { MainLayout } from '~/ui/layouts/main';
 import { useTypedLoaderData } from 'remix-typedjson';
+import { getPrettyNumber } from '~/lib/currency';
 
 const exampleCreators = [
   {
@@ -74,7 +75,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
 const Stats = {
   totalQuestions: 1205,
   totalKeys: 5840,
-  totalVolume: '458.2K',
+  totalVolume: 458_200,
   activeUsers: 842,
 };
 
@@ -136,7 +137,9 @@ const LandingPage = () => {
                     <Icon className="h-6 w-6 text-indigo-400" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white">{value}</p>
+                    <p className="text-2xl font-bold text-white">
+                      {getPrettyNumber(Number(value))}
+                    </p>
                     <p className="text-slate-400">{title}</p>
                   </div>
                 </div>
