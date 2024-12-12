@@ -28,26 +28,9 @@ export const SiteNav = ({
   const { publicKey, connected, disconnect, connecting, select, ...rest } =
     useWallet();
 
+  // TODO: We need to log the user out of their wallet if it doesn't match
+  // the one that the originally linked to their profile
   const [showWarning, setShowWarning] = React.useState(false);
-  React.useEffect(() => {
-    const validateWallet = async () => {
-      if (connecting) {
-        return;
-      }
-
-      if (
-        connected &&
-        publicKey &&
-        connectedPublicKey &&
-        connectedPublicKey !== publicKey.toString()
-      ) {
-        // setShowWarning(true);
-        await disconnect();
-        select(null);
-      }
-    };
-    validateWallet();
-  }, [publicKey, connected, disconnect, connectedPublicKey, connecting]);
 
   return (
     <nav className={`flex h-[96px] w-full flex-row items-center ${className}`}>

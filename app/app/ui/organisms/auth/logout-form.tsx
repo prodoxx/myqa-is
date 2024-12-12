@@ -6,6 +6,7 @@ export const LogoutForm = () => {
   const fetcher = useFetcher();
   const { disconnect, wallet } = useWallet();
 
+  // TODO: does not work
   const handleSubmit = async (e: any) => {
     try {
       await wallet?.adapter.disconnect();
@@ -20,16 +21,14 @@ export const LogoutForm = () => {
       action: '/logout',
       method: 'POST',
     });
-
-    console.log(wallet?.adapter);
   };
 
   return (
     <>
-      {console.log(wallet)}
-      <fetcher.Form onSubmit={handleSubmit}>
+      <fetcher.Form method="POST" action="/logout">
         <Button
           size="lg"
+          type="submit"
           variant="default"
           className="!bg-gray-900 !text-white !w-fit !mx-auto"
         >
