@@ -1,7 +1,6 @@
-import { Lock, XIcon } from 'lucide-react';
+import { XIcon } from 'lucide-react';
 import { QaDTO } from '~/domain/faq/entities/question';
 import { CryptoPrice } from '~/infrastructure/crypto';
-import { Bonk } from '~/ui/atoms/bonk';
 import { Button } from '~/ui/atoms/button';
 import { Card } from '~/ui/atoms/card';
 import { BonkPricing } from '~/ui/molecules/bonk-pricing';
@@ -12,7 +11,6 @@ import {
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from '~/ui/molecules/drawer';
 import { UnlockButton } from './unlock-button';
 
