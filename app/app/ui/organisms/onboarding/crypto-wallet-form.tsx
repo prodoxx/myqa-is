@@ -8,6 +8,7 @@ import {
 import React from 'react';
 import { OnboardingStep } from '~/domain/faq/entities/user-profile';
 import { WalletDTO } from '~/domain/faq/entities/wallet';
+import { Alert, AlertDescription, AlertTitle } from '~/ui/atoms/alert';
 import { Button } from '~/ui/atoms/button';
 import {
   Card,
@@ -20,9 +21,13 @@ import {
 
 export type CryptoWalletFormProps = {
   wallet?: WalletDTO;
+  errorMessage: string | null;
 };
 
-export const CryptoWalletForm = ({ wallet }: CryptoWalletFormProps) => {
+export const CryptoWalletForm = ({
+  wallet,
+  errorMessage,
+}: CryptoWalletFormProps) => {
   const { publicKey, connected, connecting, disconnect } = useWallet();
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === 'submitting';
@@ -52,6 +57,13 @@ export const CryptoWalletForm = ({ wallet }: CryptoWalletFormProps) => {
         </CardHeader>
 
         <CardContent className="flex flex-col space-y-4">
+          {errorMessage ? (
+            <Alert variant="destructive">
+              <AlertTitle>Failed to complete step</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          ) : null}
+
           <input
             hidden
             name="onboarding"

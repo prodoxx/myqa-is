@@ -6,22 +6,26 @@ import { OnboardingStep } from '~/entities/user-profile';
 
 export type OnboardingFormProps = {
   currentStep: keyof typeof OnboardingStep;
+  errorMessage: string | null;
 };
 
-export const OnboardingForm = ({ currentStep }: OnboardingFormProps) => {
+export const OnboardingForm = ({
+  currentStep,
+  errorMessage,
+}: OnboardingFormProps) => {
   if (currentStep === OnboardingStep.BASIC_INFORMATION) {
-    return <BasicInformationForm />;
+    return <BasicInformationForm errorMessage={errorMessage} />;
   }
 
   if (currentStep === OnboardingStep.SOCIAL_LINKS) {
-    return <SocialLinksForm />;
+    return <SocialLinksForm errorMessage={errorMessage} />;
   }
 
   if (currentStep === OnboardingStep.CRYPTO_WALLET) {
-    return <CryptoWalletForm />;
+    return <CryptoWalletForm errorMessage={errorMessage} />;
   }
 
   if (currentStep === OnboardingStep.DONE) {
-    return <OnboardingComplete />;
+    return <OnboardingComplete errorMessage={errorMessage} />;
   }
 };

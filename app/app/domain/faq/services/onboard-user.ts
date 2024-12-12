@@ -85,14 +85,20 @@ export class OnboardUser {
       return;
     }
 
-    return prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        walletPublicKey: key,
-      },
-    });
+    try {
+      return await prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          walletPublicKey: key,
+        },
+      });
+    } catch (error) {
+      throw new Error(
+        'A user has already linked the provided wallet to their profile. Please choose another wallet.'
+      );
+    }
   }
 
   getExternalLinks(data?: z.infer<typeof onboardUserSchema>['externalLinks']) {

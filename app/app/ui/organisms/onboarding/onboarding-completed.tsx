@@ -1,5 +1,6 @@
 import { Link } from '@remix-run/react';
-import { CheckCircle, PartyPopper } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '~/ui/atoms/alert';
 import { Button } from '~/ui/atoms/button';
 import {
   Card,
@@ -9,7 +10,11 @@ import {
   CardTitle,
 } from '~/ui/atoms/card';
 
-export const OnboardingComplete = () => {
+export const OnboardingComplete = ({
+  errorMessage,
+}: {
+  errorMessage: string | null;
+}) => {
   return (
     <Card className="max-w-4xl mx-auto">
       <CardTitle>
@@ -22,6 +27,13 @@ export const OnboardingComplete = () => {
         </CardHeader>
       </CardTitle>
       <CardContent>
+        {errorMessage ? (
+          <Alert variant="destructive">
+            <AlertTitle>Failed to complete step</AlertTitle>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        ) : null}
+
         <ul className="space-y-2">
           <li className="flex items-center space-x-2">
             <CheckCircle className="h-5 w-5 text-green-500 mr-2" />

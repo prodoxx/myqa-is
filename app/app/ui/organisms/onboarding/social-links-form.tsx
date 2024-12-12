@@ -4,6 +4,7 @@ import React from 'react';
 import { useTypedFetcher } from 'remix-typedjson';
 import { OnboardingStep } from '~/domain/faq/entities/user-profile';
 import { OnboardUserFormErrors } from '~/domain/faq/services/onboard-user';
+import { Alert, AlertDescription, AlertTitle } from '~/ui/atoms/alert';
 import { Button } from '~/ui/atoms/button';
 import {
   Card,
@@ -17,7 +18,11 @@ import { Label } from '~/ui/atoms/label';
 import { SocialMediaTypeDropdown } from '~/ui/molecules/social-media-type-dropdown';
 
 // This is only valid for the initial onboarding. We don't want to create duplicate items in the list!
-export const SocialLinksForm = () => {
+export const SocialLinksForm = ({
+  errorMessage,
+}: {
+  errorMessage: string | null;
+}) => {
   const fetcherData = useTypedFetcher<{ formErrors?: OnboardUserFormErrors }>();
   // There really won't be any errors tbh. It either saves or not
   const formErrors = fetcherData?.data?.formErrors;
@@ -61,6 +66,13 @@ export const SocialLinksForm = () => {
           </span>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
+          {errorMessage ? (
+            <Alert variant="destructive">
+              <AlertTitle>Failed to complete step</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          ) : null}
+
           <ul className="flex flex-col space-y-4">
             <input
               hidden
