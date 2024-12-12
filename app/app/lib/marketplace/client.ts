@@ -9,7 +9,7 @@ import {
   getAssociatedTokenAddress,
 } from '@solana/spl-token';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
-import { decryptContent } from '~/utils/encryption.server';
+import { decryptContent } from '~/utils/encryption.client';
 import axios from 'axios';
 
 export interface MintUnlockKeyParams {
