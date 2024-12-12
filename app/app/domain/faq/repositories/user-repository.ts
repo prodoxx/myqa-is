@@ -101,7 +101,10 @@ export class UserRepository {
     return await this.rebuildEntity(result);
   }
 
-  static async findByUsername(username: string) {
+  static async findByUsername(
+    username: string,
+    options?: { questions?: { page: number; size: number } }
+  ) {
     const result = await prisma.user.findFirst({
       where: {
         username,
@@ -111,7 +114,12 @@ export class UserRepository {
           include: {
             Avatar: true,
             ExternalLinks: true,
-            QAs: true,
+            QAs: {
+              take: options?.questions?.size ?? 5,
+              skip:
+                (options?.questions?.page ?? 0) *
+                (options?.questions?.size ?? 5),
+            },
           },
         },
       },

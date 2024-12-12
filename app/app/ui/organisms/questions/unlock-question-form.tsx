@@ -12,6 +12,7 @@ import {
 } from '~/ui/atoms/card';
 import { Bonk } from '~/ui/atoms/bonk';
 import { unlockQuestionAndAnswer } from '~/infrastructure/crypto/unlock-qa.client';
+import { useMarketplace } from '~/hooks/use-marketplace.client';
 
 interface UnlockQuestionFormProps {
   questionId: string;
@@ -31,6 +32,7 @@ export function UnlockQuestionForm({
   const wallet = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const marketplace = useMarketplace();
 
   const handleUnlock = async () => {
     try {
