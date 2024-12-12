@@ -1,5 +1,5 @@
 import prisma from '~/infrastructure/database/index.server';
-import { QAEntity } from '../entities/question';
+import { QAEntity } from '../entities/qa';
 
 export class QuestionRepository {
   static async rebuildEntity(data: any) {

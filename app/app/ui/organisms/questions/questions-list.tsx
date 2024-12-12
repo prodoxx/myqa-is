@@ -1,4 +1,4 @@
-import { QaDTO } from '~/domain/faq/entities/question';
+import { QaDTO } from '~/domain/faq/entities/qa';
 import { CryptoPrice } from '~/infrastructure/crypto';
 import { Card } from '~/ui/atoms/card';
 import { BonkPricing } from '~/ui/molecules/bonk-pricing';
@@ -58,10 +58,7 @@ export const QuestionsList = ({
 
                   <div className="h-4 w-px bg-gray-300 dark:bg-gray-700" />
 
-                  <AvailableKeys
-                    maxKeys={question.maxKeys}
-                    currentKeys={question.currentKeys}
-                  />
+                  <AvailableKeys maxKeys={question.maxKeys} currentKeys={10} />
                 </div>
               </div>
 

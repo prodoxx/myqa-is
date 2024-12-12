@@ -13,7 +13,7 @@ import {
 import { Skeleton } from '~/ui/atoms/skeleton';
 
 interface ViewAnswerProps {
-  questionId: string;
+  questionId: number;
   question: string;
   onClose: () => void;
 }

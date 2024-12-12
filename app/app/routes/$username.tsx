@@ -1,5 +1,4 @@
 import { LoaderFunctionArgs } from '@remix-run/node';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
 import { z } from 'zod';
 import { authenticator } from '~/auth.server';
@@ -7,13 +6,6 @@ import { UserRepository } from '~/domain/faq/repositories/user-repository';
 import { getCryptoPrice, SupportedCoins } from '~/infrastructure/crypto';
 import prisma from '~/infrastructure/database/index.server';
 import { Avatar } from '~/ui/atoms/avatar';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from '~/ui/atoms/pagination';
 import { MainLayout } from '~/ui/layouts/main';
 import { NewQuestionButton } from '~/ui/molecules/new-question-button';
 import { LoginRegisterDialog } from '~/ui/organisms/auth/login-register-dialog';

@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from '~/ui/molecules/dialog';
 import { ViewAnswer } from './view-answer';
 
 interface QuestionCardProps {
-  id: string;
+  id: number;
   question: string;
 }
 

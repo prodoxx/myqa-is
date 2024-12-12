@@ -1,16 +1,16 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { authenticator } from '~/auth.server';
+import { getErrorMessage } from '~/lib/error-messages';
+import { MainLayout } from '~/ui/layouts/main';
+import { OnboardingForm } from '~/ui/organisms/onboarding';
+import { OnboardingStep } from '~/domain/faq/entities/user-profile';
+import { OnboardUser } from '~/domain/faq/services/onboard-user';
+import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
+import { UserRepository } from '~/domain/faq/repositories/user-repository';
 import {
   ShouldRevalidateFunctionArgs,
   useSearchParams,
 } from '@remix-run/react';
-import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
-import { authenticator } from '~/auth.server';
-import { OnboardingStep } from '~/domain/faq/entities/user-profile';
-import { UserRepository } from '~/domain/faq/repositories/user-repository';
-import { OnboardUser } from '~/domain/faq/services/onboard-user';
-import { getErrorMessage } from '~/lib/error-messages';
-import { MainLayout } from '~/ui/layouts/main';
-import { OnboardingForm } from '~/ui/organisms/onboarding';
 
 export const loader = async (args: LoaderFunctionArgs) => {
   const searchParams = new URL(args.request.url).searchParams;

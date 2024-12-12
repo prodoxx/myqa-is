@@ -5,7 +5,7 @@ import { Button } from '~/ui/atoms/button';
 import { Dialog, DialogContent } from '~/ui/molecules/dialog';
 
 interface QuestionCardProps {
-  id: string;
+  id: number;
   question: string;
   priceInBonk: number;
   priceInDollar: string;

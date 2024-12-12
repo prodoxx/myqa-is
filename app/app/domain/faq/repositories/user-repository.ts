@@ -22,6 +22,7 @@ export class UserRepository {
         UserProfile: {
           include: {
             ExternalLinks: true,
+            QAs: true,
           },
         },
       },
