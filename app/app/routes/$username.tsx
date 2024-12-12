@@ -28,7 +28,6 @@ const paginationSchema = z.object({
 });
 
 export const loader = async (args: LoaderFunctionArgs) => {
-  console.log('Hi');
   const session = await authenticator.isAuthenticated(args.request);
   const username = args.params.username;
   const url = new URL(args.request.url);
