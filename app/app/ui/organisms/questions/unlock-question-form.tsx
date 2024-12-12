@@ -1,4 +1,3 @@
-import { X } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useState } from 'react';
 import { Alert, AlertTitle, AlertDescription } from '~/ui/atoms/alert';
