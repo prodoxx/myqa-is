@@ -1,6 +1,5 @@
 import { LoaderFunctionArgs } from '@remix-run/node';
 import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
-import { ClientOnly } from 'remix-utils/client-only';
 import { z } from 'zod';
 import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
@@ -9,6 +8,7 @@ import prisma from '~/infrastructure/database/index.server';
 import { Avatar } from '~/ui/atoms/avatar';
 import { MainLayout } from '~/ui/layouts/main';
 import { NewQuestionButton } from '~/ui/molecules/new-question-button';
+import { JoinButton } from '~/ui/organisms/auth/join';
 import { LoginRegisterDialog } from '~/ui/organisms/auth/login-register-dialog';
 import { ProfilePagination } from '~/ui/organisms/profile/pagination';
 import { QuestionsList } from '~/ui/organisms/questions/questions-list';
@@ -120,6 +120,8 @@ const UserProfile = () => {
           {...data?.pagination}
         />
       </div>
+
+      <JoinButton username={data?.user?.username!} />
     </MainLayout>
   );
 };

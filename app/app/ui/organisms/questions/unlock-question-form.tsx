@@ -1,19 +1,18 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useState } from 'react';
-import { Alert, AlertTitle, AlertDescription } from '~/ui/atoms/alert';
+import { useMarketplace } from '~/hooks/use-marketplace.client';
+import { unlockQuestionAndAnswer } from '~/infrastructure/crypto/unlock-qa.client';
+import { Alert, AlertDescription, AlertTitle } from '~/ui/atoms/alert';
+import { Bonk } from '~/ui/atoms/bonk';
 import { Button } from '~/ui/atoms/button';
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '~/ui/atoms/card';
-import { Bonk } from '~/ui/atoms/bonk';
-import { unlockQuestionAndAnswer } from '~/infrastructure/crypto/unlock-qa.client';
-import { useMarketplace } from '~/hooks/use-marketplace.client';
-import { useAnchorProgram } from '~/hooks/use-anchor-program.client';
 
 interface UnlockQuestionFormProps {
   questionId: number;

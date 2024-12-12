@@ -1,7 +1,7 @@
-import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from '@remix-run/react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import '@solana/wallet-adapter-react-ui/styles.css';
 import React from 'react';
 import { useUser } from '~/provider/user-provider';
 import { Button } from '~/ui/atoms/button';
@@ -14,7 +14,6 @@ import {
   DialogFooter,
   DialogTitle,
 } from '../dialog';
-import '@solana/wallet-adapter-react-ui/styles.css';
 
 export const SiteNav = ({
   className,
