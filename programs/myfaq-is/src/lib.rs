@@ -31,7 +31,8 @@ const IPFS_CID_LENGTH: usize = 46;
 const MAX_CID_LENGTH: usize = 64; 
 
 // Unlock key size
-const UNLOCK_KEY_BASE_SIZE: usize = 8 + // discriminator
+const UNLOCK_KEY_BASE_SIZE: usize = 8 + // anchor account discriminator
+    1 + // discriminator: u8 field
     32 + // owner: Pubkey
     32 + // question: Pubkey
     8 +  // token_id: u64
@@ -41,6 +42,9 @@ const UNLOCK_KEY_BASE_SIZE: usize = 8 + // discriminator
     8 +  // last_sold_price: u64
     8 +  // last_sold_time: i64
     8;   // list_time: i64
+
+// Add this near the top of the file with other constants
+const UNLOCK_KEY_DISCRIMINATOR: u8 = 1;
 
 #[account]
 pub struct UserState {
@@ -294,6 +298,9 @@ pub mod myfaq_is {
             creator_payment,
         )?;
 
+        // Set the discriminator
+        key.discriminator = UNLOCK_KEY_DISCRIMINATOR;
+        
         // store the encrypted symmetric key
         key.encrypted_key = encrypted_key;
         
@@ -728,6 +735,7 @@ pub struct MintUnlockKey<'info> {
         init,
         payer = buyer,
         space = MIN_ACCOUNT_SPACE +   // discriminator
+        1 +                          // discriminator: u8
         32 +                         // owner: Pubkey
         32 +                         // question: Pubkey
         8 +                          // token_id: u64
@@ -964,6 +972,7 @@ pub struct Question {
 
 #[account]
 pub struct UnlockKey {
+    pub discriminator: u8,
     pub owner: Pubkey,
     pub question: Pubkey,
     pub token_id: u64,

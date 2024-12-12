@@ -23,6 +23,7 @@ import {
 } from '@solana/spl-token';
 import { assert } from 'chai';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
+import { BorshAccountsCoder } from '@project-serum/anchor';
 
 const TEST_BONK_DECIMALS = 6; // Match BONK token decimals
 
@@ -543,6 +544,7 @@ describe('myfaq-is', function () {
         assert.equal(unlockKeyAccount.isListed, false);
         assert.equal(unlockKeyAccount.listPrice.toNumber(), 0);
         assert.equal(unlockKeyAccount.metadataUri, PINATA_URI);
+        assert.equal(unlockKeyAccount.discriminator, 1, 'Incorrect unlock key discriminator');
 
         // verify question state
         const questionAccount = await program.account.question.fetch(questionPda);
@@ -846,89 +848,6 @@ describe('myfaq-is', function () {
         );
       }
     });
-
-    it('Successfully transfers ownership through purchase', async () => {
-      // first mint the key
-      await program.methods
-        .mintUnlockKey(PINATA_URI, ENCRYPTED_KEY)
-        .accounts({
-          marketplace: marketplace,
-          question: questionPda,
-          unlockKey: unlockKeyPda,
-          buyer: buyer.publicKey,
-          buyerTokenAccount: buyerTokenAccount,
-          creatorTokenAccount: creatorTokenAccount,
-          platformTokenAccount: platformTokenAccount,
-          bonkMint: bonkMint.publicKey,
-          metadata: metadata,
-          mint: nftMint.publicKey,
-          mintAuthority: mintAuthority,
-          updateAuthority: mintAuthority,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId,
-          rent: SYSVAR_RENT_PUBKEY,
-          userState: userState,
-        })
-        .signers([buyer])
-        .rpc();
-
-      // list the key
-      await program.methods
-        .listKey(UNLOCK_PRICE)
-        .accounts({
-          marketplace: marketplace,
-          unlockKey: unlockKeyPda,
-          seller: buyer.publicKey,
-          userState: userState,
-        })
-        .signers([buyer])
-        .rpc();
-
-      // create a new buyer
-      const newBuyer = Keypair.generate();
-      const newBuyerTokenAccount = await createAssociatedTokenAccount(
-        provider.connection,
-        authority,
-        bonkMint.publicKey,
-        newBuyer.publicKey,
-      );
-
-      // fund new buyer
-      await mintTo(
-        provider.connection,
-        authority,
-        bonkMint.publicKey,
-        newBuyerTokenAccount,
-        authority,
-        UNLOCK_PRICE.toNumber(),
-      );
-
-      // buy the key
-      await program.methods
-        .buyListedKey(ENCRYPTED_KEY)
-        .accounts({
-          marketplace: marketplace,
-          question: questionPda,
-          unlockKey: unlockKeyPda,
-          buyer: newBuyer.publicKey,
-          buyerTokenAccount: newBuyerTokenAccount,
-          sellerTokenAccount: buyerTokenAccount,
-          creatorTokenAccount: creatorTokenAccount,
-          platformTokenAccount: platformTokenAccount,
-          bonkMint: bonkMint.publicKey,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId,
-          userState: userState,
-        })
-        .signers([newBuyer])
-        .rpc();
-
-      // verify ownership transfer
-      const unlockKeyAccount = await program.account.unlockKey.fetch(unlockKeyPda);
-      assert.ok(unlockKeyAccount.owner.equals(newBuyer.publicKey), 'Ownership not transferred correctly');
-    });
   });
 
   describe('Listings', () => {
@@ -1090,7 +1009,7 @@ describe('myfaq-is', function () {
             creatorTokenAccount: creatorATA,
             platformTokenAccount: platformATA,
             bonkMint: bonkMint.publicKey,
-            metadata: metadata,
+            metadata,
             mint: nftMint.publicKey,
             mintAuthority: mintAuthority,
             updateAuthority: mintAuthority,
@@ -1472,18 +1391,50 @@ describe('myfaq-is', function () {
 
     it('Successfully buys a listed key', async () => {
       try {
-        // initialize newBuyerTokenAccount
-        newBuyerTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, newBuyer.publicKey);
+        // airdrop SOL to new buyer for account creation
+        const latestBlockhash = await provider.connection.getLatestBlockhash();
+        const signature = await provider.connection.requestAirdrop(newBuyer.publicKey, 2 * LAMPORTS_PER_SOL);
+        await provider.connection.confirmTransaction({
+          signature,
+          ...latestBlockhash,
+        });
+        await sleep(1000);
 
-        // create ATA for new buyer if it doesn't exist
+        // initialize new buyer's user state only if it doesn't exist
+        const [newBuyerState] = PublicKey.findProgramAddressSync(
+          [Buffer.from('user_state'), newBuyer.publicKey.toBuffer()],
+          program.programId,
+        );
+
         try {
-          await getAccount(provider.connection, newBuyerTokenAccount);
+          await program.account.userState.fetch(newBuyerState);
+          console.log('User state already exists');
         } catch {
-          await createAssociatedTokenAccount(provider.connection, authority, bonkMint.publicKey, newBuyer.publicKey);
+          // only initialize if it doesn't exist
+          await program.methods
+            .initializeUserState()
+            .accounts({
+              userState: newBuyerState,
+              user: newBuyer.publicKey,
+              systemProgram: SystemProgram.programId,
+            })
+            .signers([newBuyer])
+            .rpc();
           await sleep(1000);
         }
 
-        // mint some tokens to buyer
+        // initialize newBuyerTokenAccount
+        newBuyerTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, newBuyer.publicKey);
+
+        // create ATA for new buyer
+        try {
+          await getAccount(provider.connection, newBuyerTokenAccount);
+        } catch {
+          await createAssociatedTokenAccount(provider.connection, newBuyer, bonkMint.publicKey, newBuyer.publicKey);
+          await sleep(1000);
+        }
+
+        // mint tokens to buyer
         await mintTo(
           provider.connection,
           authority,
@@ -1494,11 +1445,12 @@ describe('myfaq-is', function () {
         );
         await sleep(1000);
 
-        // get buyer's user state PDA
-        const [newBuyerState] = PublicKey.findProgramAddressSync(
-          [Buffer.from('user_state'), newBuyer.publicKey.toBuffer()],
-          program.programId,
-        );
+        // Verify state before purchase
+        const preUnlockKeyAccount = await program.account.unlockKey.fetch(unlockKeyPda);
+        assert.isTrue(preUnlockKeyAccount.isListed, 'Key should be listed before purchase');
+        assert.ok(preUnlockKeyAccount.owner.equals(buyer.publicKey), 'Incorrect initial owner');
+
+        // Execute purchase
         await program.methods
           .buyListedKey(NEW_ENCRYPTED_KEY)
           .accounts({
@@ -1517,6 +1469,18 @@ describe('myfaq-is', function () {
           })
           .signers([newBuyer])
           .rpc();
+
+        // Verify the purchase
+        const unlockKeyAccount = await program.account.unlockKey.fetch(unlockKeyPda);
+        assert.equal(unlockKeyAccount.discriminator, 1, 'Incorrect unlock key discriminator');
+        assert.ok(unlockKeyAccount.owner.equals(newBuyer.publicKey), 'Ownership not transferred correctly');
+        assert.deepEqual(
+          Array.from(unlockKeyAccount.encryptedKey),
+          Array.from(NEW_ENCRYPTED_KEY),
+          'Encrypted key not updated correctly',
+        );
+        assert.isFalse(unlockKeyAccount.isListed, 'Key should not be listed after purchase');
+        assert.equal(unlockKeyAccount.listPrice.toNumber(), 0, 'List price should be reset to 0');
       } catch (error) {
         console.error('Buy listed key error:', error);
         if ('logs' in error) {
@@ -1525,13 +1489,12 @@ describe('myfaq-is', function () {
         throw error;
       }
     });
-
     it('Fails to buy when marketplace is paused', async () => {
       try {
-        // Initialize newBuyerTokenAccount if not already done
+        // initialize newBuyerTokenAccount if not already done
         newBuyerTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, newBuyer.publicKey);
 
-        // Create ATA for new buyer if it doesn't exist
+        // create ATA for new buyer if it doesn't exist
         try {
           await getAccount(provider.connection, newBuyerTokenAccount);
         } catch {
@@ -1550,7 +1513,7 @@ describe('myfaq-is', function () {
         );
         await sleep(1000);
 
-        // Pause marketplace
+        // pause marketplace
         await program.methods
           .toggleMarketplace()
           .accounts({
@@ -1562,13 +1525,13 @@ describe('myfaq-is', function () {
 
         await sleep(2000);
 
-        // Get new buyer's user state PDA
+        // get new buyer's user state PDA
         const [newBuyerState] = PublicKey.findProgramAddressSync(
           [Buffer.from('user_state'), newBuyer.publicKey.toBuffer()],
           program.programId,
         );
 
-        // Initialize user state if not already done
+        // initialize user state if not already done
         try {
           await program.account.userState.fetch(newBuyerState);
         } catch {
@@ -1611,7 +1574,7 @@ describe('myfaq-is', function () {
           `Expected marketplace paused error, got: ${errorMessage}`,
         );
       } finally {
-        // Cleanup - unpause marketplace
+        // cleanup - unpause marketplace
         await program.methods
           .toggleMarketplace()
           .accounts({
@@ -1719,10 +1682,10 @@ describe('myfaq-is', function () {
           // handle both custom program errors and token program errors
           const errorMessage = error.toString();
           assert.ok(
-            errorMessage.includes('0x1') || // Anchor error code
+            errorMessage.includes('0x1') || // anchor error code
               errorMessage.includes('insufficient funds') || // SPL token error
-              errorMessage.includes('InsufficientFunds') || // Our custom error
-              errorMessage.includes('custom program error: 0x1'), // Alternative error format
+              errorMessage.includes('InsufficientFunds') || // our custom error
+              errorMessage.includes('custom program error: 0x1'), // alternative error format
             `Got unexpected error: ${errorMessage}`,
           );
         }
@@ -1736,5 +1699,10 @@ describe('myfaq-is', function () {
   it('Initializes with correct BONK mint', async () => {
     const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
     assert.ok(marketplaceAccount.bonkMint.equals(bonkMint.publicKey));
+  });
+
+  it('Prints UnlockKey discriminator', () => {
+    const discriminator = BorshAccountsCoder.accountDiscriminator('UnlockKey');
+    console.log('UnlockKey discriminator:', discriminator);
   });
 });
