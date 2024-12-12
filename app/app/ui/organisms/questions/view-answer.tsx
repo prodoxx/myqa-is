@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+import { R } from 'node_modules/msw/lib/core/HttpResponse-DzhqZzTK';
 import React, { useState } from 'react';
 import { viewQuestionAnswer } from '~/infrastructure/crypto/view-answer.client';
 import { getErrorMessage } from '~/lib/error-messages';
@@ -18,14 +19,25 @@ interface ViewAnswerProps {
   questionId: number;
   question: string;
   onClose: () => void;
+  ownerOnlyAnswer?: string;
 }
 
-export function ViewAnswer({ questionId, question, onClose }: ViewAnswerProps) {
+export function ViewAnswer({
+  questionId,
+  question,
+  onClose,
+  ownerOnlyAnswer,
+}: ViewAnswerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [answer, setAnswer] = useState('');
 
   React.useEffect(() => {
+    if (ownerOnlyAnswer) {
+      setAnswer(ownerOnlyAnswer);
+      return;
+    }
+
     const loadAndSaveAnswer = async () => {
       try {
         setAnswer('');
@@ -47,7 +59,7 @@ export function ViewAnswer({ questionId, question, onClose }: ViewAnswerProps) {
     };
 
     loadAndSaveAnswer();
-  }, [question, questionId]);
+  }, [question, questionId, ownerOnlyAnswer]);
 
   return (
     <Card className="w-full max-w-lg mx-auto">

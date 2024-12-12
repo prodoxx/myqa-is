@@ -7,9 +7,14 @@ import { ViewAnswer } from './view-answer';
 interface QuestionCardProps {
   id: number;
   question: string;
+  ownerOnlyAnswer?: string;
 }
 
-export function ViewAnswerButton({ id, question }: QuestionCardProps) {
+export function ViewAnswerButton({
+  id,
+  question,
+  ownerOnlyAnswer,
+}: QuestionCardProps) {
   const [showView, setShowView] = useState(false);
 
   return (
@@ -25,6 +30,7 @@ export function ViewAnswerButton({ id, question }: QuestionCardProps) {
             questionId={id}
             question={question}
             onClose={() => setShowView(false)}
+            ownerOnlyAnswer={ownerOnlyAnswer}
           />
         </DialogContent>
       </Dialog>

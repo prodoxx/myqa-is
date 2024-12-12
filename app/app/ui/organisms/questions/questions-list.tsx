@@ -18,12 +18,17 @@ export type QuestionsListProps = {
    * Creators can always unlock their question. They don't need to buy it
    */
   isCreator?: boolean;
+  decryptedQuestions?: {
+    id: number | undefined;
+    decryptedAnswer: string;
+  }[];
 };
 
 export const QuestionsList = ({
   questions,
   cryptoPrice,
   isCreator,
+  decryptedQuestions,
 }: QuestionsListProps) => {
   const { user } = useUser();
   const marketplace = useMarketplace();
@@ -109,6 +114,10 @@ export const QuestionsList = ({
                   <ViewAnswerButton
                     id={question.id!}
                     question={question.question}
+                    ownerOnlyAnswer={
+                      decryptedQuestions?.find((c) => c.id === question.id)
+                        ?.decryptedAnswer
+                    }
                   />
                 ) : (
                   <UnlockButton

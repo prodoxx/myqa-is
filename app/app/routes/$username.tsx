@@ -14,6 +14,7 @@ import { ProfilePagination } from '~/ui/organisms/profile/pagination';
 import { QuestionsList } from '~/ui/organisms/questions/questions-list';
 import { ExternalLinkList } from '~/ui/organisms/social/external-links-list';
 import { Wallet } from '~/ui/organisms/wallet';
+import { decryptContent } from '~/utils/encryption.server';
 
 const paginationSchema = z.object({
   page: z.coerce.number().min(0),
@@ -49,12 +50,18 @@ export const loader = async (args: LoaderFunctionArgs) => {
     return redirect(`/${user?.username?.toLowerCase()}`);
   }
 
-  const [bonkPrice, totalAvailableQuestions] = await Promise.all([
-    getCryptoPrice(SupportedCoins.BONKUSDT, process.env.BINANCE_API_KEY),
-    prisma.qA.count({ where: { userId: user?.id } }),
-  ]);
+  const [bonkPrice, totalAvailableQuestions, decryptedQuestions] =
+    await Promise.all([
+      getCryptoPrice(SupportedCoins.BONKUSDT, process.env.BINANCE_API_KEY),
+      prisma.qA.count({ where: { userId: user?.id } }),
+      user.UserProfile.QAs?.map((c) => ({
+        id: c.id,
+        decryptedAnswer: 'decryptedanswer',
+      })) ?? [],
+    ]);
 
   return typedjson({
+    decryptedQuestions,
     bonkPrice,
     isCreator: user?.id === session?.id,
     user: user?.json(),
@@ -100,15 +107,12 @@ const UserProfile = () => {
         </div>
       </div>
       <div className="max-w-4xl w-full 2xl:w-[1080px] flex flex-col">
-        <ClientOnly fallback={'loading'}>
-          {() => (
-            <QuestionsList
-              questions={data?.user?.UserProfile?.QAs}
-              cryptoPrice={data?.bonkPrice}
-              isCreator={data?.isCreator}
-            />
-          )}
-        </ClientOnly>
+        <QuestionsList
+          questions={data?.user?.UserProfile?.QAs}
+          cryptoPrice={data?.bonkPrice}
+          isCreator={data?.isCreator}
+          decryptedQuestions={data?.decryptedQuestions}
+        />
 
         <ProfilePagination
           basePath={`/${data?.user?.username?.toLowerCase()}`}

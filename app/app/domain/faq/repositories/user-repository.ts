@@ -115,6 +115,9 @@ export class UserRepository {
             Avatar: true,
             ExternalLinks: true,
             QAs: {
+              include: {
+                IpfsPin: true,
+              },
               take: options?.questions?.size ?? 5,
               skip:
                 (options?.questions?.page ?? 0) *
