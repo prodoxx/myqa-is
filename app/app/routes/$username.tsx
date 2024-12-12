@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs } from '@remix-run/node';
 import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
+import { ClientOnly } from 'remix-utils/client-only';
 import { z } from 'zod';
 import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
@@ -99,11 +100,15 @@ const UserProfile = () => {
         </div>
       </div>
       <div className="max-w-4xl w-full 2xl:w-[1080px] flex flex-col">
-        <QuestionsList
-          questions={data?.user?.UserProfile?.QAs}
-          cryptoPrice={data?.bonkPrice}
-          isCreator={data?.isCreator}
-        />
+        <ClientOnly fallback={'loading'}>
+          {() => (
+            <QuestionsList
+              questions={data?.user?.UserProfile?.QAs}
+              cryptoPrice={data?.bonkPrice}
+              isCreator={data?.isCreator}
+            />
+          )}
+        </ClientOnly>
 
         <ProfilePagination
           basePath={`/${data?.user?.username?.toLowerCase()}`}

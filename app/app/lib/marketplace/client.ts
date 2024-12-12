@@ -324,4 +324,31 @@ export class MarketplaceClient {
       throw error;
     }
   }
+
+  public async currentKeysCount(questionId: number) {
+    try {
+      const marketplacePda = await this.getMarketplacePda();
+
+      // Get question PDA
+      const [questionPda] = web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('question'),
+          marketplacePda.toBuffer(),
+          new BN(questionId).toArrayLike(Buffer, 'le', 8),
+        ],
+        this.program.programId
+      );
+
+      // Get question account to get current keys count
+      const questionAccount =
+        await this.program.account.question.fetch(questionPda);
+
+      console.log({ questionAccount });
+
+      return questionAccount.currentKeys.toArray();
+    } catch (error) {
+      console.error('Failed to mint unlock key:', error);
+      throw error;
+    }
+  }
 }

@@ -44,11 +44,17 @@ export function initializeMarketplace() {
   initialized = true;
 }
 
-export function getMarketplaceConfig() {
-  if (!initialized) {
+export function getMarketplaceConfig(called?: boolean) {
+  // If we call this twice, let's throw somethings wrong
+  if (!initialized && called) {
     throw new Error(
       'Marketplace config not initialized. Call initializeMarketplace() first.'
     );
+  }
+
+  if (!initialized) {
+    initializeMarketplace();
+    return getMarketplaceConfig(true);
   }
 
   return {
