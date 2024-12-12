@@ -65,12 +65,14 @@ export function ViewAnswer({ questionId, question, onClose }: ViewAnswerProps) {
             <p className="text-sm font-medium">Answer</p>
             {answer ? (
               <p className="text-2xl font-bold">{answer}</p>
-            ) : (
+            ) : !error ? (
               <>
                 <Skeleton className="w-full h-6" />
                 <Skeleton className="w-full h-6" />
                 <Skeleton className="w-full h-6" />
               </>
+            ) : (
+              <span className="text-gray-500">-</span>
             )}
           </div>
         </div>
