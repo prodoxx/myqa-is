@@ -1,6 +1,5 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { BN } from 'bn.js';
-import { getMarketplaceConfig } from '~/config/marketplace.client';
 
 // The discriminator for UnlockKey account type
 // This should match the value from the Rust program
@@ -10,7 +9,12 @@ export async function verifyKeyOwnership(
   walletPublicKey: string,
   questionId: string
 ): Promise<boolean> {
-  const config = getMarketplaceConfig();
+  const config = {
+    SOLANA_NETWORK: process.env.SOLANA_NETWORK!,
+    RPC_ENDPOINT: process.env.RPC_ENDPOINT!,
+    MARKETPLACE_PROGRAM: new PublicKey(process.env.MARKETPLACE_PROGRAM!),
+    MARKETPLACE_AUTHORITY: new PublicKey(process.env.MARKETPLACE_AUTHORITY!),
+  };
   const connection = new Connection(config.RPC_ENDPOINT);
 
   try {

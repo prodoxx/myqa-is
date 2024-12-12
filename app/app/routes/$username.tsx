@@ -1,5 +1,4 @@
 import { LoaderFunctionArgs } from '@remix-run/node';
-import { useNavigate } from '@remix-run/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
 import { z } from 'zod';
@@ -37,8 +36,6 @@ export const loader = async (args: LoaderFunctionArgs) => {
     size: searchParams.get('size') ?? 5,
   });
 
-  // Redirect to the first page
-  console.log(paginationResult.error);
   if (paginationResult.error) {
     return redirect(url.pathname);
   }
@@ -49,6 +46,10 @@ export const loader = async (args: LoaderFunctionArgs) => {
       size: paginationResult.data.size,
     },
   });
+
+  if (!user) {
+    return redirect('/dashboard');
+  }
 
   if (user?.username !== username?.toLowerCase()) {
     return redirect(`/${user?.username?.toLowerCase()}`);
@@ -104,7 +105,6 @@ const UserProfile = () => {
           <NewQuestionButton isCreator={data?.isCreator} />
         </div>
       </div>
-
       <div className="max-w-4xl w-full 2xl:w-[1080px]">
         <QuestionsList
           questions={data?.user?.UserProfile?.QAs}
