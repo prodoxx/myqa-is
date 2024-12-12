@@ -1,4 +1,4 @@
-import { Lock } from 'lucide-react';
+import { Unlock } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '~/ui/atoms/button';
 import { Dialog, DialogContent } from '~/ui/molecules/dialog';
@@ -18,7 +18,7 @@ export function ViewAnswerButton({ id, question }: QuestionCardProps) {
         onClick={() => setShowView(true)}
         className="bg-purple-500 hover:bg-purple-600"
       >
-        <Lock className="mr-2 h-4 w-4" />
+        <Unlock className="mr-2 h-4 w-4" />
         View Answer
       </Button>
 

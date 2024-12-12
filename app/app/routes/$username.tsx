@@ -8,6 +8,7 @@ import { Avatar } from '~/ui/atoms/avatar';
 import { Button } from '~/ui/atoms/button';
 import { Card, CardContent } from '~/ui/atoms/card';
 import { MainLayout } from '~/ui/layouts/main';
+import { NewQuestionButton } from '~/ui/molecules/new-question-button';
 import { QuestionsList } from '~/ui/organisms/questions/questions-list';
 import { ExternalLinkList } from '~/ui/organisms/social/external-links-list';
 
@@ -27,7 +28,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
   return typedjson({
     bonkPrice,
-    isOwner: user?.id === session?.id,
+    isCreator: user?.id === session?.id,
     user: user?.json(),
   });
 };
@@ -56,13 +57,7 @@ const UserProfile = () => {
               />
             </div>
 
-            <Button
-              variant="default"
-              asChild
-              className="w-fit mx-auto bg-purple-500 hover:bg-purple-600"
-            >
-              <Link to="/questions/new">Create a new question</Link>
-            </Button>
+            <NewQuestionButton isCreator={data?.isCreator} />
           </>
         </CardContent>
       </Card>
@@ -71,6 +66,7 @@ const UserProfile = () => {
         <QuestionsList
           questions={data?.user?.UserProfile?.QAs}
           cryptoPrice={data?.bonkPrice}
+          isCreator={data?.isCreator}
         />
       </div>
     </MainLayout>

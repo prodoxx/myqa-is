@@ -1,29 +1,30 @@
-import { XIcon } from 'lucide-react';
 import { QaDTO } from '~/domain/faq/entities/question';
 import { CryptoPrice } from '~/infrastructure/crypto';
-import { Button } from '~/ui/atoms/button';
 import { Card } from '~/ui/atoms/card';
 import { BonkPricing } from '~/ui/molecules/bonk-pricing';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from '~/ui/molecules/drawer';
 import { UnlockButton } from './unlock-button';
 import { ViewAnswerButton } from './view-answer-button';
+import { useUser } from '~/provider/user-provider';
+import { Button } from '~/ui/atoms/button';
+import { Link } from '@remix-run/react';
+import { AvailableKeys } from '~/ui/molecules/available-keys';
 
 export type QuestionsListProps = {
   questions?: QaDTO[];
   cryptoPrice: CryptoPrice | null;
+  /**
+   * Creators can always unlock their question. They don't need to buy it
+   */
+  isCreator?: boolean;
 };
 
 export const QuestionsList = ({
   questions,
   cryptoPrice,
+  isCreator,
 }: QuestionsListProps) => {
+  const { user } = useUser();
+
   return (
     <ol className="w-full max-w-4xl mx-auto space-y-4 p-4">
       {!questions?.length ? (
@@ -56,33 +57,33 @@ export const QuestionsList = ({
 
                 <div className="h-4 w-px bg-gray-300 dark:bg-gray-700" />
 
-                <div className="text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">
-                    {question.currentKeys}
-                  </span>{' '}
-                  of{' '}
-                  <span className="font-medium text-foreground">
-                    {question.maxKeys}
-                  </span>{' '}
-                  keys sold
-                </div>
+                <AvailableKeys
+                  maxKeys={question.maxKeys}
+                  currentKeys={question.currentKeys}
+                />
               </div>
             </div>
 
-            {Math.random() >= 0.5 ? (
-              <ViewAnswerButton
-                id={question.id!}
-                question={question.question}
-              />
+            {user ? (
+              Math.random() >= 0.5 || isCreator ? (
+                <ViewAnswerButton
+                  id={question.id!}
+                  question={question.question}
+                />
+              ) : (
+                <UnlockButton
+                  id={question.id!}
+                  question={question.question}
+                  priceInBonk={Number(question.unlockPriceInBonk)}
+                  priceInDollar={Intl.NumberFormat('en-US').format(
+                    Number(question.unlockPriceInBonk) * cryptoPrice!.price
+                  )}
+                />
+              )
             ) : (
-              <UnlockButton
-                id={question.id!}
-                question={question.question}
-                priceInBonk={Number(question.unlockPriceInBonk)}
-                priceInDollar={Intl.NumberFormat('en-US').format(
-                  Number(question.unlockPriceInBonk) * cryptoPrice!.price
-                )}
-              />
+              <Button asChild variant="default">
+                <Link to="/login">Login to Unlock Answer</Link>
+              </Button>
             )}
           </div>
         </Card>
