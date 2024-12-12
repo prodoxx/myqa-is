@@ -1,5 +1,5 @@
 /** @type {import('remix-sitemap').Config} */
 export default {
-  siteUrl: 'https://myfaq.is',
+  siteUrl: 'https://myqa.is',
   generateRobotsTxt: true,
 };

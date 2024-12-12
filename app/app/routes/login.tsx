@@ -33,12 +33,12 @@ const getValuesFromRequest = async (request: Request) => {
 export const meta: MetaFunction = () => {
   return [
     {
-      title: "Log in to MyFAQ.is | Your Fan's Preferred Way to Get to Know You",
+      title: "Log in to MyQA.is | Your Fan's Preferred Way to Get to Know You",
     },
     {
       name: 'description',
       content:
-        'Discover the stories behind your favorite creators on MyFAQ.is. Unlock deep, personal questions by supporting creators you love',
+        'Discover the stories behind your favorite creators on MyQA.is. Unlock deep, personal questions by supporting creators you love',
     },
   ];
 };

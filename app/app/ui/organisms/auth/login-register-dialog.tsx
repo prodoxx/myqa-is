@@ -38,7 +38,7 @@ export function LoginRegisterDialog({ username }: LoginRegisterDialogProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl">
-                  Join MyFAQ.is & earn from creating QAs
+                  Join MyQA.is & earn from creating QAs
                 </CardTitle>
               </div>
               <CardDescription>
@@ -50,7 +50,7 @@ export function LoginRegisterDialog({ username }: LoginRegisterDialogProps) {
             <CardContent className="space-y-4">
               <div className="w-full h-40 rounded-2xl flex flex-col items-center justify-center bg-gradient-to-r from-purple-700 to-indigo-600">
                 <span className="font-extrabold text-2xl text-white leading-loose">
-                  myfaq.is/{username}
+                  myqa.is/{username}
                 </span>
               </div>
             </CardContent>

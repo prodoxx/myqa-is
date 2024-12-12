@@ -52,6 +52,7 @@ export class QAEntity {
       questionHash: this.questionHash,
       encryptedAnswer: this.encryptedAnswer,
       unlockPriceInBonk: this.unlockPriceInBonk,
+      IpfsPin: this.IpfsPin.json(),
     } as QaDTO;
   }
 }

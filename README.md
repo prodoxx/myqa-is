@@ -1,4 +1,4 @@
-# MyFAQ.is
+# MyQA.is
 
 A creator knowledge-base for fans.
 

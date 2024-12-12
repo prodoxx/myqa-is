@@ -28,12 +28,13 @@ export class IpfsPinEntity {
       id: this.id,
       cid: this.cid,
       status: this.status,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
       userId: this.userId,
       qaId: this.qaId,
     } as IpfsPinEntityDTO;
   }
 }
 
-export type IpfsPinEntityDTO = IpfsPinEntity;
+export type IpfsPinEntityDTO = Pick<
+  IpfsPinEntity,
+  'id' | 'cid' | 'status' | 'userId' | 'qaId'
+>;

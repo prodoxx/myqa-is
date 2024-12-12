@@ -64,12 +64,17 @@ function removeTrailingSlash(s: string) {
 }
 
 export function getUrl(requestInfo?: { origin: string; path: string }) {
-  return removeTrailingSlash(`${requestInfo?.origin ?? 'https://myfaq.is'}${requestInfo?.path ?? ''}`);
+  return removeTrailingSlash(
+    `${requestInfo?.origin ?? 'https://myqa.is'}${requestInfo?.path ?? ''}`
+  );
 }
 
 export function getDomainUrl(request: Request) {
   const url = new URL(request.url);
-  const host = request.headers.get('X-Forwarded-Host') ?? request.headers.get('host') ?? url.host;
+  const host =
+    request.headers.get('X-Forwarded-Host') ??
+    request.headers.get('host') ??
+    url.host;
   if (!host) {
     throw new Error('Could not determine domain URL.');
   }
