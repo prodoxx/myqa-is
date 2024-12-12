@@ -21,6 +21,7 @@ interface UnlockQuestionFormProps {
   priceInBonk: number;
   priceInDollar: string;
   onClose: () => void;
+  cid: string;
 }
 
 export function UnlockQuestionForm({
@@ -29,6 +30,7 @@ export function UnlockQuestionForm({
   priceInBonk,
   onClose,
   priceInDollar,
+  cid,
 }: UnlockQuestionFormProps) {
   const wallet = useWallet();
   const [isLoading, setIsLoading] = useState(false);
@@ -43,8 +45,8 @@ export function UnlockQuestionForm({
       await unlockQuestionAndAnswer(
         {
           wallet,
-          metadataUri: ``,
-          encryptedKey: program.account,
+          metadataUri: `ipfs://${cid}`,
+          encryptedKey: {} as any,
           questionId: String(questionId),
         },
         marketplace

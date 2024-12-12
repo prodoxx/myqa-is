@@ -9,6 +9,7 @@ interface QuestionCardProps {
   question: string;
   priceInBonk: number;
   priceInDollar: string;
+  cid: string;
 }
 
 export function UnlockButton({
@@ -16,6 +17,7 @@ export function UnlockButton({
   priceInBonk,
   question,
   priceInDollar,
+  cid,
 }: QuestionCardProps) {
   const [showUnlock, setShowUnlock] = useState(false);
 
@@ -34,6 +36,7 @@ export function UnlockButton({
             priceInBonk={priceInBonk}
             priceInDollar={priceInDollar}
             onClose={() => setShowUnlock(false)}
+            cid={cid}
           />
         </DialogContent>
       </Dialog>

@@ -122,6 +122,7 @@ export const QuestionsList = ({
                 ) : (
                   <UnlockButton
                     id={question.id!}
+                    cid={question.IpfsPin.cid}
                     question={question.question}
                     priceInBonk={Number(question.unlockPriceInBonk)}
                     priceInDollar={Intl.NumberFormat('en-US').format(
