@@ -8,6 +8,7 @@ const createQuestionSchema = z.object({
   cid: z.string().min(1),
   onChainId: z.string().min(1),
   question: z.string().min(10),
+  encryptedAnswer: z.string().min(1),
   unlockPrice: z.object({
     type: z.string().min(1),
     value: z.string().min(1),
@@ -33,8 +34,15 @@ export const action: ActionFunction = async ({ request }) => {
     return typedjson({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { cid, onChainId, question, unlockPrice, maxKeys, questionHash } =
-    await createQuestionSchema.parseAsync(await request.json());
+  const {
+    cid,
+    onChainId,
+    question,
+    unlockPrice,
+    maxKeys,
+    questionHash,
+    encryptedAnswer,
+  } = await createQuestionSchema.parseAsync(await request.json());
   const unlockPriceInBonk = BigInt(unlockPrice.value);
 
   try {
@@ -60,6 +68,7 @@ export const action: ActionFunction = async ({ request }) => {
     const qa = await prisma.qA.create({
       data: {
         question,
+        encryptedAnswer,
         unlockPriceInBonk: Number(unlockPriceInBonk),
         maxKeys,
         questionHash,

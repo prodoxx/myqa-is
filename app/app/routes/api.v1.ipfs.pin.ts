@@ -122,6 +122,7 @@ export const action: ActionFunction = async ({ request }) => {
         questionHash: questionHash.toString('hex'),
         cid: result.IpfsHash,
         contentHash: contentHash.toString('hex'),
+        encryptedAnswer,
       },
     });
   } catch (error) {

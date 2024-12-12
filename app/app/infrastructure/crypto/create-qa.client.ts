@@ -33,7 +33,7 @@ export async function createQuestionAndAnswer({
     // Step 1: Pin to IPFS
     const {
       data: {
-        data: { cid, questionHash, contentHash },
+        data: { cid, questionHash, contentHash, encryptedAnswer },
       },
     } = await axios.post('/api/v1/ipfs/pin', {
       question,
@@ -57,6 +57,7 @@ export async function createQuestionAndAnswer({
           cid,
           onChainId,
           question,
+          encryptedAnswer,
           unlockPrice: unlockPriceInBonk,
           maxKeys,
           questionHash,
