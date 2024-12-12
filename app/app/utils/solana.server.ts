@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@project-serum/anchor';
+import { BN } from 'bn.js';
 import { getMarketplaceConfig } from '~/config/marketplace.client';
 
 // The discriminator for UnlockKey account type
