@@ -13,6 +13,7 @@ import {
   DrawerTitle,
 } from '~/ui/molecules/drawer';
 import { UnlockButton } from './unlock-button';
+import { ViewAnswerButton } from './view-answer-button';
 
 export type QuestionsListProps = {
   questions?: QaDTO[];
@@ -32,43 +33,48 @@ export const QuestionsList = ({
       ) : null}
 
       {questions?.map((question) => (
-        <Drawer fixed={false} modal>
-          <Card
-            key={question.id}
-            className="p-6 bg-gradient-to-r transition-all duration-300 border border-purple-500/20"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-4 flex-1">
-                <h3 className="text-xl font-bold text-gradient bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
-                  {question.question}
-                </h3>
+        <Card
+          key={question.id}
+          className="p-6 bg-gradient-to-r transition-all duration-300 border border-purple-500/20"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-4 flex-1">
+              <h3 className="text-xl font-bold text-gradient bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
+                {question.question}
+              </h3>
 
-                <div className="flex items-center gap-4">
-                  {cryptoPrice ? (
-                    <BonkPricing
-                      toUsd={Intl.NumberFormat('en-US').format(
-                        Number(question.unlockPriceInBonk) * cryptoPrice!.price
-                      )}
-                    >
-                      {question.unlockPriceInBonk.toLocaleString()}
-                    </BonkPricing>
-                  ) : null}
+              <div className="flex items-center gap-4">
+                {cryptoPrice ? (
+                  <BonkPricing
+                    toUsd={Intl.NumberFormat('en-US').format(
+                      Number(question.unlockPriceInBonk) * cryptoPrice!.price
+                    )}
+                  >
+                    {question.unlockPriceInBonk.toLocaleString()}
+                  </BonkPricing>
+                ) : null}
 
-                  <div className="h-4 w-px bg-gray-300 dark:bg-gray-700" />
+                <div className="h-4 w-px bg-gray-300 dark:bg-gray-700" />
 
-                  <div className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">
-                      {question.currentKeys}
-                    </span>{' '}
-                    of{' '}
-                    <span className="font-medium text-foreground">
-                      {question.maxKeys}
-                    </span>{' '}
-                    keys sold
-                  </div>
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">
+                    {question.currentKeys}
+                  </span>{' '}
+                  of{' '}
+                  <span className="font-medium text-foreground">
+                    {question.maxKeys}
+                  </span>{' '}
+                  keys sold
                 </div>
               </div>
+            </div>
 
+            {Math.random() >= 0.5 ? (
+              <ViewAnswerButton
+                id={question.id!}
+                question={question.question}
+              />
+            ) : (
               <UnlockButton
                 id={question.id!}
                 question={question.question}
@@ -77,31 +83,9 @@ export const QuestionsList = ({
                   Number(question.unlockPriceInBonk) * cryptoPrice!.price
                 )}
               />
-            </div>
-          </Card>
-
-          <DrawerContent className="max-w-4xl mx-auto min-h-96">
-            <DrawerHeader>
-              <div className="flex flex-row justify-between items-center">
-                <DrawerTitle className="text-2xl">
-                  Unlock the answer to this question?
-                </DrawerTitle>
-                <DrawerClose>
-                  <Button variant="ghost" size="icon" className="!rounded-full">
-                    <XIcon />
-                  </Button>
-                </DrawerClose>
-              </div>
-
-              <DrawerDescription className="text-gray-500">
-                You can pay BONK to unlock the answer to this question. All
-                operations are protected by the Solana network.
-              </DrawerDescription>
-            </DrawerHeader>
-
-            <div className="px-4">{/*  */}</div>
-          </DrawerContent>
-        </Drawer>
+            )}
+          </div>
+        </Card>
       ))}
     </ol>
   );
