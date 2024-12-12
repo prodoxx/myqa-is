@@ -13,9 +13,10 @@ import {
 import { Bonk } from '~/ui/atoms/bonk';
 import { unlockQuestionAndAnswer } from '~/infrastructure/crypto/unlock-qa.client';
 import { useMarketplace } from '~/hooks/use-marketplace.client';
+import { useAnchorProgram } from '~/hooks/use-anchor-program.client';
 
 interface UnlockQuestionFormProps {
-  questionId: string;
+  questionId: number;
   question: string;
   priceInBonk: number;
   priceInDollar: string;
@@ -32,13 +33,22 @@ export function UnlockQuestionForm({
   const wallet = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { program } = useAnchorProgram();
   const marketplace = useMarketplace();
 
   const handleUnlock = async () => {
     try {
       setIsLoading(true);
       setError('');
-      await unlockQuestionAndAnswer();
+      await unlockQuestionAndAnswer(
+        {
+          wallet,
+          metadataUri: ``,
+          encryptedKey: program.account,
+          questionId: String(questionId),
+        },
+        marketplace
+      );
       onClose();
     } catch (err) {
       console.error('Failed to unlock question', err);

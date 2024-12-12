@@ -10,7 +10,7 @@ import {
 } from '@solana/spl-token';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 
-interface MintUnlockKeyParams {
+export interface MintUnlockKeyParams {
   questionId: string;
   metadataUri: string;
   encryptedKey: Uint8Array;
