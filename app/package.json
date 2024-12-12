@@ -36,6 +36,7 @@
     "@logtail/pino": "^0.5.0",
     "@pinata/sdk": "^2.1.0",
     "@prisma/client": "5.13.0",
+    "@project-serum/anchor": "^0.26.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-avatar": "^1.0.0",
     "@radix-ui/react-dialog": "^1.0.5",
