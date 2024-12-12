@@ -17,6 +17,7 @@ import {
 import { MainLayout } from '~/ui/layouts/main';
 import { NewQuestionButton } from '~/ui/molecules/new-question-button';
 import { LoginRegisterDialog } from '~/ui/organisms/auth/login-register-dialog';
+import { ProfilePagination } from '~/ui/organisms/profile/pagination';
 import { QuestionsList } from '~/ui/organisms/questions/questions-list';
 import { ExternalLinkList } from '~/ui/organisms/social/external-links-list';
 import { Wallet } from '~/ui/organisms/wallet';
@@ -105,44 +106,17 @@ const UserProfile = () => {
           <NewQuestionButton isCreator={data?.isCreator} />
         </div>
       </div>
-      <div className="max-w-4xl w-full 2xl:w-[1080px]">
+      <div className="max-w-4xl w-full 2xl:w-[1080px] flex flex-col">
         <QuestionsList
           questions={data?.user?.UserProfile?.QAs}
           cryptoPrice={data?.bonkPrice}
           isCreator={data?.isCreator}
         />
 
-        <Pagination className="py-8">
-          <PaginationContent className="flex flex-row items-center space-x-4">
-            {data?.pagination?.page > 0 ? (
-              <PaginationItem>
-                <PaginationPrevious
-                  href={`/${data?.user?.username}?page=${data?.pagination?.page - 1}`}
-                />
-              </PaginationItem>
-            ) : (
-              <PaginationItem className="px-2 cursor-not-allowed text-sm flex flex-row items-center space-x-1">
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </PaginationItem>
-            )}
-
-            <PaginationItem>{data?.pagination?.page + 1}</PaginationItem>
-
-            {data?.pagination?.page + 1 < data?.pagination.pageCount ? (
-              <PaginationItem>
-                <PaginationNext
-                  href={`/${data?.user?.username}?page=${data?.pagination?.page + 1}`}
-                />
-              </PaginationItem>
-            ) : (
-              <PaginationItem className="px-2 cursor-not-allowed text-sm flex flex-row items-center space-x-1">
-                Next
-                <ChevronRight className="h-4 w-4" />
-              </PaginationItem>
-            )}
-          </PaginationContent>
-        </Pagination>
+        <ProfilePagination
+          basePath={`/${data?.user?.username?.toLowerCase()}`}
+          {...data?.pagination}
+        />
       </div>
     </MainLayout>
   );
