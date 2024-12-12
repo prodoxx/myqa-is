@@ -1,5 +1,7 @@
+import { AxiosError } from 'axios';
 import React, { useState } from 'react';
 import { viewQuestionAnswer } from '~/infrastructure/crypto/view-answer.client';
+import { getErrorMessage } from '~/lib/error-messages';
 import { Alert, AlertDescription, AlertTitle } from '~/ui/atoms/alert';
 import { Button } from '~/ui/atoms/button';
 import {
@@ -29,11 +31,16 @@ export function ViewAnswer({ questionId, question, onClose }: ViewAnswerProps) {
         setAnswer('');
         setIsLoading(true);
         setError('');
-        const answer = await viewQuestionAnswer();
-        setAnswer(answer);
-      } catch (err) {
-        console.error('Failed to view question', err);
-        setError('Failed to view the question. Please try again.');
+        const { answer: decryptedAnswer } =
+          await viewQuestionAnswer(questionId);
+        setAnswer(decryptedAnswer);
+      } catch (error) {
+        console.error('Failed to view question', getErrorMessage(error));
+        if (error instanceof AxiosError) {
+          setError(error.response?.data?.error);
+        } else {
+          setError(getErrorMessage(error));
+        }
       } finally {
         setIsLoading(false);
       }
