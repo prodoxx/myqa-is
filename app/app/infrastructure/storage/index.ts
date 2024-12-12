@@ -1,4 +1,8 @@
-import { PutObjectCommand, PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3';
+import {
+  PutObjectCommand,
+  PutObjectCommandInput,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import Failure from '~/lib/failure';
 
 export class BlobStorage {
@@ -33,7 +37,7 @@ export class BlobStorage {
       await this.s3.send(new PutObjectCommand(params));
       return `${process.env.DIGITAL_OCEAN_ENDPOINT_URL!.replace(
         `${process.env.DIGITAL_OCEAN_REGION}.`,
-        `${process.env.DIGITAL_OCEAN_REGION}.cdn.`,
+        `${process.env.DIGITAL_OCEAN_REGION}.cdn.`
       )}/images/${this.filename}`;
     } catch (error) {
       console.error(error);

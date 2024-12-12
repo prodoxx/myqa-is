@@ -8,6 +8,8 @@ import { useUser } from '~/provider/user-provider';
 import { Button } from '~/ui/atoms/button';
 import { Link } from '@remix-run/react';
 import { AvailableKeys } from '~/ui/molecules/available-keys';
+import { useMarketplace } from '~/hooks/use-marketplace.client';
+import React from 'react';
 
 export type QuestionsListProps = {
   questions?: QaDTO[];
@@ -24,6 +26,39 @@ export const QuestionsList = ({
   isCreator,
 }: QuestionsListProps) => {
   const { user } = useUser();
+  const marketplace = useMarketplace();
+  const [currentQuestionKeysCountBy, setCurrentQuestionKeysCountBy] =
+    React.useState<{ id: number; count: number }[]>([]);
+
+  React.useEffect(() => {
+    if (!questions) {
+      return;
+    }
+
+    const getCurrentKeysCount = async () => {
+      const result = await Promise.all(
+        questions.map(async (question) => {
+          let count = 0;
+
+          try {
+            const result = await marketplace.currentKeysCount(question.id!);
+            count = result.length;
+          } catch (error) {
+            console.log('Question not found');
+          }
+
+          return {
+            count,
+            id: question.id!,
+          };
+        })
+      );
+
+      setCurrentQuestionKeysCountBy(result);
+    };
+
+    getCurrentKeysCount();
+  }, [questions]);
 
   return (
     <>
@@ -58,7 +93,14 @@ export const QuestionsList = ({
 
                   <div className="h-4 w-px bg-gray-300 dark:bg-gray-700" />
 
-                  <AvailableKeys maxKeys={question.maxKeys} currentKeys={10} />
+                  <AvailableKeys
+                    maxKeys={question.maxKeys}
+                    currentKeys={
+                      currentQuestionKeysCountBy?.find(
+                        (c) => c.id === question.id
+                      )?.count ?? 0
+                    }
+                  />
                 </div>
               </div>
 
