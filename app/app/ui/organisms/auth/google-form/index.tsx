@@ -6,7 +6,7 @@ export const GoogleLoginForm = () => {
     <form action="/auth/google" method="post" className="w-ful">
       <Button type="submit" size="lg" variant="outline" className="w-full">
         <img src={google} alt="google" className="h-8 w-8 mr-2" />
-        Login with Google
+        Log in with Google
       </Button>
     </form>
   );

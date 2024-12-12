@@ -30,7 +30,7 @@ export function SolanaProvider({
   }, []);
 
   const wallets = useMemo(
-    () => [new SolflareWalletAdapter()],
+    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
     [SOLANA_NETWORK]
   );
 

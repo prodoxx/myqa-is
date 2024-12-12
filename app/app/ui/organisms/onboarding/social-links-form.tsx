@@ -5,7 +5,13 @@ import { useTypedFetcher } from 'remix-typedjson';
 import { OnboardingStep } from '~/domain/faq/entities/user-profile';
 import { OnboardUserFormErrors } from '~/domain/faq/services/onboard-user';
 import { Button } from '~/ui/atoms/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/ui/atoms/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '~/ui/atoms/card';
 import { Input } from '~/ui/atoms/input-field';
 import { Label } from '~/ui/atoms/label';
 import { SocialMediaTypeDropdown } from '~/ui/molecules/social-media-type-dropdown';
@@ -17,7 +23,9 @@ export const SocialLinksForm = () => {
   const formErrors = fetcherData?.data?.formErrors;
   const isSubmitting = fetcherData.state === 'submitting';
 
-  const [socialLinks, setSocialLinks] = React.useState<{ url: string; type: SocialLinkORM }[]>([
+  const [socialLinks, setSocialLinks] = React.useState<
+    { url: string; type: SocialLinkORM }[]
+  >([
     {
       type: 'FACEBOOK',
       url: '',
@@ -33,27 +41,50 @@ export const SocialLinksForm = () => {
   };
 
   const onRemoveLink = (indexItemToRemove: number) => {
-    setSocialLinks(socialLinks.filter((c, index) => index !== indexItemToRemove));
+    setSocialLinks(
+      socialLinks.filter((c, index) => index !== indexItemToRemove)
+    );
   };
 
   return (
-    <fetcherData.Form method="POST" action="/onboarding" encType="multipart/form-data">
+    <fetcherData.Form
+      method="POST"
+      action="/onboarding"
+      encType="multipart/form-data"
+    >
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl">Social Links</CardTitle>
-          <span className="text-gray-600">
-            Add your social links to personalize your profile and make it easier for others to connect with you
+          <span>
+            Add your social links to personalize your profile and make it easier
+            for others to connect with you
           </span>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4">
           <ul className="flex flex-col space-y-4">
-            <input hidden name="onboarding" value={OnboardingStep.SOCIAL_LINKS} onChange={() => {}} />
-            <input hidden name="socialLinks" value={JSON.stringify(socialLinks)} onChange={() => {}} />
+            <input
+              hidden
+              name="onboarding"
+              value={OnboardingStep.SOCIAL_LINKS}
+              onChange={() => {}}
+            />
+            <input
+              hidden
+              name="socialLinks"
+              value={JSON.stringify(socialLinks)}
+              onChange={() => {}}
+            />
 
             {socialLinks.map((link, index) => (
-              <li key={`${link.type}${index}`} className="grid grid-cols-4 gap-4">
+              <li
+                key={`${link.type}${index}`}
+                className="grid grid-cols-4 gap-4"
+              >
                 <div className="flex flex-col col-span-3">
-                  <Label className="text-xs" htmlFor={`pending-externalLinks.${index}.url`}>
+                  <Label
+                    className="text-xs"
+                    htmlFor={`pending-externalLinks.${index}.url`}
+                  >
                     Username
                   </Label>
                   <Input
@@ -62,8 +93,10 @@ export const SocialLinksForm = () => {
                     onChange={(e) =>
                       setSocialLinks(
                         socialLinks.map((c, currentIndex) =>
-                          currentIndex !== index ? c : { ...c, url: e.target.value },
-                        ),
+                          currentIndex !== index
+                            ? c
+                            : { ...c, url: e.target.value }
+                        )
                       )
                     }
                     value={link.url}
@@ -76,7 +109,9 @@ export const SocialLinksForm = () => {
                     value={socialLinks?.[index]?.type}
                     onChange={(value) =>
                       setSocialLinks(
-                        socialLinks.map((c, currentIndex) => (currentIndex !== index ? c : { ...c, type: value })),
+                        socialLinks.map((c, currentIndex) =>
+                          currentIndex !== index ? c : { ...c, type: value }
+                        )
                       )
                     }
                   />
@@ -99,7 +134,12 @@ export const SocialLinksForm = () => {
           </Button>
         </CardContent>
         <CardFooter className="gap-4">
-          <Button type="submit" disabled={isSubmitting} className="w-1/2" variant="outline">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-1/2"
+            variant="outline"
+          >
             Skip
           </Button>
           <Button type="submit" disabled={isSubmitting} className="w-1/2">

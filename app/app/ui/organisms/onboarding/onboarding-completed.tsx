@@ -1,7 +1,13 @@
 import { Link } from '@remix-run/react';
 import { CheckCircle, PartyPopper } from 'lucide-react';
 import { Button } from '~/ui/atoms/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/ui/atoms/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '~/ui/atoms/card';
 
 export const OnboardingComplete = () => {
   return (
@@ -10,7 +16,8 @@ export const OnboardingComplete = () => {
         <CardHeader>
           <CardTitle className="text-2xl">Profile Completed</CardTitle>
           <span className="text-gray-600 font-normal">
-            You've successfully set up your account. You can start adding your questions and answers.
+            You've successfully set up your account. You can start adding your
+            questions and answers.
           </span>
         </CardHeader>
       </CardTitle>

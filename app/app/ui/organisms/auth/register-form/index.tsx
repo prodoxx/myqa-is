@@ -17,7 +17,9 @@ export type RegisterFormProps = {
 export const RegisterForm = (props: RegisterFormProps) => {
   return (
     <Form method="POST" action="/register" className={props.className}>
-      {props.errors?.general ? <span className="text-red-500">{props.errors.general?.toString()}</span> : null}
+      {props.errors?.general ? (
+        <span className="text-red-500">{props.errors.general?.toString()}</span>
+      ) : null}
 
       <InputField
         autoComplete="off"
@@ -47,7 +49,12 @@ export const RegisterForm = (props: RegisterFormProps) => {
         Forgot Password?
       </Link>
 
-      <Button type="submit" size="lg" variant="default" className="!bg-gray-900 !text-white !w-full !mx-auto">
+      <Button
+        type="submit"
+        size="lg"
+        variant="default"
+        className="!w-full !mx-auto"
+      >
         Sign Up
       </Button>
     </Form>

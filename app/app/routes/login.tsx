@@ -52,9 +52,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export const action = async ({ request }: ActionFunctionArgs) => {
   let headers;
   try {
-    const user = await authenticator.authenticate('user-pass', request, {
-      throwOnError: true,
-    });
+    const user = await authenticator.authenticate('user-pass', request, {});
 
     // manually get the session
     const session = await getSession(request.headers.get('cookie'));
@@ -69,7 +67,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (error instanceof Response) throw error;
     if (error instanceof AuthorizationError) {
       return typedjson({
-        values: await getValuesFromRequest(request),
         errors: {
           general: getErrorMessage(error),
         },
@@ -93,12 +90,10 @@ const Login = () => {
 
   return (
     <MainLayout enableBackgroundImage className="space-y-8 items-center">
-      <Card className="w-full md:max-w-xl border-none shadow-lg">
+      <Card className="w-full md:max-w-xl">
         <CardHeader>
-          <CardTitle className="text-2xl text-black">Sign In Now</CardTitle>
-          <CardDescription className="text-gray-600">
-            Start adding your FAQ now!
-          </CardDescription>
+          <CardTitle className="text-2xl">Sign In Now</CardTitle>
+          <CardDescription>Start adding your FAQ now!</CardDescription>
         </CardHeader>
 
         <CardContent className="flex flex-col space-y-4">
@@ -107,8 +102,8 @@ const Login = () => {
             isSubmitting={transition.state === 'submitting'}
             errors={actionData?.errors}
             initialValues={{
-              email: actionData?.values?.email?.toString() ?? '',
-              password: actionData?.values?.password?.toString() ?? '',
+              email: '',
+              password: '',
             }}
           />
 
@@ -122,7 +117,7 @@ const Login = () => {
         type="submit"
         size="lg"
         variant="outline"
-        className="!text-black !bg-white !w-full !mx-auto md:!max-w-xl"
+        className="!w-full !mx-auto md:!max-w-xl"
       >
         <Link to="/register">Sign Up</Link>
       </Button>

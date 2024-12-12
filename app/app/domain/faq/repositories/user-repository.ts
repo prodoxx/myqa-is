@@ -67,10 +67,9 @@ export class UserRepository {
     return await this.rebuildEntity(result);
   }
 
-  static async createUser(name: string, email: string, hashedPassword: string) {
+  static async createUser(email: string, hashedPassword: string) {
     const result = await prisma.user.create({
       data: {
-        username: name,
         email,
         password: hashedPassword,
         UserProfile: {

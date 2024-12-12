@@ -1,7 +1,10 @@
 import { CheckBadgeIcon } from '@heroicons/react/24/outline';
 import { useFetcher } from '@remix-run/react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import {
+  WalletMultiButton,
+  WalletDisconnectButton,
+} from '@solana/wallet-adapter-react-ui';
 import React from 'react';
 import { OnboardingStep } from '~/domain/faq/entities/user-profile';
 import { WalletDTO } from '~/domain/faq/entities/wallet';
@@ -9,6 +12,7 @@ import { Button } from '~/ui/atoms/button';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -19,9 +23,13 @@ export type CryptoWalletFormProps = {
 };
 
 export const CryptoWalletForm = ({ wallet }: CryptoWalletFormProps) => {
-  const { publicKey, connected, connecting } = useWallet();
+  const { publicKey, connected, connecting, disconnect } = useWallet();
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === 'submitting';
+
+  React.useEffect(() => {
+    disconnect();
+  }, []);
 
   return (
     <fetcher.Form
@@ -37,10 +45,10 @@ export const CryptoWalletForm = ({ wallet }: CryptoWalletFormProps) => {
               <CheckBadgeIcon className="text-green-500 h-8 w-8 ml-1" />
             ) : null}
           </CardTitle>
-          <span className="text-gray-600">
+          <CardDescription>
             Connect your crypto wallet to your account in order to purchase
             answers.
-          </span>
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="flex flex-col space-y-4">
