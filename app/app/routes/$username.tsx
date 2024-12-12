@@ -56,7 +56,8 @@ export const loader = async (args: LoaderFunctionArgs) => {
       prisma.qA.count({ where: { userId: user?.id } }),
       user.UserProfile.QAs?.map((c) => ({
         id: c.id,
-        decryptedAnswer: 'decryptedanswer',
+        decryptedAnswer:
+          decryptContent(c.encryptedAnswer, c.IpfsPin?.symmetricKey) ?? '',
       })) ?? [],
     ]);
 
