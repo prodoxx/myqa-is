@@ -14,6 +14,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '~/ui/molecules/drawer';
+import { UnlockButton } from './unlock-button';
 
 export type QuestionsListProps = {
   questions?: QaDTO[];
@@ -45,13 +46,15 @@ export const QuestionsList = ({
                 </h3>
 
                 <div className="flex items-center gap-4">
-                  <BonkPricing
-                    toUsd={Intl.NumberFormat('en-US').format(
-                      Number(question.unlockPriceInBonk) * cryptoPrice!.price
-                    )}
-                  >
-                    {question.unlockPriceInBonk.toLocaleString()}
-                  </BonkPricing>
+                  {cryptoPrice ? (
+                    <BonkPricing
+                      toUsd={Intl.NumberFormat('en-US').format(
+                        Number(question.unlockPriceInBonk) * cryptoPrice!.price
+                      )}
+                    >
+                      {question.unlockPriceInBonk.toLocaleString()}
+                    </BonkPricing>
+                  ) : null}
 
                   <div className="h-4 w-px bg-gray-300 dark:bg-gray-700" />
 
@@ -68,18 +71,11 @@ export const QuestionsList = ({
                 </div>
               </div>
 
-              <Button
-                asChild
-                variant="default"
-                className={`relative w-fit overflow-hidden bg-purple-500 hover:bg-purple-600`}
-              >
-                <DrawerTrigger>
-                  <>
-                    <Lock className="w-4 h-4 mr-2" />
-                    Unlock Answer
-                  </>
-                </DrawerTrigger>
-              </Button>
+              <UnlockButton
+                id={question.id!}
+                question={question.question}
+                priceInBonk={Number(question.unlockPriceInBonk)}
+              />
             </div>
           </Card>
 
