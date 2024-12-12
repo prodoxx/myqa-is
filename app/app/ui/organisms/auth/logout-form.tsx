@@ -1,8 +1,9 @@
 import { useFetcher } from '@remix-run/react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { cn } from '~/lib/utils';
 import { Button } from '~/ui/atoms/button';
 
-export const LogoutForm = () => {
+export const LogoutForm = ({ className }: { className?: string }) => {
   const fetcher = useFetcher();
   const { disconnect, wallet } = useWallet();
 
@@ -24,17 +25,10 @@ export const LogoutForm = () => {
   };
 
   return (
-    <>
-      <fetcher.Form method="POST" action="/logout">
-        <Button
-          size="lg"
-          type="submit"
-          variant="default"
-          className="!bg-gray-900 !text-white !w-fit !mx-auto"
-        >
-          Log out
-        </Button>
-      </fetcher.Form>
-    </>
+    <fetcher.Form method="POST" action="/logout" className={className}>
+      <Button size="lg" type="submit" variant="ghost" className="w-full">
+        Log out
+      </Button>
+    </fetcher.Form>
   );
 };

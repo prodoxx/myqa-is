@@ -7,11 +7,7 @@ export const NewQuestionButton = ({ isCreator }: { isCreator?: boolean }) => {
   }
 
   return (
-    <Button
-      variant="default"
-      asChild
-      className="w-fit mx-auto bg-purple-500 hover:bg-purple-600"
-    >
+    <Button asChild variant="default" className="w-fit mx-auto" size="lg">
       <Link to="/questions/new">Create a new question</Link>
     </Button>
   );

@@ -21,7 +21,7 @@ export function UnlockButton({
 
   return (
     <div className="space-y-4">
-      <Button onClick={() => setShowUnlock(true)}>
+      <Button variant="default" onClick={() => setShowUnlock(true)}>
         <Lock className="mr-2 h-4 w-4" />
         Unlock Answer
       </Button>

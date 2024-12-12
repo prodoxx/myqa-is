@@ -55,7 +55,7 @@ export default function App() {
   const data = useTypedLoaderData<typeof loader>();
 
   return (
-    <html lang="en" className="h-full w-full">
+    <html lang="en" className="h-full w-full dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -79,7 +79,7 @@ export default function App() {
         ></link>
       </head>
 
-      <body className="h-full w-full flex min-h-screen flex-col bg-muted/40 font-sans">
+      <body className="h-full w-full flex min-h-screen flex-col font-sans">
         <SolanaProvider
           SOLANA_NETWORK={data.ENV.SOLANA_NETWORK}
           RPC_ENDPOINT={data.ENV.SOLANA_RPC_URL}

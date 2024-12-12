@@ -4,8 +4,8 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 export default {
   darkMode: ['class'],
   content: [
-    './app/**/*.{js,jsx,ts,tsx, mdx}',
-    './ui/**/*.{js,jsx,ts,tsx, mdx}',
+    './app/**/*.{js,jsx,ts,tsx,mdx}',
+    './ui/**/*.{js,jsx,ts,tsx,mdx}',
     './src/**/*.{js,jsx,ts,tsx}',
     './public/index.html',
   ],
@@ -52,10 +52,17 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        crypto: {
+          bitcoin: 'hsl(var(--crypto-bitcoin))',
+          ethereum: 'hsl(var(--crypto-ethereum))',
+          solana: 'hsl(var(--crypto-solana))',
+          polkadot: 'hsl(var(--crypto-polkadot))',
+          cardano: 'hsl(var(--crypto-cardano))',
+        },
       },
       borderRadius: {
-        lg: `var(--radius)`,
-        md: `calc(var(--radius) - 2px)`,
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {

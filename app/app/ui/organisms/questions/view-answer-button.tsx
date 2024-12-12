@@ -14,10 +14,7 @@ export function ViewAnswerButton({ id, question }: QuestionCardProps) {
 
   return (
     <div className="space-y-4">
-      <Button
-        onClick={() => setShowView(true)}
-        className="bg-purple-500 hover:bg-purple-600"
-      >
+      <Button variant="default" onClick={() => setShowView(true)}>
         <Unlock className="mr-2 h-4 w-4" />
         View Answer
       </Button>

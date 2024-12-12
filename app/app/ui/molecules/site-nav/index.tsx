@@ -52,16 +52,7 @@ export const SiteNav = ({
             )}
             <LogoutForm />
           </>
-        ) : (
-          <Button
-            onClick={() => navigate('/login')}
-            size="lg"
-            variant="default"
-            className="!bg-gray-900 !text-white !w-fit !mx-auto"
-          >
-            Log in <ArrowLongRightIcon className="text-white h-8 w-10" />
-          </Button>
-        )}
+        ) : null}
       </div>
 
       <Dialog open={showWarning} onOpenChange={setShowWarning}>
