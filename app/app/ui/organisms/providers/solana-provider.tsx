@@ -30,13 +30,17 @@ export function SolanaProvider({
   }, []);
 
   const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+    () => [new SolflareWalletAdapter()],
     [SOLANA_NETWORK]
   );
 
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
   return (
     <ConnectionProvider endpoint={RPC_ENDPOINT}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
