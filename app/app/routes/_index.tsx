@@ -91,7 +91,7 @@ const LandingPage = () => {
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-20 pb-16">
         <div className="text-center">
-          <h1 className="text-7xl font-black text-white mb-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black text-white mb-6">
             Unlock Exclusive Access to Your{' '}
             <span className="bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
               Favorite Creators
@@ -103,21 +103,13 @@ const LandingPage = () => {
             tokens from their expertise.
           </p>
           <div className="flex justify-center gap-4">
-            <Button
-              asChild
-              className="px-8 py-3 rounded-lg font-medium"
-              size="lg"
-            >
+            <Button asChild className="font-medium" size="lg">
               <Link to="/login" className="flex items-center">
                 Launch App
                 <ChevronRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button
-              variant="secondary"
-              size="lg"
-              className="px-8 py-3 rounded-lg font-medium"
-            >
+            <Button variant="secondary" size="lg" className="font-medium">
               Learn More
             </Button>
           </div>
