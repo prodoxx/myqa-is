@@ -41,12 +41,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export const meta: MetaFunction = () => {
   return [
     {
-      title: "MyFAQ.is | Your Fan's Preferred Way to Get to Know You",
+      title: "MyQA.is | Your Fan's Preferred Way to Get to Know You",
     },
     {
       name: 'description',
       content:
-        'Discover the stories behind your favorite creators on MyFAQ.is. Unlock deep, personal questions by supporting creators you love',
+        'Discover the stories behind your favorite creators on MyQA.is. Unlock deep, personal questions by supporting creators you love',
     },
   ];
 };

@@ -35,7 +35,7 @@ export const SiteNav = ({
   return (
     <nav className={`flex h-[96px] w-full flex-row items-center ${className}`}>
       <div className="mr-auto">
-        <NavLogo isLink size="large" />
+        <NavLogo isText={false} isLink size="large" />
       </div>
 
       <div className="ml-auto hidden items-center gap-4 sm:flex">

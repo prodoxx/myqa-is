@@ -8,11 +8,11 @@ import { MainLayout } from '~/ui/layouts/main';
 export const meta: MetaFunction = () => {
   return [
     {
-      title: 'MyFAQ.is | MyFAQ.is',
+      title: 'MyQA.is | MyQA.is',
     },
     {
       name: 'description',
-      content: "MyFAQ.is | Your Fan's Preferred Way to Get to Know You",
+      content: "MyQA.is | Your Fan's Preferred Way to Get to Know You",
     },
   ];
 };

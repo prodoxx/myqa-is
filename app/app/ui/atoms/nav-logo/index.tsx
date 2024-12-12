@@ -7,13 +7,26 @@ export type NavLogoProps = {
   isText?: boolean;
 };
 
-export const NavLogo = ({ size, isLink, className, isText = true }: NavLogoProps) => {
-  const sizeClass = size === 'small' ? 'text-xs !font-bold' : size === 'medium' ? 'text-md' : 'text-2xl';
+export const NavLogo = ({
+  size,
+  isLink,
+  className,
+  isText = true,
+}: NavLogoProps) => {
+  const sizeClass =
+    size === 'small'
+      ? 'text-xs !font-bold'
+      : size === 'medium'
+        ? 'text-md'
+        : 'text-2xl';
   const As = isLink ? NavLink : 'span';
 
   return (
-    <As to="/" className={`font-extrabold tracking-tight text-primary-3 ${sizeClass} ${className}`}>
-      {isText ? 'MyFAQ.is' : <img src={'logo'} className="w-36" />}
+    <As
+      to="/"
+      className={`font-extrabold tracking-tight text-primary-3 ${sizeClass} ${className}`}
+    >
+      {isText ? 'MyQA.is' : <img src="/logo.svg" className="w-28" />}
     </As>
   );
 };

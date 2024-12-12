@@ -9,6 +9,7 @@ export const MainLayout = ({
   enableBackgroundImage,
   connectedPublicKey,
   backgroundClassName,
+  navClassName,
 }: {
   disableSiteNav?: boolean;
   children: React.ReactNode;
@@ -16,6 +17,7 @@ export const MainLayout = ({
   backgroundClassName?: string;
   enableBackgroundImage?: boolean;
   connectedPublicKey?: string;
+  navClassName?: string;
 }) => {
   return (
     <div
@@ -26,6 +28,7 @@ export const MainLayout = ({
     >
       {disableSiteNav ? null : (
         <SiteNav
+          className={navClassName}
           connectedPublicKey={
             typeof window !== 'undefined'
               ? window?.ENV?.CONNECTED_PUBLIC_KEY

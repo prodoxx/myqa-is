@@ -8,7 +8,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     redirect('/login');
   }
 
-  return redirect('/login', {
+  return redirect('/', {
     headers: { 'Set-Cookie': await destroySession(session) },
   });
 };

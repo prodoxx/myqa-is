@@ -15,7 +15,7 @@ const seed = async () => {
   try {
     user = await db.user.create({
       data: {
-        email: 'admin@myfaq.is',
+        email: 'admin@myqa.is',
         username: "admin",
         password,
       },
@@ -37,7 +37,7 @@ const seed = async () => {
 
     const newUser = await db.user.create({
       data: {
-        email: `business-${index}${nanoid(2)}@myfaq.is`,
+        email: `business-${index}${nanoid(2)}@myqa.is`,
         username: businessName.toLowerCase() + nanoid(3),
         password,
         UserProfile: {
