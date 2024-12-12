@@ -67,21 +67,25 @@ model Asset {
 }
 
 model QA {
-  id                String      @id @default(cuid())
-  userProfileId     String
-  onChainId         String      @unique
-  ipfsPinId         String      @unique
-  userId            Int
+  id                Int         @id @default(autoincrement())
   question          String
-  questionHash      String
-  unlockPriceInBonk BigInt
+  encryptedAnswer   String
+  unlockPriceInBonk Int
   maxKeys           Int
-  currentKeys       Int         @default(0)
+  questionHash      String
+  onChainId         String
+  ipfsPinId         String      @unique
+  userProfileId     String
+  userId            Int
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
-  UserProfile       UserProfile @relation(fields: [userProfileId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   IpfsPin           IpfsPin     @relation(fields: [ipfsPinId], references: [id])
+  UserProfile       UserProfile @relation(fields: [userProfileId], references: [id])
   User              User        @relation(fields: [userId], references: [id])
+
+  @@index([ipfsPinId])
+  @@index([userProfileId])
+  @@index([userId])
 }
 
 enum PinStatus {
@@ -99,7 +103,7 @@ model IpfsPin {
   userId       Int
   User         User      @relation(fields: [userId], references: [id])
   qa           QA?
-  qaId         String?
+  qaId         Int?
 
   @@index([userId])
   @@index([cid])
