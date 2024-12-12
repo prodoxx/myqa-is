@@ -35,7 +35,6 @@ export function UnlockQuestionForm({
   const wallet = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { program } = useAnchorProgram();
   const marketplace = useMarketplace();
 
   const handleUnlock = async () => {
@@ -45,8 +44,6 @@ export function UnlockQuestionForm({
       await unlockQuestionAndAnswer(
         {
           wallet,
-          metadataUri: `ipfs://${cid}`,
-          encryptedKey: {} as any,
           questionId: String(questionId),
         },
         marketplace
