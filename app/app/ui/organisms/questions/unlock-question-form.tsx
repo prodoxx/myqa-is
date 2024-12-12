@@ -17,6 +17,7 @@ interface UnlockQuestionFormProps {
   questionId: string;
   question: string;
   priceInBonk: number;
+  priceInDollar: string;
   onClose: () => void;
 }
 
@@ -25,6 +26,7 @@ export function UnlockQuestionForm({
   question,
   priceInBonk,
   onClose,
+  priceInDollar,
 }: UnlockQuestionFormProps) {
   const wallet = useWallet();
   const [isLoading, setIsLoading] = useState(false);
@@ -65,8 +67,11 @@ export function UnlockQuestionForm({
           <div className="space-y-1">
             <p className="text-sm font-medium">Price to unlock</p>
             <p className="text-2xl font-bold">
-              {priceInBonk.toLocaleString()} BONK
+              BONK {priceInBonk.toLocaleString()}
             </p>
+            <span className="text-xs text-muted-foreground">
+              ≈ ${priceInDollar}
+            </span>
           </div>
           <Bonk className="h-8 w-8" />
         </div>

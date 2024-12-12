@@ -75,6 +75,9 @@ export const QuestionsList = ({
                 id={question.id!}
                 question={question.question}
                 priceInBonk={Number(question.unlockPriceInBonk)}
+                priceInDollar={Intl.NumberFormat('en-US').format(
+                  Number(question.unlockPriceInBonk) * cryptoPrice!.price
+                )}
               />
             </div>
           </Card>
