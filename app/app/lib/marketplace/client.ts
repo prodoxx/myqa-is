@@ -343,11 +343,9 @@ export class MarketplaceClient {
       const questionAccount =
         await this.program.account.question.fetch(questionPda);
 
-      console.log({ questionAccount });
-
       return questionAccount.currentKeys.toArray();
     } catch (error) {
-      console.error('Failed to mint unlock key:', error);
+      console.error('Failed to find question current keys:', error);
       throw error;
     }
   }
