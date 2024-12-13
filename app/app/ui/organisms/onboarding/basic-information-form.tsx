@@ -36,7 +36,7 @@ export const BasicInformationForm = ({
         <CardHeader>
           <CardTitle className="text-2xl">Basic Information</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col space-y-4">
+        <CardContent className="flex flex-col space-y-8">
           {errorMessage ? (
             <Alert variant="destructive">
               <AlertTitle>Failed to complete step</AlertTitle>
@@ -54,15 +54,29 @@ export const BasicInformationForm = ({
             {() => <ImageInput name="avatar" error={formErrors?.avatar?.[0]} />}
           </ClientOnly>
 
-          <div>
-            <Label htmlFor="username">Username</Label>
-            <Input id="username" name="username" />
+          <div className="space-y-3">
+            <Label htmlFor="username" className="text-base">
+              Username
+            </Label>
+            <Input
+              id="username"
+              name="username"
+              placeholder="Choose a unique username that represents you"
+              className="h-12"
+            />
             <ErrorMessage message={formErrors?.username?.[0]} />
           </div>
 
-          <div>
-            <Label htmlFor="about">Bio</Label>
-            <Textarea id="about" name="about" />
+          <div className="space-y-3">
+            <Label htmlFor="about" className="text-base">
+              Bio
+            </Label>
+            <Textarea
+              id="about"
+              name="about"
+              placeholder="Share your story, expertise, and what makes you unique..."
+              className="min-h-[120px] resize-none"
+            />
             <ErrorMessage message={formErrors?.about?.[0]} />
           </div>
         </CardContent>
