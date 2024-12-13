@@ -31,8 +31,12 @@ const createPrismaClient = () => {
   );
 };
 
-const prisma = global.prisma || createPrismaClient();
+let prisma: ReturnType<typeof createPrismaClient>;
 
-if (process.env.NODE_ENV === 'development') global.prisma = prisma;
+if (process.env.NODE_ENV === 'production') {
+  prisma = createPrismaClient();
+} else {
+  prisma = global.prisma;
+}
 
 export default prisma;
