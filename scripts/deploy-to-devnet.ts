@@ -9,21 +9,29 @@ import path from 'path';
 const DEVNET_BONK_MINT = new web3.PublicKey('Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr');
 const DEVNET_URL = 'https://api.devnet.solana.com';
 
-async function ensureAccountFunded(
+async function checkAccountFunding(
   connection: web3.Connection,
   account: web3.PublicKey,
+  accountName: string,
   minBalance: number = 1 * web3.LAMPORTS_PER_SOL,
 ): Promise<void> {
-  try {
-    const balance = await connection.getBalance(account);
-    if (balance < minBalance) {
-      console.log(`Funding account ${account.toString()}...`);
-      const signature = await connection.requestAirdrop(account, minBalance);
-      await connection.confirmTransaction(signature);
-    }
-  } catch (error) {
-    console.error('Failed to fund account:', error);
-    throw error;
+  const balance = await connection.getBalance(account);
+  if (balance < minBalance) {
+    console.error(
+      `Error: ${accountName} (${account.toString()}) has insufficient balance: ${balance / web3.LAMPORTS_PER_SOL} SOL`,
+    );
+    console.error(`Required minimum balance: ${minBalance / web3.LAMPORTS_PER_SOL} SOL`);
+    console.error(`Please fund the account before proceeding with deployment`);
+    throw new Error(`Insufficient balance for ${accountName}`);
+  } else {
+    console.log(`✓ ${accountName} is sufficiently funded with ${balance / web3.LAMPORTS_PER_SOL} SOL`);
+  }
+}
+
+async function verifyProgramDeployment(connection: web3.Connection, programId: web3.PublicKey): Promise<void> {
+  const verifyProgramInfo = await connection.getAccountInfo(programId);
+  if (!verifyProgramInfo || !verifyProgramInfo.executable) {
+    throw new Error('Program deployment verification failed');
   }
 }
 
@@ -41,14 +49,13 @@ async function deployProgram({
     await executeCommand('anchor build');
 
     const wallet = provider.wallet;
-    const walletPubkey = wallet.publicKey;
+    console.log(`Using Program Authority wallet: ${wallet.publicKey.toString()}`);
 
-    console.log(`Using wallet: ${walletPubkey.toString()}`);
-
-    const programInfo = await connection.getAccountInfo(walletPubkey);
+    // Check if program exists at the program ID address
+    const programInfo = await connection.getAccountInfo(programId);
 
     if (programInfo && programInfo.executable) {
-      console.log(`Program exists at ${walletPubkey.toString()}, attempting upgrade...`);
+      console.log(`Program exists at ${programId.toString()}, attempting upgrade...`);
 
       const programSoPath = `target/deploy/${PROGRAM_NAME}.so`;
       if (!fs.existsSync(programSoPath)) {
@@ -58,17 +65,15 @@ async function deployProgram({
       await executeCommand(
         `anchor upgrade ${programSoPath} --program-id ${programId.toString()} --provider.cluster devnet`,
       );
+      await verifyProgramDeployment(connection, programId);
       console.log('Program upgraded successfully');
     } else {
       console.log('Deploying new program...');
       await executeCommand('anchor deploy --provider.cluster devnet');
+      await verifyProgramDeployment(connection, programId);
       console.log(`Program deployed to ${programId.toString()}`);
     }
 
-    const verifyProgramInfo = await connection.getAccountInfo(programId);
-    if (!verifyProgramInfo || !verifyProgramInfo.executable) {
-      throw new Error('Program deployment verification failed');
-    }
     return true;
   } catch (error) {
     console.error('Program deployment/upgrade failed:', error);
@@ -76,54 +81,65 @@ async function deployProgram({
   }
 }
 
+async function ensureProgramBuild(): Promise<void> {
+  console.log('Ensuring program is built...');
+  const programSoPath = `target/deploy/${PROGRAM_NAME}.so`;
+  const programKeypairPath = `target/deploy/${PROGRAM_NAME}-keypair.json`;
+
+  if (!fs.existsSync(programSoPath) || !fs.existsSync(programKeypairPath)) {
+    console.log('Program build not found, building...');
+    await executeCommand('anchor build');
+  }
+
+  if (!fs.existsSync(programKeypairPath)) {
+    throw new Error('Program keypair not found even after build. Check your anchor.toml configuration.');
+  }
+}
+
 async function deploy() {
   try {
-    // Ensure config/devnet directory exists
-    const configDir = path.join(process.cwd(), 'config', 'devnet');
-    if (!fs.existsSync(configDir)) {
-      fs.mkdirSync(configDir, { recursive: true });
-    }
+    const configDir = path.join(process.cwd(), 'config');
+
+    // Ensure program is built before proceeding
+    await ensureProgramBuild();
+
+    // Load treasury keypair from config/keys
+    const treasuryKeypair = web3.Keypair.fromSecretKey(
+      Buffer.from(JSON.parse(fs.readFileSync(path.join(configDir, 'keys', 'treasury-keypair.json'), 'utf-8'))),
+    );
 
     const connection = new web3.Connection(DEVNET_URL, 'confirmed');
 
-    // load the deployed program ID
+    // Load the deployed program ID
     const programIdKeypair = web3.Keypair.fromSecretKey(
       Buffer.from(JSON.parse(fs.readFileSync(`target/deploy/${PROGRAM_NAME}-keypair.json`, 'utf-8'))),
     );
     const programId = programIdKeypair.publicKey;
 
+    // Check funding for critical accounts
+    console.log('\nChecking account balances...');
+    await checkAccountFunding(connection, treasuryKeypair.publicKey, 'Treasury');
+    await checkAccountFunding(connection, programId, 'Program ID');
+
+    // Use default provider (from Solana CLI wallet) for program deployment
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
+    console.log(`Using Program Authority from Solana CLI config: ${provider.wallet.publicKey.toString()}`);
+    await checkAccountFunding(connection, provider.wallet.publicKey, 'Program Authority (Solana CLI wallet)');
 
     const deployed = await deployProgram({ connection, programId, provider });
     if (!deployed) throw new Error('Program deployment failed');
 
-    // load or generate treasury keypair
-    let treasuryKeypair: web3.Keypair;
-    const treasuryKeypairFile = path.join(configDir, 'treasury-keypair.json');
-
-    if (fs.existsSync(treasuryKeypairFile)) {
-      console.log('Using existing treasury keypair...');
-      const secretKey = Buffer.from(JSON.parse(fs.readFileSync(treasuryKeypairFile, 'utf-8')));
-      treasuryKeypair = web3.Keypair.fromSecretKey(secretKey);
-    } else {
-      console.log('Creating new treasury keypair...');
-      treasuryKeypair = web3.Keypair.generate();
-      fs.writeFileSync(treasuryKeypairFile, JSON.stringify(Array.from(treasuryKeypair.secretKey)), 'utf-8');
-    }
-
-    await ensureAccountFunded(connection, treasuryKeypair.publicKey, 2 * web3.LAMPORTS_PER_SOL);
-
-    // initialize the program
+    // Initialize the program
     const program = new anchor.Program(require(`../target/idl/${PROGRAM_NAME}.json`), programId, provider);
 
-    // derive the marketplace PDA
+    // Derive the marketplace PDA from program authority
     const [marketplacePDA] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from('marketplace'), provider.wallet.publicKey.toBuffer()],
       program.programId,
     );
 
-    // initialize the marketplace
+    // Initialize the marketplace
     await program.methods
       .initialize()
       .accounts({
@@ -145,10 +161,15 @@ async function deploy() {
       deploymentTime: new Date().toISOString(),
       version: JSON.parse(fs.readFileSync('package.json', 'utf-8')).version,
       treasury: treasuryKeypair.publicKey.toString(),
-      treasuryKeypairPath: 'config/devnet/treasury-keypair.json',
     };
 
-    fs.writeFileSync(path.join(configDir, 'deployment-info.json'), JSON.stringify(deployInfo, null, 2));
+    // Ensure config/devnet directory exists
+    const devnetConfigDir = path.join(configDir, 'devnet');
+    if (!fs.existsSync(devnetConfigDir)) {
+      fs.mkdirSync(devnetConfigDir, { recursive: true });
+    }
+
+    fs.writeFileSync(path.join(devnetConfigDir, 'deployment-info.json'), JSON.stringify(deployInfo, null, 2));
 
     console.log('\n=== Deployment Summary ===');
     console.log(`✓ Program deployed to: ${programId.toString()}`);
@@ -159,7 +180,6 @@ async function deploy() {
     console.log(`✓ Marketplace: ${marketplacePDA.toString()}`);
     console.log(`✓ Treasury: ${treasuryKeypair.publicKey.toString()}`);
     console.log('✓ Deployment info: ./config/devnet/deployment-info.json');
-    console.log('✓ Treasury keypair: ./config/devnet/treasury-keypair.json');
     console.log('\nDeployment completed successfully!\n');
 
     return deployInfo;

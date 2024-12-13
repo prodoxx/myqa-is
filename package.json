@@ -2,8 +2,9 @@
   "license": "ISC",
   "scripts": {
     "start:localnet": "npm run clean:validator && dotenv -- tsx scripts/start-localnet.ts",
-    "deploy:devnet": "tsx deploy/scripts/deploy-devnet.ts",
+    "deploy:devnet": "tsx scripts/deploy-to-devnet.ts",
     "stop:validator": "pkill -f solana-test-validator || true",
+    "generate-keys": "tsx scripts/generate-all-keys.ts",
     "clean": "rm -rf target .anchor",
     "clean:deploy": "npm run clean && rm -f deploy/deployment-info.json",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
