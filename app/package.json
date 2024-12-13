@@ -18,7 +18,7 @@
     "db:reset:dev": "dotenv -e .env.dev npx prisma migrate reset",
     "db:seed:dev": "yarn db:reset:dev && npx dotenv -e .env.dev prisma db seed",
     "db:migrate:create": "dotenv -e .env.dev npx prisma migrate dev --name",
-    "db:migrate": "run-p db:migrate:*",
+    "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "dotenv -e .env.dev npx prisma migrate dev",
     "db:migrate:test": "dotenv -e .env.test -- npx prisma db push --accept-data-loss",
     "db:gen:migrate": "dotenv -e .env.dev npx prisma migrate dev --name",
