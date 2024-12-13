@@ -11,6 +11,7 @@ import { AvailableKeys } from '~/ui/molecules/available-keys';
 import { useMarketplace } from '~/hooks/use-marketplace.client';
 import React from 'react';
 import { Badge } from '~/ui/atoms/badge';
+import { Lock } from 'lucide-react';
 
 export type QuestionsListProps = {
   questions?: QaDTO[];
@@ -149,7 +150,10 @@ export const QuestionsList = ({
                 )
               ) : (
                 <Button asChild variant="default">
-                  <Link to="/login">Login to Unlock Answer</Link>
+                  <Link to="/login">
+                    <Lock className="mr-2 h-4 w-4" />
+                    Login to Unlock Answer
+                  </Link>
                 </Button>
               )}
             </div>
