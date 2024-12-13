@@ -1,4 +1,5 @@
 import { useTypedFetcher } from 'remix-typedjson';
+import { ClientOnly } from 'remix-utils/client-only';
 import { OnboardingStep } from '~/domain/faq/entities/user-profile';
 import { OnboardUserFormErrors } from '~/domain/faq/services/onboard-user';
 import { Alert, AlertTitle, AlertDescription } from '~/ui/atoms/alert';
@@ -49,7 +50,9 @@ export const BasicInformationForm = ({
             value={OnboardingStep.BASIC_INFORMATION}
             onClick={() => {}}
           />
-          <ImageInput name="avatar" error={formErrors?.avatar?.[0]} />
+          <ClientOnly>
+            {() => <ImageInput name="avatar" error={formErrors?.avatar?.[0]} />}
+          </ClientOnly>
 
           <div>
             <Label htmlFor="username">Username</Label>

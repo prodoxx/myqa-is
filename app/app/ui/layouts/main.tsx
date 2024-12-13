@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '~/lib/utils';
 import { SiteNav } from '../molecules/site-nav';
+import { Toaster } from 'sonner';
 
 export const MainLayout = ({
   disableSiteNav = false,
@@ -45,6 +46,7 @@ export const MainLayout = ({
       >
         {children}
       </main>
+      <Toaster />
     </div>
   );
 };

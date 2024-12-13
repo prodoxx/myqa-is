@@ -9,7 +9,11 @@ import {
   useLocation,
   useRouteError,
 } from '@remix-run/react';
-import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
+import type {
+  LinksFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node';
 import { typedjson, useTypedLoaderData } from 'remix-typedjson';
 import '~/assets/styles/app.css';
 import { authenticator } from './auth.server';
@@ -20,6 +24,11 @@ import { TooltipProvider } from './ui/atoms/tooltip';
 import { SolanaProvider } from '~/ui/organisms/providers/solana-provider';
 import { useEffect } from 'react';
 import { posthog } from './infrastructure/analytics/index.client';
+import sonnerStyles from 'sonner/dist/styles.css?url';
+
+export const links: LinksFunction = () => [
+  { rel: 'stylesheet', href: sonnerStyles },
+];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {});

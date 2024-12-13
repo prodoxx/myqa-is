@@ -5,6 +5,8 @@ import { Label } from '../atoms/label';
 import { Avatar } from '../atoms/avatar';
 import { Button } from '../atoms/button';
 import { ErrorMessage } from '../atoms/error-message';
+import { toast } from 'sonner';
+import { getErrorMessage } from '~/lib/error-messages';
 
 export type ImageInput = {
   name: string;
@@ -15,6 +17,7 @@ export type ImageInput = {
 export const ImageInput = ({ name, className, error }: ImageInput) => {
   const hiddenInputRef = React.useRef(null);
   const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
+    maxSize: 2_000_000,
     accept: {
       'image/png': ['.png'],
       'image/jpeg': ['.jpg', '.jpeg'],
@@ -31,6 +34,16 @@ export const ImageInput = ({ name, className, error }: ImageInput) => {
         hiddenInputRef.current.files = dataTransfer.files;
       }
     },
+    onError: (error) => {
+      console.log(error);
+      toast.error(`Failed to select image: ${getErrorMessage(error)}`);
+    },
+    onDropRejected: (rejected) => {
+      console.log(error);
+      toast.error(
+        `Failed to select image: ${rejected?.[0]?.errors?.[0]?.message}`
+      );
+    },
   });
 
   const selectedImagePreviewUrl = React.useMemo(() => {
@@ -43,11 +56,19 @@ export const ImageInput = ({ name, className, error }: ImageInput) => {
 
   return (
     <div className="mx-auto">
-      <div {...getRootProps({ className: cn('flex flex-col space-y-2 mb-2', className) })}>
+      <div
+        {...getRootProps({
+          className: cn('flex flex-col space-y-2 mb-2', className),
+        })}
+      >
         <Label htmlFor={name}>Profile Picture</Label>
         <input hidden type="file" name={name} required ref={hiddenInputRef} />
         <input hidden {...getInputProps()} />
-        <Avatar fallback="" src={selectedImagePreviewUrl} className="h-36 w-36 border-2 border-gray-200" />
+        <Avatar
+          fallback=""
+          src={selectedImagePreviewUrl}
+          className="h-36 w-36 border-2 border-gray-200"
+        />
 
         <ErrorMessage message={error} />
       </div>
