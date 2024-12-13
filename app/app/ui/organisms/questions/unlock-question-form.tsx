@@ -43,7 +43,8 @@ export function UnlockQuestionForm({
       await unlockQuestionAndAnswer(
         {
           wallet,
-          questionId: onChainId,
+          onChainId,
+          questionId: String(questionId),
         },
         marketplace
       );

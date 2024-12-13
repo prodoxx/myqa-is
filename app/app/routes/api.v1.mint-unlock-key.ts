@@ -38,7 +38,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     // Find the question and its associated IPFS pin
     const qa = await prisma.qA.findFirst({
-      where: { onChainId: questionId },
+      where: { id: Number(questionId) },
       include: { IpfsPin: true },
     });
 

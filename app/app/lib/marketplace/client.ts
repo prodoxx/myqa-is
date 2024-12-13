@@ -17,6 +17,7 @@ export interface MintUnlockKeyParams {
   metadataUri: string;
   encryptedKey: Uint8Array;
   wallet: WalletContextState;
+  onChainId: string;
 }
 
 export interface DecryptContentParams {
@@ -286,6 +287,7 @@ export class MarketplaceClient {
 
   public async mintUnlockKey({
     questionId,
+    onChainId,
     wallet,
   }: MintUnlockKeyParams): Promise<string> {
     let data: any;
@@ -305,7 +307,7 @@ export class MarketplaceClient {
         body: JSON.stringify({
           questionId,
           tokenId: (
-            await this.currentKeysCount(parseInt(questionId))
+            await this.currentKeysCount(parseInt(onChainId))
           ).toString(),
           ...decryptionMaterial,
         }),
@@ -326,7 +328,7 @@ export class MarketplaceClient {
         [
           Buffer.from('question'),
           marketplacePda.toBuffer(),
-          new BN(questionId).toArrayLike(Buffer, 'le', 8),
+          new BN(String(onChainId)).toArrayLike(Buffer, 'le', 8),
         ],
         this.program.programId
       );
@@ -454,7 +456,7 @@ export class MarketplaceClient {
         [
           Buffer.from('question'),
           marketplacePda.toBuffer(),
-          new BN(onChainId).toArrayLike(Buffer, 'le', 8),
+          new BN(String(onChainId)).toArrayLike(Buffer, 'le', 8),
         ],
         this.program.programId
       );
@@ -463,7 +465,7 @@ export class MarketplaceClient {
       const questionAccount =
         await this.program.account.question.fetch(questionPda);
 
-      return questionAccount.currentKeys.toArray();
+      return questionAccount.currentKeys.toString();
     } catch (error) {
       console.error('Failed to find question current keys:', error);
       throw error;
