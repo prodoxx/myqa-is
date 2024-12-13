@@ -9,14 +9,14 @@ interface CustomNodeJsGlobal extends NodeJS.Global {
 // Prevent multiple instances of Prisma Client in development
 declare const global: CustomNodeJsGlobal;
 
-console.log('LOADING...', process.env.POSTGRES_PRISMA_URL);
+console.log('LOADING...', process.env);
 
 const createPrismaClient = () => {
-  console.log('CREATING...', process.env.POSTGRES_PRISMA_URL);
+  console.log('CREATING...', process.env.DATABASE_URL);
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: process.env.POSTGRES_PRISMA_URL as string,
+        url: process.env.DATABASE_URL as string,
       },
     },
   });
