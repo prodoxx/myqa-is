@@ -84,7 +84,7 @@ const UserProfile = () => {
       <div className="max-w-4xl w-full 2xl:w-[1080px] border-slate-300">
         <div className="flex flex-col p-4 space-y-8">
           <div className="flex flex-row items-center">
-            <div className="ml-auto">
+            <div className="ml-auto flex flex-row space-x-2 items-center">
               <Wallet />
               <LoginRegisterDialog
                 username={data?.user?.username?.toLowerCase()!}

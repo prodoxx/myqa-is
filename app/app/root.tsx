@@ -86,18 +86,18 @@ export default function App() {
       </head>
 
       <body className="h-full w-full flex min-h-screen flex-col font-sans">
-        <SolanaProvider
-          SOLANA_NETWORK={data.ENV.SOLANA_NETWORK}
-          RPC_ENDPOINT={data.ENV.SOLANA_RPC_URL}
-        >
-          <UserProvider user={data?.user || undefined}>
+        <UserProvider user={data?.user || undefined}>
+          <SolanaProvider
+            SOLANA_NETWORK={data.ENV.SOLANA_NETWORK}
+            RPC_ENDPOINT={data.ENV.SOLANA_RPC_URL}
+          >
             <TooltipProvider>
               <PHProvider>
                 <Outlet />
               </PHProvider>
             </TooltipProvider>
-          </UserProvider>
-        </SolanaProvider>
+          </SolanaProvider>
+        </UserProvider>
         <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{

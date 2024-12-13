@@ -25,7 +25,7 @@ export const LogoutForm = ({ className }: { className?: string }) => {
   };
 
   return (
-    <fetcher.Form method="POST" action="/logout" className={className}>
+    <fetcher.Form onSubmit={handleSubmit} className={className}>
       <Button size="lg" type="submit" variant="ghost" className="w-full">
         Log out
       </Button>

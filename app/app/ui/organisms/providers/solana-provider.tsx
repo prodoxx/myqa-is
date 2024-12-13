@@ -11,6 +11,7 @@ import { useMemo, useEffect } from 'react';
 
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { initializeMarketplace } from '~/config/marketplace.client';
+import { useUser } from '~/provider/user-provider';
 
 export function SolanaProvider({
   children,
@@ -21,6 +22,8 @@ export function SolanaProvider({
   SOLANA_NETWORK: string;
   RPC_ENDPOINT: string;
 }) {
+  const { user } = useUser();
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       initializeMarketplace();
@@ -38,7 +41,7 @@ export function SolanaProvider({
 
   return (
     <ConnectionProvider endpoint={RPC_ENDPOINT}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets} autoConnect={!!user}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
