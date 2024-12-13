@@ -5,6 +5,8 @@
     "deploy:devnet": "ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ANCHOR_WALLET=$HOME/.config/solana/id.json tsx scripts/deploy-to-devnet.ts",
     "stop:validator": "pkill -f solana-test-validator || true",
     "generate-keys": "tsx scripts/generate-all-keys.ts",
+    "initialize:devnet": "ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ANCHOR_WALLET=$HOME/.config/solana/id.json tsx scripts/initialize-contract.ts devnet",
+    "initialize:mainnet": "ANCHOR_PROVIDER_URL=https://api.mainnet-beta.solana.com ANCHOR_WALLET=$HOME/.config/solana/id.json tsx scripts/initialize-contract.ts mainnet",
     "clean": "rm -rf target .anchor",
     "clean:deploy": "npm run clean && rm -f deploy/deployment-info.json",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
