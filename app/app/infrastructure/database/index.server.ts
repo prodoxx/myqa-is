@@ -3,7 +3,7 @@ import { fieldEncryptionExtension } from 'prisma-field-encryption';
 
 // add prisma to the NodeJS global type
 interface CustomNodeJsGlobal extends NodeJS.Global {
-  prisma: ReturnType<typeof createPrismaClient>;
+  prisma: PrismaClient;
 }
 
 // Prevent multiple instances of Prisma Client in development
@@ -11,24 +11,15 @@ declare const global: CustomNodeJsGlobal;
 
 console.log('LOADING...', process.env);
 
-const createPrismaClient = () => {
-  console.log('CREATING...', process.env.DATABASE_URL);
-  const prisma = new PrismaClient({
+const prisma =
+  global.prisma ||
+  new PrismaClient({
     datasources: {
       db: {
         url: process.env.DATABASE_URL as string,
       },
     },
-  });
-
-  return prisma.$extends(
-    fieldEncryptionExtension({
-      encryptionKey: process.env.ENCRYPTION_KEY as string,
-    })
-  );
-};
-
-const prisma = global.prisma || createPrismaClient();
+  }).$extends(fieldEncryptionExtension());
 
 if (process.env.NODE_ENV === 'development') global.prisma = prisma;
 
