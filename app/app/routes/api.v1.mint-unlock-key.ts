@@ -88,6 +88,7 @@ export const action: ActionFunction = async ({ request }) => {
       properties: {
         question_cid: qa.IpfsPin.cid,
         category: 'access_key',
+        timestamp: new Date().getTime(),
       },
     };
 
