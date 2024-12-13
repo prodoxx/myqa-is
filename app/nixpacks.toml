@@ -1,6 +1,12 @@
 [phases.setup]
 workingDirectory = "app"
-aptPackages = ["python3", "make", "g++", "python3-pip", "build-essential"]
+aptPackages = [
+  "build-essential", 
+  "libusb-1.0-0-dev", 
+  "python3", 
+  "python3-pip", 
+  "make", 
+  "g++"]
 
 [environment]
 nodeVersion = "22.11.0"
