@@ -83,8 +83,6 @@ export const action: ActionFunction = async ({ request }) => {
       },
     };
 
-    console.log('ipfsContent', ipfsContent);
-
     const contentHash = hashContent(JSON.stringify(ipfsContent));
     const questionHash = hashContent(question);
 
