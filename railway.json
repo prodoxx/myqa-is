@@ -4,13 +4,7 @@
     "builder": "NIXPACKS",
     "buildCommand": "npm run build:remix",
     "watchPatterns": ["/app/**", "/public/**"],
-    "nixpacksConfig": {
-      "setup": {
-        "nodeVersion": "22.11.0",
-        "pythonVersion": "3.11",
-        "aptPackages": ["python3", "make", "g++", "python3-pip", "build-essential"]
-      }
-    }
+    "nixpacksConfigPath": "nixpacks.toml"
   },
   "deploy": {
     "startCommand": "npm run start",

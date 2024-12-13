@@ -1,0 +1,12 @@
+[phases.setup]
+aptPackages = ["python3", "make", "g++", "python3-pip", "build-essential"]
+
+[phases.build]
+commands = ["npm run build:remix"]
+
+[phases.start]
+commands = ["npm run start"]
+
+[environment]
+nodeVersion = "22.11.0"
+pythonVersion = "3.11"
