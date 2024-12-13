@@ -10,6 +10,7 @@ import { Link } from '@remix-run/react';
 import { AvailableKeys } from '~/ui/molecules/available-keys';
 import { useMarketplace } from '~/hooks/use-marketplace.client';
 import React from 'react';
+import { Badge } from '~/ui/atoms/badge';
 
 export type QuestionsListProps = {
   questions?: QaDTO[];
@@ -22,6 +23,7 @@ export type QuestionsListProps = {
     id: number | undefined;
     decryptedAnswer: string;
   }[];
+  isDemo?: boolean;
 };
 
 export const QuestionsList = ({
@@ -29,6 +31,7 @@ export const QuestionsList = ({
   cryptoPrice,
   isCreator,
   decryptedQuestions,
+  isDemo,
 }: QuestionsListProps) => {
   const { user } = useUser();
   const marketplace = useMarketplace();
@@ -80,10 +83,20 @@ export const QuestionsList = ({
             className="p-6 bg-gradient-to-r transition-all duration-300 border border-purple-500/20"
           >
             <div className="flex items-start justify-between gap-4">
-              <div className="space-y-4 flex-1">
+              <div className="space-y-4 flex-1 flex-col flex">
                 <h3 className="text-xl font-bold text-gradient bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
-                  {question.question}
+                  {question.question}{' '}
                 </h3>
+
+                {isDemo && 'author' in question && 'field' in question ? (
+                  <div>
+                    <span>Asked to {String(question?.author)} in </span>
+                    <span className="font-bold">{String(question.field)} </span>
+                    <Badge variant="outline" className="ml-2">
+                      Demo
+                    </Badge>
+                  </div>
+                ) : null}
 
                 <div className="flex items-center gap-4">
                   {cryptoPrice ? (
@@ -110,7 +123,7 @@ export const QuestionsList = ({
               </div>
 
               {user ? (
-                Math.random() >= 0.5 || isCreator ? (
+                isCreator ? (
                   <ViewAnswerButton
                     id={question.id!}
                     question={question.question}

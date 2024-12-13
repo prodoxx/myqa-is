@@ -3,11 +3,15 @@ import { Link } from '@remix-run/react';
 import { ChevronRight, Coins, Key, Lock, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTypedLoaderData } from 'remix-typedjson';
+import { QaDTO } from '~/domain/faq/entities/qa';
+import { getCryptoPrice, SupportedCoins } from '~/infrastructure/crypto';
 import prisma from '~/infrastructure/database/index.server';
 import { getPrettyNumber } from '~/lib/currency';
 import { Button } from '~/ui/atoms/button';
 import { Card, CardContent } from '~/ui/atoms/card';
 import { MainLayout } from '~/ui/layouts/main';
+import FeaturedQuestions from '~/ui/organisms/home/features-questions';
+import JoinCommunity from '~/ui/organisms/home/join-community';
 
 const exampleCreators = [
   {
@@ -40,12 +44,84 @@ const exampleCreators = [
 ];
 
 const exampleQuestions = [
-  { question: 'What inspired your latest project?' },
-  { question: 'How do you overcome creative blocks?' },
-  { question: "What's your daily routine like?" },
-  { question: 'Which books have influenced you the most?' },
-  { question: 'What advice would you give to aspiring creators?' },
-  { question: 'How do you see your field evolving in the next decade?' },
+  {
+    id: 1,
+    question: 'What inspired your latest project?',
+    userProfileId: 101,
+    maxKeys: 3,
+    ipfsPinId: 'QmXyz123',
+    questionHash: 'hash123abc',
+    encryptedAnswer: 'encAnswer123',
+    unlockPriceInBonk: 1_000_000,
+    IpfsPin: { url: 'https://ipfs.io/ipfs/QmXyz123' },
+    field: 'Creativity',
+    author: 'Jane Doe',
+  },
+  {
+    id: 2,
+    question: 'How do you overcome creative blocks?',
+    userProfileId: 102,
+    maxKeys: 2,
+    ipfsPinId: 'QmXyz124',
+    questionHash: 'hash124abc',
+    encryptedAnswer: 'encAnswer124',
+    unlockPriceInBonk: 1_500_000,
+    IpfsPin: { url: 'https://ipfs.io/ipfs/QmXyz123' },
+    field: 'Productivity',
+    author: 'John Smith',
+  },
+  {
+    id: 3,
+    question: "What's your daily routine like?",
+    userProfileId: 103,
+    maxKeys: 4,
+    ipfsPinId: 'QmXyz125',
+    questionHash: 'hash125abc',
+    encryptedAnswer: 'encAnswer125',
+    unlockPriceInBonk: 2_000_000,
+    IpfsPin: { url: 'https://ipfs.io/ipfs/QmXyz123' },
+    field: 'Lifestyle',
+    author: 'Alice Johnson',
+  },
+  {
+    id: 4,
+    question: 'Which books have influenced you the most?',
+    userProfileId: 104,
+    maxKeys: 5,
+    ipfsPinId: 'QmXyz126',
+    questionHash: 'hash126abc',
+    encryptedAnswer: 'encAnswer126',
+    unlockPriceInBonk: 2_500_000,
+    IpfsPin: { url: 'https://ipfs.io/ipfs/QmXyz123' },
+    field: 'Education',
+    author: 'John Doe',
+  },
+  {
+    id: 5,
+    question: 'What advice would you give to aspiring creators?',
+    userProfileId: 105,
+    maxKeys: 1,
+    ipfsPinId: 'QmXyz127',
+    questionHash: 'hash127abc',
+    encryptedAnswer: 'encAnswer127',
+    unlockPriceInBonk: 3_000_000,
+    IpfsPin: { url: 'https://ipfs.io/ipfs/QmXyz123' },
+    field: 'Career',
+    author: 'Bob Williams',
+  },
+  {
+    id: 6,
+    question: 'How do you see your field evolving in the next decade?',
+    userProfileId: 106,
+    maxKeys: 2,
+    ipfsPinId: 'QmXyz128',
+    questionHash: 'hash128abc',
+    encryptedAnswer: 'encAnswer128',
+    unlockPriceInBonk: 3_500_000,
+    IpfsPin: { url: 'https://ipfs.io/ipfs/QmXyz123' },
+    field: 'Industry Trends',
+    author: 'Emma Brown',
+  },
 ];
 
 export const meta: MetaFunction = () => {
@@ -62,11 +138,13 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async (args: LoaderFunctionArgs) => {
-  const [questions, creators] = await Promise.all([
+  const [questions, creators, bonkPrice] = await Promise.all([
     prisma.qA.findMany({ take: 5 }),
     prisma.user.findMany({ take: 5, include: { UserProfile: true } }),
+    getCryptoPrice(SupportedCoins.BONKUSDT, process.env.BINANCE_API_KEY),
   ]);
   return {
+    bonkPrice,
     questions: exampleQuestions,
     creators: exampleCreators,
   };
@@ -148,6 +226,13 @@ const LandingPage = () => {
           ))}
         </div>
       </div>
+
+      <JoinCommunity />
+      <FeaturedQuestions
+        isDemo
+        questions={data.questions}
+        cryptoPrice={data.bonkPrice!}
+      />
 
       {/* Footer */}
       <footer className="mt-auto border-t border-slate-700/50">

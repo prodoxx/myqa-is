@@ -6,7 +6,7 @@ import {
 } from '@project-serum/anchor';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useMemo } from 'react';
-import { IDL } from '~/lib/types/myfaq_is';
+import { IDL, MyfaqIs } from '~/lib/types/myfaq_is';
 import { getMarketplaceConfig } from '~/config/marketplace.client';
 
 export function useAnchorProgram() {
@@ -27,7 +27,7 @@ export function useAnchorProgram() {
     );
     setProvider(provider);
 
-    const program = new Program(IDL as Idl, MARKETPLACE_PROGRAM, provider);
+    const program = new Program(IDL as MyfaqIs, MARKETPLACE_PROGRAM, provider);
 
     return {
       program,

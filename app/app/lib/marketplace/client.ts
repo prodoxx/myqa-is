@@ -118,6 +118,7 @@ export class MarketplaceClient {
   }: QuestionAnswerParams): Promise<string> {
     try {
       const publicKey = await this.ensureWalletConnected(wallet);
+      console.log({ publicKey });
 
       // convert contentMetadataHash from hex to Uint8Array
       const contentHash = new Uint8Array(
@@ -131,7 +132,9 @@ export class MarketplaceClient {
       );
 
       const marketplacePda = await this.getMarketplacePda();
+      console.log({ marketplacePda });
       const marketplaceState = await this.getMarketplaceState();
+      console.log({ marketplaceState });
 
       // get the next question counter
       const questionCounter = marketplaceState.questionCounter;

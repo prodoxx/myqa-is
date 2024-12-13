@@ -6,6 +6,8 @@ import { MainLayout } from '~/ui/layouts/main';
 import { NewQuestionForm } from '~/ui/organisms/questions/new-question-form';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Spinner } from '~/ui/atoms/spinner';
+import React from 'react';
+import { initializeMarketplace } from '~/config/marketplace.client';
 
 export const meta: MetaFunction = () => {
   return [
@@ -31,6 +33,10 @@ export const loader = async (args: LoaderFunctionArgs) => {
 };
 
 export default function Page() {
+  React.useEffect(() => {
+    initializeMarketplace();
+  }, []);
+
   return (
     <MainLayout>
       <ClientOnly
