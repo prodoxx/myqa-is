@@ -9,7 +9,7 @@
     "seed": "tsx prisma/seed.mts"
   },
   "scripts": {
-    "build:remix": "cross-env NODE_ENV=production remix vite:build",
+    "build:remix": "NODE_ENV=production remix vite:build",
     "build:sitemap": "yarn remix-sitemap",
     "dev": "dotenv -e .env.dev -- npm-run-all --parallel \"dev:*\"",
     "dev:build": "cross-env NODE_ENV=development remix vite:dev",
