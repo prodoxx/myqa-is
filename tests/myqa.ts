@@ -1,6 +1,6 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
-import { MyfaqIs } from '../target/types/myfaq_is';
+import { Myqa } from '../target/types/myqa';
 import {
   PublicKey,
   Keypair,
@@ -29,7 +29,7 @@ const TOKEN_METADATA_PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
 
 const TEST_BONK_DECIMALS = 6; // Match BONK token decimals
 
-describe('myfaq-is', function () {
+describe('myqa', function () {
   // set timeout to 30 seconds for all tests in this suite
   this.timeout(30000);
 
@@ -59,7 +59,7 @@ describe('myfaq-is', function () {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.MyfaqIs as Program<MyfaqIs>;
+  const program = anchor.workspace.Myqa as Program<Myqa>;
 
   // constants for testing
   const CONTENT_CID = 'QmT8JtG98Pu6YqHrRxiANrqjaC8ydz3F4uuQvRfQqC3T45';

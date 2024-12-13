@@ -1306,7 +1306,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "myfaq-is"
+name = "myqa"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",

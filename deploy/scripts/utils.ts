@@ -2,17 +2,10 @@ import { web3, Program, Wallet, AnchorProvider } from '@project-serum/anchor';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import {
-  createMint as _createMint,
-  createAccount,
-  mintTo as _mintTo,
-  TOKEN_PROGRAM_ID,
-  getAccount,
-  createMint,
-} from '@solana/spl-token';
+import { createMint as _createMint, mintTo as _mintTo, createMint } from '@solana/spl-token';
 
 export const LOCALNET_URL = 'http://127.0.0.1:8899';
-export const PROGRAM_NAME = 'myfaq_is';
+export const PROGRAM_NAME = 'myqa';
 export const MAX_RETRIES = 3;
 export const RETRY_DELAY = 2000;
 

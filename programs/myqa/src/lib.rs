@@ -54,7 +54,7 @@ pub struct UserState {
 }
 
 #[program]
-pub mod myfaq_is {
+pub mod myqa {
     use super::*;
 
     pub fn initialize_user_state(ctx: Context<InitializeUserState>) -> Result<()> {

@@ -7,7 +7,7 @@ const KEYS_DIR = path.join(process.cwd(), 'config', 'keys');
 
 // function to extract program ID from lib.rs
 function getProgramId(): web3.PublicKey {
-  const libRsPath = path.join(process.cwd(), 'programs', 'myfaq-is', 'src', 'lib.rs');
+  const libRsPath = path.join(process.cwd(), 'programs', 'myqa', 'src', 'lib.rs');
   const content = fs.readFileSync(libRsPath, 'utf-8');
   const match = content.match(/declare_id!\("([^"]+)"\)/);
 
