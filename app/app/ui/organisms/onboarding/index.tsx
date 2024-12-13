@@ -4,17 +4,28 @@ import { OnboardingComplete } from './onboarding-completed';
 import { SocialLinksForm } from './social-links-form';
 import { OnboardingStep } from '~/entities/user-profile';
 
-export type OnboardingFormProps = {
-  currentStep: keyof typeof OnboardingStep;
+interface OnboardingFormProps {
+  currentStep: (typeof OnboardingStep)[keyof typeof OnboardingStep];
   errorMessage: string | null;
-};
+  initialData?: {
+    username?: string | null;
+    about?: string | null;
+    avatarUrl?: string | null;
+  };
+}
 
 export const OnboardingForm = ({
   currentStep,
   errorMessage,
+  initialData,
 }: OnboardingFormProps) => {
   if (currentStep === OnboardingStep.BASIC_INFORMATION) {
-    return <BasicInformationForm errorMessage={errorMessage} />;
+    return (
+      <BasicInformationForm
+        errorMessage={errorMessage}
+        initialData={initialData}
+      />
+    );
   }
 
   if (currentStep === OnboardingStep.SOCIAL_LINKS) {

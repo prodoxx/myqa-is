@@ -16,18 +16,18 @@ import prisma from '~/infrastructure/database/index.server';
 
 export const onboardUserSchema = z.object({
   onboarding: z.nativeEnum(OnboardingStep),
-  username: z.string().min(1).nullish(), // this is required but the onboarding flow handles this itself
-  avatar: z.instanceof(NodeOnDiskFile).nullish(),
-  about: z.string().nullish(),
+  username: z.string().min(1).optional(),
+  avatar: z.any().optional(),
+  about: z.string().optional(),
   externalLinks: z
     .array(
       z.object({
-        url: z.string().min(1).nullish(),
-        type: z.nativeEnum(SocialLink).nullish(),
+        url: z.string().min(1).optional(),
+        type: z.nativeEnum(SocialLink).optional(),
       })
     )
-    .nullish(),
-  publicKey: z.string().min(1).nullish(),
+    .optional(),
+  publicKey: z.string().min(1).optional(),
 });
 
 export type OnboardUserFormErrors = z.inferFlattenedErrors<
@@ -48,23 +48,26 @@ export class OnboardUser {
       this.request,
       uploadHandler
     );
+
+    const about = formData.get('about');
+    const username = formData.get('username');
+    const publicKey = formData.get('publicKey');
+    const socialLinks = formData.get('socialLinks');
+
     const data = await onboardUserSchema.parseAsync({
       onboarding: formData.get('onboarding'),
-      about: formData.get('about'),
-      username: formData.get('username'),
-      avatar: formData?.get('avatar'),
-      externalLinks: JSON.parse(String(formData.get('socialLinks'))), // simpler; couldn't get array to submit 😅
-      publicKey: formData?.get('publicKey'),
+      about: about === null ? undefined : about,
+      username: username === null ? undefined : username,
+      avatar: formData.get('avatar'),
+      externalLinks: socialLinks ? JSON.parse(String(socialLinks)) : undefined,
+      publicKey: publicKey === null ? undefined : publicKey,
     });
 
     return data;
   }
 
-  async updateAvatar(
-    userProfile: UserProfileEntity,
-    avatar?: NodeOnDiskFile | null
-  ) {
-    if (!avatar) {
+  async updateAvatar(userProfile: UserProfileEntity, avatar?: any) {
+    if (!avatar || !(avatar instanceof NodeOnDiskFile)) {
       return;
     }
 
@@ -135,14 +138,17 @@ export class OnboardUser {
         onboarding: user.UserProfile.getNextOnboardingStep(),
         username: data.username ?? undefined,
         Avatar: avatar,
-        about: data?.about,
+        about: data.about ?? null,
         ExternalLinks: this.getExternalLinks(data?.externalLinks),
       }
     );
 
-    updatedUserProfile!.Avatar = avatar!;
-    user.UserProfile = updatedUserProfile!;
-    user.walletPublicKey = updatedUser?.walletPublicKey;
+    if (updatedUserProfile) {
+      updatedUserProfile.Avatar = avatar;
+      user.UserProfile = updatedUserProfile;
+      user.walletPublicKey = updatedUser?.walletPublicKey;
+      user.username = data.username || user.username;
+    }
 
     return user;
   }

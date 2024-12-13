@@ -1,9 +1,9 @@
 import { useNavigate } from '@remix-run/react';
-import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import React from 'react';
 import { useUser } from '~/provider/user-provider';
+import { useWalletState } from '~/provider/wallet-provider';
 import { Button } from '~/ui/atoms/button';
 import { NavLogo } from '~/ui/atoms/nav-logo';
 import { LogoutForm } from '~/ui/organisms/auth/logout-form';
@@ -25,13 +25,13 @@ export const SiteNav = ({
 }) => {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { publicKey, connected, disconnect, connecting, select, ...rest } =
-    useWallet();
-
+  const { isConnected, walletAddress } = useWalletState();
   const [showWarning, setShowWarning] = React.useState(false);
 
-  // Check if user has completed onboarding
+  // Check if user is in onboarding or has completed it
+  const isOnboarding = user?.UserProfile?.onboarding !== undefined;
   const hasCompletedOnboarding = user?.UserProfile?.onboarding === 'DONE';
+  const shouldShowWallet = isOnboarding || hasCompletedOnboarding;
 
   return (
     <nav className={`flex h-[96px] w-full flex-row items-center ${className}`}>
@@ -42,16 +42,16 @@ export const SiteNav = ({
       <div className="ml-auto hidden items-center gap-4 sm:flex">
         {user ? (
           <>
-            {hasCompletedOnboarding && (
+            {shouldShowWallet && (
               <>
-                {publicKey ? (
-                  <span className="rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground">
-                    {publicKey.toString()}
-                  </span>
+                {isConnected ? (
+                  <code className="rounded-md border border-input bg-background px-4 py-2 font-mono text-sm font-medium text-foreground">
+                    {`${walletAddress?.slice(0, 4)}...${walletAddress?.slice(-4)}`}
+                  </code>
                 ) : (
-                  <span className="pointer-events-none text-xs text-gray-400">
-                    <WalletMultiButton />
-                  </span>
+                  <WalletMultiButton className="!bg-primary hover:!bg-primary/90">
+                    Connect Wallet
+                  </WalletMultiButton>
                 )}
               </>
             )}

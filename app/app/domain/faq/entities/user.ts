@@ -44,5 +44,5 @@ export type UserDTO = Pick<
 > & {
   createdAt?: string;
   updatedAt?: string;
-  UserProfile: UserProfileDTO;
+  UserProfile?: UserProfileDTO | null;
 };

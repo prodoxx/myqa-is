@@ -1,13 +1,11 @@
-import { CheckBadgeIcon } from '@heroicons/react/24/outline';
 import { useFetcher } from '@remix-run/react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletState } from '~/provider/wallet-provider';
 import {
   WalletMultiButton,
   WalletDisconnectButton,
 } from '@solana/wallet-adapter-react-ui';
 import React from 'react';
 import { OnboardingStep } from '~/domain/faq/entities/user-profile';
-import { WalletDTO } from '~/domain/faq/entities/wallet';
 import { Alert, AlertDescription, AlertTitle } from '~/ui/atoms/alert';
 import { Button } from '~/ui/atoms/button';
 import {
@@ -18,22 +16,28 @@ import {
   CardHeader,
   CardTitle,
 } from '~/ui/atoms/card';
+import { CheckCircle2 } from 'lucide-react';
+import { Transaction, Connection } from '@solana/web3.js';
 
 export type CryptoWalletFormProps = {
-  wallet?: WalletDTO;
   errorMessage: string | null;
 };
 
-export const CryptoWalletForm = ({
-  wallet,
-  errorMessage,
-}: CryptoWalletFormProps) => {
-  const { publicKey, connected, connecting, disconnect } = useWallet();
+export const CryptoWalletForm = ({ errorMessage }: CryptoWalletFormProps) => {
+  const {
+    isConnected,
+    isConnecting,
+    hasPermission,
+    disconnectWallet,
+    connectWallet,
+    walletAddress,
+  } = useWalletState();
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === 'submitting';
 
   React.useEffect(() => {
-    disconnect();
+    // Disconnect wallet when component mounts to ensure fresh connection
+    disconnectWallet();
   }, []);
 
   return (
@@ -43,20 +47,14 @@ export const CryptoWalletForm = ({
       encType="multipart/form-data"
     >
       <Card className="max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl flex space-x-2 items-center">
-            Connect your Wallet
-            {publicKey ? (
-              <CheckBadgeIcon className="text-green-500 h-8 w-8 ml-1" />
-            ) : null}
-          </CardTitle>
+        <CardHeader className="pb-8">
+          <CardTitle className="text-2xl">Connect your Wallet</CardTitle>
           <CardDescription>
-            Connect your crypto wallet to your account in order to purchase
-            answers.
+            Connect your crypto wallet to your account to participate.
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="flex flex-col space-y-4">
+        <CardContent className="flex flex-col items-center space-y-4 pb-12">
           {errorMessage ? (
             <Alert variant="destructive">
               <AlertTitle>Failed to complete step</AlertTitle>
@@ -73,16 +71,38 @@ export const CryptoWalletForm = ({
           <input
             hidden
             name="publicKey"
-            value={publicKey?.toString()}
+            value={walletAddress || ''}
             onChange={() => {}}
           />
-          <WalletMultiButton disabled={connected} className="w-full" />
+
+          <div className="flex flex-col items-center space-y-4 w-full">
+            <WalletMultiButton
+              className="!bg-primary hover:!bg-primary/90 !h-11 !px-8"
+              onClick={connectWallet}
+            >
+              {isConnected ? 'Change Wallet' : 'Connect Wallet'}
+            </WalletMultiButton>
+
+            {isConnected && hasPermission && (
+              <div className="flex flex-col items-center space-y-3">
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  <span>Connected</span>
+                </div>
+                <code className="rounded-md border border-input/20 bg-black/40 px-4 py-2 font-mono text-sm font-medium bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
+                  {walletAddress}
+                </code>
+              </div>
+            )}
+          </div>
         </CardContent>
 
-        <CardFooter className="gap-4">
+        <CardFooter className="gap-4 pt-4">
           <Button
             type="submit"
-            disabled={connecting || isSubmitting || !connected}
+            disabled={
+              isConnecting || isSubmitting || !isConnected || !hasPermission
+            }
             className="w-full"
           >
             Next

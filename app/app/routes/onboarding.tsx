@@ -11,6 +11,7 @@ import {
   ShouldRevalidateFunctionArgs,
   useSearchParams,
 } from '@remix-run/react';
+import prisma from '~/infrastructure/database/index.server';
 
 export const loader = async (args: LoaderFunctionArgs) => {
   const searchParams = new URL(args.request.url).searchParams;
@@ -20,8 +21,22 @@ export const loader = async (args: LoaderFunctionArgs) => {
     })
   )?.id;
 
-  const user = await UserRepository.findByUserId(userId!);
-  if (user?.UserProfile?.isOnboardingComplete() && !searchParams?.get('step')) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      UserProfile: {
+        include: {
+          Avatar: true,
+          ExternalLinks: true,
+        },
+      },
+    },
+  });
+
+  if (
+    user?.UserProfile?.onboarding === OnboardingStep.DONE &&
+    !searchParams?.get('step')
+  ) {
     return redirect(`/onboarding?step=${OnboardingStep.DONE}`);
   }
 
@@ -40,12 +55,26 @@ export const loader = async (args: LoaderFunctionArgs) => {
     return redirect(`/onboarding?step=${user?.UserProfile?.onboarding}`);
   }
 
+  const userProfile = await prisma.userProfile.findUnique({
+    where: { userId },
+    include: {
+      User: true,
+      Avatar: true,
+    },
+  });
+
   return typedjson({
     errorMessage: searchParams.get('errorMessage'),
     currentStep:
       user?.UserProfile?.onboarding === OnboardingStep.PENDING
         ? OnboardingStep.BASIC_INFORMATION
         : user?.UserProfile?.onboarding,
+    user,
+    initialData: {
+      username: userProfile?.User?.username,
+      about: userProfile?.about,
+      avatarUrl: userProfile?.Avatar?.url,
+    },
   });
 };
 
@@ -88,7 +117,7 @@ export function shouldRevalidate({
 }
 
 const Onboarding = () => {
-  const { currentStep } = useTypedLoaderData<typeof loader>();
+  const { currentStep, initialData } = useTypedLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
 
   return (
@@ -96,6 +125,7 @@ const Onboarding = () => {
       <OnboardingForm
         currentStep={currentStep}
         errorMessage={searchParams.get('errorMessage')}
+        initialData={initialData}
       />
     </MainLayout>
   );

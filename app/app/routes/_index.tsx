@@ -12,6 +12,7 @@ import { Card, CardContent } from '~/ui/atoms/card';
 import { MainLayout } from '~/ui/layouts/main';
 import FeaturedQuestions from '~/ui/organisms/home/features-questions';
 import JoinCommunity from '~/ui/organisms/home/join-community';
+import { useWalletState } from '~/provider/wallet-provider';
 
 const exampleCreators = [
   {
@@ -160,6 +161,7 @@ const Stats = {
 const LandingPage = () => {
   const data = useTypedLoaderData<typeof loader>();
   const [stats, setStats] = useState(Stats);
+  const { walletAddress, isConnected } = useWalletState();
 
   useEffect(() => {
     setStats(Stats);
@@ -377,6 +379,11 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+      {isConnected && walletAddress && (
+        <code className="rounded-md border border-input bg-background px-4 py-2 font-mono text-sm">
+          {`${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`}
+        </code>
+      )}
     </MainLayout>
   );
 };

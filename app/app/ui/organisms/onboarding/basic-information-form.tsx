@@ -16,15 +16,42 @@ import { Input } from '~/ui/atoms/input-field';
 import { Label } from '~/ui/atoms/label';
 import { Textarea } from '~/ui/atoms/text-area';
 import { ImageInput } from '~/ui/molecules/image-input';
+import { useEffect } from 'react';
 
 export const BasicInformationForm = ({
   errorMessage,
+  initialData,
 }: {
   errorMessage: string | null;
+  initialData?: {
+    username?: string | null;
+    about?: string | null;
+    avatarUrl?: string | null;
+  };
 }) => {
   const fetcherData = useTypedFetcher<{ formErrors?: OnboardUserFormErrors }>();
   const formErrors = fetcherData?.data?.formErrors;
   const isSubmitting = fetcherData.state === 'submitting';
+
+  // Load initial data if available
+  useEffect(() => {
+    if (initialData?.username) {
+      const usernameInput = document.getElementById(
+        'username'
+      ) as HTMLInputElement;
+      if (usernameInput) {
+        usernameInput.value = initialData.username;
+      }
+    }
+    if (initialData?.about) {
+      const aboutInput = document.getElementById(
+        'about'
+      ) as HTMLTextAreaElement;
+      if (aboutInput) {
+        aboutInput.value = initialData.about;
+      }
+    }
+  }, [initialData]);
 
   return (
     <fetcherData.Form
@@ -48,10 +75,16 @@ export const BasicInformationForm = ({
             name="onboarding"
             hidden
             value={OnboardingStep.BASIC_INFORMATION}
-            onClick={() => {}}
+            readOnly
           />
           <ClientOnly>
-            {() => <ImageInput name="avatar" error={formErrors?.avatar?.[0]} />}
+            {() => (
+              <ImageInput
+                name="avatar"
+                error={formErrors?.avatar?.[0]}
+                initialImage={initialData?.avatarUrl}
+              />
+            )}
           </ClientOnly>
 
           <div className="space-y-3">
@@ -63,6 +96,7 @@ export const BasicInformationForm = ({
               name="username"
               placeholder="Choose a unique username that represents you"
               className="h-12"
+              defaultValue={initialData?.username || ''}
             />
             <ErrorMessage message={formErrors?.username?.[0]} />
           </div>
@@ -76,6 +110,7 @@ export const BasicInformationForm = ({
               name="about"
               placeholder="Share your story, expertise, and what makes you unique..."
               className="min-h-[120px] resize-none"
+              defaultValue={initialData?.about || ''}
             />
             <ErrorMessage message={formErrors?.about?.[0]} />
           </div>

@@ -5,7 +5,7 @@ import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
 import { getCryptoPrice, SupportedCoins } from '~/infrastructure/crypto';
 import prisma from '~/infrastructure/database/index.server';
-import { Avatar } from '~/ui/atoms/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '~/ui/atoms/avatar';
 import { MainLayout } from '~/ui/layouts/main';
 import { NewQuestionButton } from '~/ui/molecules/new-question-button';
 import { JoinButton } from '~/ui/organisms/auth/join';
@@ -92,13 +92,17 @@ const UserProfile = () => {
           </div>
 
           <div className="mx-auto text-center flex flex-col">
-            <Avatar
-              src={data.user?.UserProfile?.Avatar?.url!}
-              fallback={data.user?.username?.[0]!}
-              className="h-40 w-40 mx-auto mb-4"
-            />
-            <h1 className="font-bold text-xl">{data?.user?.username}</h1>
-            <span className="text-gray-500 font-lg">
+            <Avatar className="h-40 w-40 mx-auto mb-4">
+              <AvatarImage
+                src={data.user?.UserProfile?.Avatar?.url ?? ''}
+                alt={data.user?.username ?? ''}
+              />
+              <AvatarFallback>
+                {data.user?.username?.[0]?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <h1 className="font-bold text-xl mb-5">{data?.user?.username}</h1>
+            <span className="text-gray-500 font-lg mb-4">
               {data?.user?.UserProfile?.about ?? 'No bio available'}
             </span>
 

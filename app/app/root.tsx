@@ -25,6 +25,7 @@ import { SolanaProvider } from '~/ui/organisms/providers/solana-provider';
 import { useEffect } from 'react';
 import { posthog } from './infrastructure/analytics/index.client';
 import sonnerStyles from 'sonner/dist/styles.css?url';
+import { WalletProvider } from './provider/wallet-provider';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: sonnerStyles },
@@ -91,11 +92,13 @@ export default function App() {
             SOLANA_NETWORK={data.ENV.SOLANA_NETWORK}
             RPC_ENDPOINT={data.ENV.SOLANA_RPC_URL}
           >
-            <TooltipProvider>
-              <PHProvider>
-                <Outlet />
-              </PHProvider>
-            </TooltipProvider>
+            <WalletProvider>
+              <TooltipProvider>
+                <PHProvider>
+                  <Outlet />
+                </PHProvider>
+              </TooltipProvider>
+            </WalletProvider>
           </SolanaProvider>
         </UserProvider>
         <ScrollRestoration />

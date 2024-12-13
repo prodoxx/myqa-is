@@ -8,15 +8,15 @@ import { toast } from 'sonner';
 import { getErrorMessage } from '~/lib/error-messages';
 import { UserIcon } from 'lucide-react';
 
-export type ImageInput = {
+interface ImageInputProps {
   name: string;
-  className?: string;
   error?: string;
-};
+  initialImage?: string | null;
+}
 
-export const ImageInput = ({ name, className, error }: ImageInput) => {
+export const ImageInput = ({ name, error, initialImage }: ImageInputProps) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = React.useState<string>('');
+  const [preview, setPreview] = React.useState<string>(initialImage || '');
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -39,8 +39,11 @@ export const ImageInput = ({ name, className, error }: ImageInput) => {
 
       <div onClick={handleClick} className="cursor-pointer">
         <Avatar className="h-32 w-32">
-          {preview ? (
-            <AvatarImage src={preview} alt="Profile picture" />
+          {preview || initialImage ? (
+            <AvatarImage
+              src={preview || initialImage || ''}
+              alt="Profile picture"
+            />
           ) : (
             <AvatarFallback className="bg-muted">
               <UserIcon className="h-16 w-16" />
@@ -50,7 +53,7 @@ export const ImageInput = ({ name, className, error }: ImageInput) => {
       </div>
 
       <Button variant="outline" size="sm" onClick={handleClick} type="button">
-        Select Picture
+        {initialImage ? 'Change Picture' : 'Select Picture'}
       </Button>
 
       <input
