@@ -10,7 +10,7 @@ aptPackages = [
 ]
 
 [phases.build]
-commands = ["pnpm run build:remix"]
+commands = ["pnpm install", "pnpm run build:remix"]
 
 [phases.start]
 commands = ["pnpm run start"]
