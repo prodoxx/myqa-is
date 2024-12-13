@@ -2,7 +2,7 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "cd app && npm run build:remix",
+    "buildCommand": "cd app && npm i && npm run build:remix",
     "watchPatterns": ["/app/**", "/public/**"],
     "nixpacksConfigPath": "nixpacks.toml"
   },
