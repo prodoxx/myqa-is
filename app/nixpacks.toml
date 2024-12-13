@@ -13,7 +13,7 @@ aptPackages = [
 commands = ["pnpm install", "pnpm run build:remix"]
 
 [phases.start]
-commands = ["pnpm run start"]
+commands = ["pnpm install --frozen-lockfile", "pnpm run start"]
 
 [environment]
 nodeVersion = "22.11.0"
