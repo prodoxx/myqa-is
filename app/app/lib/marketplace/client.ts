@@ -427,6 +427,7 @@ export class MarketplaceClient {
       // return the token ID (current keys count)
       return questionAccount.currentKeys.toString();
     } catch (error) {
+      console.log(error);
       // clean up IPFS pin if we have metadata URI and the transaction failed
       if (data?.metadataUri) {
         try {
@@ -442,7 +443,7 @@ export class MarketplaceClient {
     }
   }
 
-  public async currentKeysCount(questionId: number) {
+  public async currentKeysCount(onChainId: number) {
     try {
       const marketplacePda = await this.getMarketplacePda();
 
@@ -451,7 +452,7 @@ export class MarketplaceClient {
         [
           Buffer.from('question'),
           marketplacePda.toBuffer(),
-          new BN(questionId).toArrayLike(Buffer, 'le', 8),
+          new BN(onChainId).toArrayLike(Buffer, 'le', 8),
         ],
         this.program.programId
       );

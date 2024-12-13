@@ -49,8 +49,10 @@ export const QuestionsList = ({
           let count = 0;
 
           try {
-            const result = await marketplace.currentKeysCount(question.id!);
-            count = result.length;
+            const result = await marketplace.currentKeysCount(
+              Number(question.onChainId!)
+            );
+            count = result as any;
           } catch (error) {
             console.log('Question not found');
           }
@@ -137,7 +139,7 @@ export const QuestionsList = ({
                 ) : (
                   <UnlockButton
                     id={question.id!}
-                    cid={question.IpfsPin.cid}
+                    onChainId={question.onChainId}
                     question={question.question}
                     priceInBonk={Number(question.unlockPriceInBonk)}
                     priceInDollar={Intl.NumberFormat('en-US').format(

@@ -57,7 +57,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
       user.UserProfile.QAs?.map((c) => ({
         id: c.id,
         decryptedAnswer:
-          decryptContent(c.encryptedAnswer, c.IpfsPin?.symmetricKey) ?? '',
+          decryptContent(c.encryptedAnswer, c.IpfsPin?.symmetricKey!) ?? '',
       })) ?? [],
     ]);
 

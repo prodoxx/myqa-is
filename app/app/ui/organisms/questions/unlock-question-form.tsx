@@ -20,16 +20,16 @@ interface UnlockQuestionFormProps {
   priceInBonk: number;
   priceInDollar: string;
   onClose: () => void;
-  cid: string;
+  onChainId: string;
 }
 
 export function UnlockQuestionForm({
   questionId,
+  onChainId,
   question,
   priceInBonk,
   onClose,
   priceInDollar,
-  cid,
 }: UnlockQuestionFormProps) {
   const wallet = useWallet();
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +43,7 @@ export function UnlockQuestionForm({
       await unlockQuestionAndAnswer(
         {
           wallet,
-          questionId: String(questionId),
+          questionId: onChainId,
         },
         marketplace
       );
