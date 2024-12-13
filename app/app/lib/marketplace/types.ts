@@ -25,8 +25,8 @@ export interface QuestionAnswerParams {
 }
 
 export interface MarketplaceState {
-  authority: PublicKey;
   treasury: PublicKey;
+  authority: PublicKey;
   questionCounter: BN;
   platformFeeBps: number;
   creatorRoyaltyBps: number;

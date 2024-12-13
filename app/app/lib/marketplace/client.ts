@@ -74,23 +74,37 @@ export class MarketplaceClient {
         const marketplaceAccount =
           await this.program.account.marketplace.fetch(marketplacePda);
 
+        // Match exact order from Rust struct
         this.marketplaceState = {
-          authority: marketplaceAccount.authority,
           treasury: marketplaceAccount.treasury,
+          authority: marketplaceAccount.authority,
           questionCounter: marketplaceAccount.questionCounter,
           platformFeeBps: marketplaceAccount.platformFeeBps,
           creatorRoyaltyBps: marketplaceAccount.creatorRoyaltyBps,
           totalVolume: marketplaceAccount.totalVolume,
-          paused: marketplaceAccount.paused,
-          pausedOperations: marketplaceAccount.pausedOperations,
+          paused: !!marketplaceAccount.paused,
+          pausedOperations: {
+            createQuestion:
+              !!marketplaceAccount.pausedOperations.createQuestion,
+            mintKey: !!marketplaceAccount.pausedOperations.mintKey,
+            listKey: !!marketplaceAccount.pausedOperations.listKey,
+            buyKey: !!marketplaceAccount.pausedOperations.buyKey,
+          },
           bonkMint: marketplaceAccount.bonkMint,
-        } as MarketplaceState;
+        };
+
+        console.log('Raw marketplace account:', marketplaceAccount);
+        console.log('Parsed marketplace state:', this.marketplaceState);
       } catch (error) {
         console.error('Failed to fetch marketplace account:', error);
-        throw new Error(
-          `Marketplace not initialized at ${marketplacePda.toString()}. ` +
-            'Please ensure the marketplace has been properly initialized.'
-        );
+        if (error instanceof Error) {
+          throw new Error(
+            `Marketplace not initialized at ${marketplacePda.toString()}. ` +
+              'Please ensure the marketplace has been properly initialized. ' +
+              `Original error: ${error.message}`
+          );
+        }
+        throw error;
       }
     }
     return this.marketplaceState;
@@ -168,6 +182,11 @@ export class MarketplaceClient {
         })
         .transaction();
 
+      // set feePayer and recentBlockhash
+      const latestBlockhash = await this.connection.getLatestBlockhash();
+      tx.feePayer = publicKey;
+      tx.recentBlockhash = latestBlockhash.blockhash;
+
       // sign and send the transaction using the wallet
       const signature = await wallet.sendTransaction(tx, this.connection);
 
@@ -205,6 +224,10 @@ export class MarketplaceClient {
           systemProgram: web3.SystemProgram.programId,
         })
         .transaction();
+
+      const latestBlockhash = await this.connection.getLatestBlockhash();
+      tx.feePayer = publicKey;
+      tx.recentBlockhash = latestBlockhash.blockhash;
 
       // sign and send the transaction using the wallet
       const signature = await wallet.sendTransaction(tx, this.connection);
