@@ -11,7 +11,7 @@ export class QAEntity {
   questionHash: QaORM['questionHash'];
   encryptedAnswer: QaORM['encryptedAnswer'];
   unlockPriceInBonk: QaORM['unlockPriceInBonk'];
-  IpfsPin: IpfsPinEntity;
+  IpfsPin?: IpfsPinEntity;
 
   constructor(
     question: Pick<
@@ -52,7 +52,7 @@ export class QAEntity {
       questionHash: this.questionHash,
       encryptedAnswer: this.encryptedAnswer,
       unlockPriceInBonk: this.unlockPriceInBonk,
-      IpfsPin: this.IpfsPin.json(),
+      IpfsPin: this.IpfsPin?.json(),
     } as QaDTO;
   }
 }

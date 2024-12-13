@@ -1,5 +1,6 @@
 import prisma from '~/infrastructure/database/index.server';
 import { QAEntity } from '../entities/qa';
+import { IpfsPinRepository } from './ipfs-pin-repository';
 
 export class QuestionRepository {
   static async rebuildEntity(data: any) {
@@ -7,7 +8,10 @@ export class QuestionRepository {
       return undefined;
     }
 
-    return new QAEntity(data);
+    return new QAEntity({
+      ...data,
+      IpfsPin: await IpfsPinRepository.rebuildEntity(data.IpfsPin),
+    });
   }
 
   static async create(data: QAEntity) {

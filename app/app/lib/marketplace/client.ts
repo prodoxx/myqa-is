@@ -118,8 +118,6 @@ export class MarketplaceClient {
   }: QuestionAnswerParams): Promise<string> {
     try {
       const publicKey = await this.ensureWalletConnected(wallet);
-      console.log({ publicKey });
-
       // convert contentMetadataHash from hex to Uint8Array
       const contentHash = new Uint8Array(
         contentMetadataHash.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
@@ -132,9 +130,7 @@ export class MarketplaceClient {
       );
 
       const marketplacePda = await this.getMarketplacePda();
-      console.log({ marketplacePda });
       const marketplaceState = await this.getMarketplaceState();
-      console.log({ marketplaceState });
 
       // get the next question counter
       const questionCounter = marketplaceState.questionCounter;
@@ -190,7 +186,6 @@ export class MarketplaceClient {
     wallet: WalletContextState
   ): Promise<void> {
     const publicKey = await this.ensureWalletConnected(wallet);
-
     const [userStatePda] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from('user_state'), publicKey.toBuffer()],
       this.program.programId
