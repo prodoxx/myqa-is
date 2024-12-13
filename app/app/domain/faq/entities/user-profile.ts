@@ -34,6 +34,7 @@ export class UserProfileEntity {
     }
   ) {
     this.id = userProfile?.id;
+    this.about = userProfile.about;
     this.createdAt = userProfile?.createdAt;
     this.updatedAt = userProfile?.updatedAt;
     this.dateOfBirth = userProfile?.dateOfBirth;
