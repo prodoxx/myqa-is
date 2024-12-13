@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
   useRouteError,
 } from '@remix-run/react';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
@@ -17,6 +18,8 @@ import { PHProvider } from './provider/posthog-provider';
 import { UserProvider } from './provider/user-provider';
 import { TooltipProvider } from './ui/atoms/tooltip';
 import { SolanaProvider } from '~/ui/organisms/providers/solana-provider';
+import { useEffect } from 'react';
+import { posthog } from './infrastructure/analytics/index.client';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {});
@@ -53,6 +56,11 @@ export const meta: MetaFunction = () => {
 
 export default function App() {
   const data = useTypedLoaderData<typeof loader>();
+
+  const location = useLocation();
+  useEffect(() => {
+    posthog.capture('$pageview');
+  }, [location]);
 
   return (
     <html lang="en" className="h-full w-full dark">

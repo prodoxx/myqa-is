@@ -391,6 +391,8 @@ export class MarketplaceClient {
 
       const metadataUri = `ipfs://${data.cid}`;
 
+      console.log(data.encryptedKey, Buffer.from(data.encryptionKey, 'hex'));
+
       // send transaction
       const tx = await this.program.methods
         .mintUnlockKey(metadataUri, data.encryptionKey)
