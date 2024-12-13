@@ -13,7 +13,7 @@ const createPrismaClient = () => {
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: process.env.POSTGRES_PRISMA_URL as string,
+        url: process.env.DATABASE_URL as string,
       },
     },
   });
