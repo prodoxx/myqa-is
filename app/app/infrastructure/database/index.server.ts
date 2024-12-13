@@ -10,16 +10,10 @@ interface CustomNodeJsGlobal extends NodeJS.Global {
 declare const global: CustomNodeJsGlobal;
 
 const createPrismaClient = () => {
-  if (!process.env.DATABASE_URL) {
-    throw new Error(
-      'DATABASE_URL environment variable is required but not set'
-    );
-  }
-
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DATABASE_URL as string,
+        url: process.env.POSTGRES_PRISMA_URL as string,
       },
     },
   });
@@ -31,12 +25,8 @@ const createPrismaClient = () => {
   );
 };
 
-let prisma: ReturnType<typeof createPrismaClient>;
+const prisma = global.prisma || createPrismaClient();
 
-if (process.env.NODE_ENV === 'production') {
-  prisma = createPrismaClient();
-} else {
-  prisma = global.prisma;
-}
+if (process.env.NODE_ENV === 'development') global.prisma = prisma;
 
 export default prisma;
