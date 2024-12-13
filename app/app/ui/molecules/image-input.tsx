@@ -15,48 +15,32 @@ export type ImageInput = {
 };
 
 export const ImageInput = ({ name, className, error }: ImageInput) => {
-  const hiddenInputRef = React.useRef<HTMLInputElement>(null);
-  const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
-    maxSize: 2_000_000,
-    accept: {
-      'image/png': ['.png'],
-      'image/jpeg': ['.jpg', '.jpeg'],
-    },
-    onDrop: (incomingFiles) => {
-      if (hiddenInputRef.current) {
-        const dataTransfer = new DataTransfer();
-        incomingFiles.forEach((v) => {
-          dataTransfer.items.add(v);
-        });
-        hiddenInputRef.current.files = dataTransfer.files;
-      }
-    },
-    onError: (error) => {
-      console.log(error);
-      toast.error(`Failed to select image: ${getErrorMessage(error)}`);
-    },
-    onDropRejected: (rejected) => {
-      toast.error(
-        `Failed to select image: ${rejected?.[0]?.errors?.[0]?.message}`
-      );
-    },
-  });
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = React.useState<string>('');
 
-  const selectedImagePreviewUrl = React.useMemo(() => {
-    if (acceptedFiles?.[0]) {
-      return URL.createObjectURL(acceptedFiles?.[0]);
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-    return '';
-  }, [acceptedFiles]);
+  };
+
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className="flex flex-col items-center space-y-4">
       <p className="text-sm font-medium">Profile Picture</p>
 
-      <div {...getRootProps()}>
-        <Avatar className="h-32 w-32 cursor-pointer">
-          {selectedImagePreviewUrl ? (
-            <AvatarImage src={selectedImagePreviewUrl} alt="Profile picture" />
+      <div onClick={handleClick} className="cursor-pointer">
+        <Avatar className="h-32 w-32">
+          {preview ? (
+            <AvatarImage src={preview} alt="Profile picture" />
           ) : (
             <AvatarFallback className="bg-muted">
               <UserIcon className="h-16 w-16" />
@@ -65,18 +49,18 @@ export const ImageInput = ({ name, className, error }: ImageInput) => {
         </Avatar>
       </div>
 
-      <Button variant="outline" size="sm" onClick={open}>
+      <Button variant="outline" size="sm" onClick={handleClick} type="button">
         Select Picture
       </Button>
 
       <input
+        ref={fileInputRef}
         type="file"
         name={name}
         hidden
-        ref={hiddenInputRef}
         accept="image/*"
+        onChange={handleFileSelect}
       />
-      <input {...getInputProps()} />
       {error && <ErrorMessage message={error} />}
     </div>
   );
