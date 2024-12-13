@@ -16,7 +16,7 @@ commands = ["pnpm install", "pnpm run build:remix"]
 commands = ["pnpm install --frozen-lockfile", "pnpm run start"]
 
 [environment]
-nodeVersion = "22.11.0"
+nodeVersion = "18.17.1"
 pythonVersion = "3.11"
 npm_config_fallback_to_build = "true"
 
