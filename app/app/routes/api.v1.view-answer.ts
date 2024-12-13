@@ -1,4 +1,4 @@
-import type { ActionFunction } from '@remix-run/node';
+import type { ActionFunction } from '@vercel/remix';
 import { typedjson } from 'remix-typedjson';
 import { z } from 'zod';
 import { authenticator } from '~/auth.server';
@@ -8,7 +8,7 @@ import { verifyKeyOwnership } from '~/utils/solana.server';
 
 const viewAnswerSchema = z.object({
   questionId: z.number().int().positive(),
-  tokenId: z.string().min(1),
+  tokenId: z.string().min(1).nullish(),
 });
 
 export const action: ActionFunction = async ({ request }) => {

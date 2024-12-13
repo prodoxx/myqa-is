@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { ActionFunctionArgs, LoaderFunctionArgs } from '@vercel/remix';
 import { authenticator } from '~/auth.server';
 import { getErrorMessage } from '~/lib/error-messages';
 import { MainLayout } from '~/ui/layouts/main';

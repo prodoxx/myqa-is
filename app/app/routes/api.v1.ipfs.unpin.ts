@@ -1,4 +1,4 @@
-import { ActionFunction } from '@remix-run/node';
+import { ActionFunction } from '@vercel/remix';
 import { typedjson } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import prisma from '~/infrastructure/database/index.server';

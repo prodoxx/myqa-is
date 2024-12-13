@@ -64,6 +64,7 @@
     "@solana/wallet-adapter-solflare": "^0.6.28",
     "@solana/web3.js": "^1.95.8",
     "@tanstack/react-table": "^8.16.0",
+    "@vercel/remix": "^2.15.1",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "bn.js": "5.2.1",

@@ -1,4 +1,4 @@
-import type { ActionFunction } from '@remix-run/node';
+import type { ActionFunction } from '@vercel/remix';
 import { PinataSDK } from 'pinata-web3';
 import { typedjson } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';

@@ -9,5 +9,5 @@ export const uploadHandler = unstable_composeUploadHandlers(
     maxPartSize: 5_000_000,
     file: ({ filename }) => filename,
   }),
-  unstable_createMemoryUploadHandler(),
+  unstable_createMemoryUploadHandler()
 );

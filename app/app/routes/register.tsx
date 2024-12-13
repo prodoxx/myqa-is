@@ -1,10 +1,10 @@
-import { redirect } from '@remix-run/node';
+import { redirect } from '@vercel/remix';
 import { Link, useNavigation } from '@remix-run/react';
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
-} from '@remix-run/node';
+} from '@vercel/remix';
 import { AuthorizationError } from 'remix-auth';
 import { typedjson, useTypedActionData } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';

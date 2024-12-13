@@ -13,7 +13,7 @@ import type {
   LinksFunction,
   LoaderFunctionArgs,
   MetaFunction,
-} from '@remix-run/node';
+} from '@vercel/remix';
 import { typedjson, useTypedLoaderData } from 'remix-typedjson';
 import '~/assets/styles/app.css';
 import { authenticator } from './auth.server';

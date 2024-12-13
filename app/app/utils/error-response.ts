@@ -1,4 +1,4 @@
-import { json } from '@remix-run/node';
+import { json } from '@vercel/remix';
 import * as joi from 'joi';
 import get from 'lodash/get';
 import { getErrorMessage } from '~/lib/error-messages';

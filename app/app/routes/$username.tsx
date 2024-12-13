@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs } from '@remix-run/node';
+import { LoaderFunctionArgs } from '@vercel/remix';
 import { redirect, typedjson, useTypedLoaderData } from 'remix-typedjson';
 import { z } from 'zod';
 import { authenticator } from '~/auth.server';

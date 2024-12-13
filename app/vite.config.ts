@@ -4,6 +4,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { vercelPreset } from '@vercel/remix/vite';
 
 installGlobals({ nativeFetch: true });
 
@@ -60,6 +61,7 @@ export default defineConfig({
   plugins: [
     nodePolyfills({ include: ['buffer'] }),
     remix({
+      presets: [vercelPreset()],
       future: {
         v3_singleFetch: true,
       },

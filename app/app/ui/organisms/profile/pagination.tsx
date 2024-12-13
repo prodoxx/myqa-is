@@ -1,4 +1,4 @@
-import { data } from '@remix-run/node';
+import { data } from '@vercel/remix';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   Pagination,

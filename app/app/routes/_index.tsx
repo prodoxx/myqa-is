@@ -1,4 +1,4 @@
-import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node';
+import { type LoaderFunctionArgs, type MetaFunction } from '@vercel/remix';
 import { Link } from '@remix-run/react';
 import { ChevronRight, Coins, Key, Lock, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
