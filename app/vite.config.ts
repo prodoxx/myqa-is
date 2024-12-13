@@ -3,6 +3,7 @@ import { installGlobals } from '@remix-run/node';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 installGlobals({ nativeFetch: true });
 
@@ -57,6 +58,7 @@ export default defineConfig({
           ],
   },
   plugins: [
+    nodePolyfills({ include: ['buffer'] }),
     remix({
       future: {
         v3_singleFetch: true,
