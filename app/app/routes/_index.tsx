@@ -90,8 +90,8 @@ const LandingPage = () => {
   return (
     <MainLayout>
       {/* Hero Section */}
-      <div className="container mx-auto px-4 pt-20 pb-16">
-        <div className="text-center">
+      <div className="container mx-auto px-4 pt-20 pb-16 min-h-[720px] flex items-center justify-center">
+        <div className="text-center my-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black text-white mb-6">
             Unlock Exclusive Access to Your{' '}
             <span className="bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
