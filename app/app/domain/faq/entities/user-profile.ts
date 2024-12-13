@@ -4,7 +4,6 @@ import {
 } from '@prisma/client';
 import { AssetDTO, AssetEntity } from './asset';
 import { ExternalLinkDTO, ExternalLinkEntity } from './external-link';
-import { WalletDTO, WalletEntity } from './wallet';
 import { QaDTO, QAEntity } from './qa';
 
 export const OnboardingStep: typeof OnboardingStepORM = {
@@ -25,14 +24,12 @@ export class UserProfileEntity {
   Avatar?: AssetEntity;
   about?: UserProfileORM['about'];
   onboarding?: UserProfileORM['onboarding'];
-  Wallet?: WalletEntity;
   QAs?: QAEntity[];
 
   constructor(
     userProfile: UserProfileORM & {
       ExternalLinks?: ExternalLinkEntity[];
       Avatar?: AssetEntity;
-      Wallet?: WalletEntity;
       QAs: QAEntity[];
     }
   ) {
@@ -44,7 +41,6 @@ export class UserProfileEntity {
     this.ExternalLinks = userProfile?.ExternalLinks;
     this.Avatar = userProfile?.Avatar;
     this.onboarding = userProfile?.onboarding;
-    this.Wallet = userProfile?.Wallet;
     this.QAs = userProfile?.QAs;
   }
 
@@ -91,7 +87,6 @@ export class UserProfileEntity {
       onboarding: this.onboarding,
       ExternalLinks: this.ExternalLinks?.map((c) => c.json()),
       Avatar: this.Avatar?.json(),
-      Wallet: this.Wallet?.json(),
       QAs: this.QAs?.map((c) => c.json()),
     } as UserProfileDTO;
   }
@@ -105,6 +100,5 @@ export type UserProfileDTO = Omit<
   updatedAt?: string;
   ExternalLinks: ExternalLinkDTO[];
   Avatar: AssetDTO;
-  Wallet: WalletDTO;
   QAs: QaDTO[];
 };
