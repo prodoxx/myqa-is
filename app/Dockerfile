@@ -1,5 +1,5 @@
 # Use Node.js LTS (20.x) as the base image
-FROM node:20-bullseye-slim as base
+FROM node:18-alpine
 
 # Install build dependencies and tools
 RUN apt-get update && apt-get install -y \
