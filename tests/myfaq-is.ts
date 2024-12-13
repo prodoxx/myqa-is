@@ -25,6 +25,8 @@ import { assert } from 'chai';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { BorshAccountsCoder } from '@project-serum/anchor';
 
+const TOKEN_METADATA_PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
+
 const TEST_BONK_DECIMALS = 6; // Match BONK token decimals
 
 describe('myfaq-is', function () {
@@ -33,14 +35,15 @@ describe('myfaq-is', function () {
 
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // jrogram test accounts
+  // Program test accounts
   const authority = Keypair.generate();
+  const treasury = Keypair.generate();
   const user = Keypair.generate();
   const bonkMint = Keypair.generate();
   let marketplace: PublicKey;
   let userState: PublicKey;
   let userTokenAccount: PublicKey;
-  let platformTokenAccount: PublicKey;
+  let treasuryTokenAccount: PublicKey;
 
   // mint unlock key test accounts
   const buyer = Keypair.generate();
@@ -50,6 +53,7 @@ describe('myfaq-is', function () {
   let questionPda: PublicKey;
   let mintAuthority: PublicKey;
   let metadata: PublicKey;
+  let updateAuthority: PublicKey;
 
   // configure the client to use the local cluster
   const provider = anchor.AnchorProvider.env();
@@ -62,212 +66,212 @@ describe('myfaq-is', function () {
   const CONTENT_HASH = Array(32).fill(1);
   const UNLOCK_PRICE = new anchor.BN(1_000_000); // 1 BONK (6 decimals)
   const MAX_KEYS = new anchor.BN(10);
-  const TOKEN_METADATA_PROGRAM_ID = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
+  const PINATA_URI = 'https://gateway.pinata.cloud/ipfs/QmT8JtG98Pu6YqHrRxiANrqjaC8ydz3F4uuQvRfQqC3T45';
+  const ENCRYPTED_KEY = Buffer.from('encrypted_key_data');
   const LIST_PRICE = new anchor.BN(2_000_000); // 2 BONK (6 decimals)
+  const UPDATED_PRICE = new anchor.BN(3_000_000); // 3 BONK (6 decimals)
 
   before(async () => {
-    try {
-      // airdrop SOL with confirmation
-      const latestBlockhash = await provider.connection.getLatestBlockhash();
+    // airdrop SOL
+    const latestBlockhash = await provider.connection.getLatestBlockhash();
 
-      for (const kp of [authority, user]) {
-        const signature = await provider.connection.requestAirdrop(kp.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);
-
-        await provider.connection.confirmTransaction({
-          signature,
-          ...latestBlockhash,
-        });
-      }
-
-      // find PDA for marketplace instead of using a regular account
-      const [marketplacePda, bump] = PublicKey.findProgramAddressSync(
-        [Buffer.from('marketplace'), authority.publicKey.toBuffer()],
-        program.programId,
-      );
-      marketplace = marketplacePda;
-
-      // initialize marketplace using PDA
-      await program.methods
-        .initialize()
-        .accounts({
-          marketplace,
-          authority: authority.publicKey,
-          bonkMint: bonkMint.publicKey,
-          systemProgram: SystemProgram.programId,
-          rent: SYSVAR_RENT_PUBKEY,
-        })
-        .signers([authority])
-        .rpc();
-
-      // create BONK token mint with correct decimals
-      await createMint(provider.connection, authority, authority.publicKey, null, TEST_BONK_DECIMALS, bonkMint);
-
-      // create associated token accounts
-      userTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, user.publicKey);
-
-      platformTokenAccount = await createAssociatedTokenAccount(
-        provider.connection,
-        authority,
-        bonkMint.publicKey,
-        authority.publicKey,
-      );
-
-      // find PDA for user state
-      [userState] = PublicKey.findProgramAddressSync(
-        [Buffer.from('user_state'), user.publicKey.toBuffer()],
-        program.programId,
-      );
-
-      // additional setup for mint unlock key tests
-      buyerTokenAccount = await createAssociatedTokenAccount(
-        provider.connection,
-        authority,
-        bonkMint.publicKey,
-        buyer.publicKey,
-      );
-
-      creatorTokenAccount = await createAssociatedTokenAccount(
-        provider.connection,
-        authority,
-        bonkMint.publicKey,
-        user.publicKey,
-      );
-
-      // mint some BONK tokens to buyer
-      await mintTo(
-        provider.connection,
-        authority,
-        bonkMint.publicKey,
-        buyerTokenAccount,
-        authority,
-        10_000_000, // 10 BONK
-      );
-
-      // find PDAs
-      [mintAuthority] = PublicKey.findProgramAddressSync([Buffer.from('mint_authority')], program.programId);
-
-      [questionPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from('question'), marketplace.toBuffer(), new anchor.BN(0).toArrayLike(Buffer, 'le', 8)],
-        program.programId,
-      );
-
-      // find metadata address
-      [metadata] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from('metadata'),
-          new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID).toBuffer(),
-          nftMint.publicKey.toBuffer(),
-        ],
-        new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID),
-      );
-    } catch (error) {
-      console.error('Setup error:', error);
-      if ('logs' in error) {
-        console.error('Error logs:', error.logs);
-      }
-      throw error;
+    for (const kp of [authority, user, treasury]) {
+      const signature = await provider.connection.requestAirdrop(kp.publicKey, 10 * LAMPORTS_PER_SOL);
+      await provider.connection.confirmTransaction({
+        signature,
+        ...latestBlockhash,
+      });
     }
+
+    // find PDA for marketplace
+    const [marketplacePda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('marketplace'), authority.publicKey.toBuffer()],
+      program.programId,
+    );
+    marketplace = marketplacePda;
+
+    // initialize marketplace
+    await program.methods
+      .initialize()
+      .accounts({
+        marketplace,
+        authority: authority.publicKey,
+        treasury: treasury.publicKey,
+        bonkMint: bonkMint.publicKey,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
+      })
+      .signers([authority])
+      .rpc();
+
+    // create BONK token mint
+    await createMint(provider.connection, authority, authority.publicKey, null, TEST_BONK_DECIMALS, bonkMint);
+
+    // create treasury token account (ATA for treasury)
+    treasuryTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, treasury.publicKey);
+    try {
+      await getAccount(provider.connection, treasuryTokenAccount);
+    } catch {
+      const ix = createAssociatedTokenAccountInstruction(
+        authority.publicKey,
+        treasuryTokenAccount,
+        treasury.publicKey,
+        bonkMint.publicKey,
+      );
+      const tx = new Transaction().add(ix);
+      await sendAndConfirmTransaction(provider.connection, tx, [authority]);
+    }
+
+    // create user token account
+    userTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, user.publicKey);
+
+    // find PDA for user state
+    [userState] = PublicKey.findProgramAddressSync(
+      [Buffer.from('user_state'), user.publicKey.toBuffer()],
+      program.programId,
+    );
+
+    // initialize user state
+    await program.methods
+      .initializeUserState()
+      .accounts({
+        userState,
+        user: user.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([user])
+      .rpc();
+
+    // Setup buyer token account
+    buyerTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, buyer.publicKey);
+    try {
+      await getAccount(provider.connection, buyerTokenAccount);
+    } catch {
+      const ix = createAssociatedTokenAccountInstruction(
+        authority.publicKey,
+        buyerTokenAccount,
+        buyer.publicKey,
+        bonkMint.publicKey,
+      );
+      const tx = new Transaction().add(ix);
+      await sendAndConfirmTransaction(provider.connection, tx, [authority]);
+    }
+
+    // Setup creator token account
+    creatorTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, user.publicKey);
+    try {
+      await getAccount(provider.connection, creatorTokenAccount);
+    } catch {
+      const ix = createAssociatedTokenAccountInstruction(
+        authority.publicKey,
+        creatorTokenAccount,
+        user.publicKey,
+        bonkMint.publicKey,
+      );
+      const tx = new Transaction().add(ix);
+      await sendAndConfirmTransaction(provider.connection, tx, [authority]);
+    }
+
+    // mint some BONK to buyer
+    await mintTo(
+      provider.connection,
+      authority,
+      bonkMint.publicKey,
+      buyerTokenAccount,
+      authority,
+      10_000_000, // 10 BONK
+    );
+
+    // find mintAuthority
+    [mintAuthority] = PublicKey.findProgramAddressSync([Buffer.from('mint_authority')], program.programId);
+
+    // find question PDA
+    const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
+    [questionPda] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('question'),
+        marketplace.toBuffer(),
+        new anchor.BN(marketplaceAccount.questionCounter).toArrayLike(Buffer, 'le', 8),
+      ],
+      program.programId,
+    );
+
+    // create NFT mint for tests
+    await createMint(provider.connection, authority, mintAuthority, null, 0, nftMint);
+
+    // find metadata
+    [metadata] = PublicKey.findProgramAddressSync(
+      [Buffer.from('metadata'), TOKEN_METADATA_PROGRAM_ID.toBuffer(), nftMint.publicKey.toBuffer()],
+      TOKEN_METADATA_PROGRAM_ID,
+    );
+
+    // updateAuthority can be a PDA or just the mintAuthority for simplicity
+    updateAuthority = mintAuthority;
   });
 
   it('Initializes the marketplace', async () => {
-    try {
-      const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
+    const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
 
-      assert.ok(marketplaceAccount.authority.equals(authority.publicKey));
-      assert.equal(marketplaceAccount.questionCounter.toNumber(), 0);
-      assert.equal(marketplaceAccount.platformFeeBps, 500); // 5%
-      assert.equal(marketplaceAccount.creatorRoyaltyBps, 200); // 2%
-      assert.equal(marketplaceAccount.totalVolume.toNumber(), 0);
-      assert.equal(marketplaceAccount.paused, false);
-      assert.deepEqual(marketplaceAccount.pausedOperations, {
-        createQuestion: false,
-        mintKey: false,
-        listKey: false,
-        buyKey: false,
-      });
-    } catch (error) {
-      console.error('Verification error:', error);
-      throw error;
-    }
+    assert.ok(marketplaceAccount.authority.equals(authority.publicKey));
+    assert.ok(marketplaceAccount.treasury.equals(treasury.publicKey));
+    assert.equal(marketplaceAccount.questionCounter.toNumber(), 0);
+    assert.equal(marketplaceAccount.platformFeeBps, 500); // 5%
+    assert.equal(marketplaceAccount.creatorRoyaltyBps, 200); // 2%
+    assert.equal(marketplaceAccount.totalVolume.toNumber(), 0);
+    assert.equal(marketplaceAccount.paused, false);
+    assert.deepEqual(marketplaceAccount.pausedOperations, {
+      createQuestion: false,
+      mintKey: false,
+      listKey: false,
+      buyKey: false,
+    });
   });
 
   it('Initializes user state', async () => {
-    try {
-      const [userStatePda] = PublicKey.findProgramAddressSync(
-        [Buffer.from('user_state'), user.publicKey.toBuffer()],
-        program.programId,
-      );
-
-      await program.methods
-        .initializeUserState()
-        .accounts({
-          userState: userStatePda,
-          user: user.publicKey,
-          systemProgram: SystemProgram.programId,
-        })
-        .signers([user])
-        .rpc();
-
-      const userStateAccount = await program.account.userState.fetch(userStatePda);
-      assert.equal(userStateAccount.questionsCreated.toNumber(), 0);
-      assert.equal(userStateAccount.isBlacklisted, false);
-    } catch (error) {
-      console.error('User state initialization error:', error);
-      throw error;
-    }
+    const userStateAccount = await program.account.userState.fetch(userState);
+    assert.equal(userStateAccount.questionsCreated.toNumber(), 0);
+    assert.equal(userStateAccount.isBlacklisted, false);
   });
 
   describe('CreateQuestion', () => {
     it('Creates a question', async () => {
-      try {
-        // get user state PDA
-        const [userStatePda] = PublicKey.findProgramAddressSync(
-          [Buffer.from('user_state'), user.publicKey.toBuffer()],
-          program.programId,
-        );
-
-        // get question PDA
-        const [questionPda] = PublicKey.findProgramAddressSync(
-          [Buffer.from('question'), marketplace.toBuffer(), new anchor.BN(0).toArrayLike(Buffer, 'le', 8)],
-          program.programId,
-        );
-
-        await program.methods
-          .createQuestion(CONTENT_CID, CONTENT_HASH, UNLOCK_PRICE, MAX_KEYS)
-          .accounts({
-            marketplace: marketplace,
-            userState: userStatePda,
-            question: questionPda,
-            creator: user.publicKey,
-            systemProgram: SystemProgram.programId,
-            rent: SYSVAR_RENT_PUBKEY,
-          })
-          .signers([user])
-          .rpc();
-
-        const questionAccount = await program.account.question.fetch(questionPda);
-        assert.ok(questionAccount.creator.equals(user.publicKey));
-        assert.equal(questionAccount.contentCid, CONTENT_CID);
-        assert.deepEqual(Array.from(questionAccount.contentHash), CONTENT_HASH);
-        assert.equal(questionAccount.unlockPrice.toNumber(), UNLOCK_PRICE.toNumber());
-        assert.equal(questionAccount.maxKeys.toNumber(), MAX_KEYS.toNumber());
-        assert.equal(questionAccount.currentKeys.toNumber(), 0);
-        assert.equal(questionAccount.isActive, true);
-
-        const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
-        assert.equal(marketplaceAccount.questionCounter.toNumber(), 1);
-      } catch (error) {
-        console.error('Create question error:', error);
-        throw error;
-      }
-    });
-
-    it('Fails to create question when marketplace is paused', async () => {
-      const [userStatePda] = PublicKey.findProgramAddressSync(
-        [Buffer.from('user_state'), user.publicKey.toBuffer()],
+      const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
+      const [questionPdaNew] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('question'),
+          marketplace.toBuffer(),
+          new anchor.BN(marketplaceAccount.questionCounter).toArrayLike(Buffer, 'le', 8),
+        ],
         program.programId,
       );
 
+      await program.methods
+        .createQuestion(CONTENT_CID, CONTENT_HASH, UNLOCK_PRICE, MAX_KEYS)
+        .accounts({
+          marketplace: marketplace,
+          userState: userState,
+          question: questionPdaNew,
+          creator: user.publicKey,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
+        })
+        .signers([user])
+        .rpc();
+
+      const questionAccount = await program.account.question.fetch(questionPdaNew);
+      assert.ok(questionAccount.creator.equals(user.publicKey));
+      assert.equal(questionAccount.contentCid, CONTENT_CID);
+      assert.deepEqual(Array.from(questionAccount.contentHash), CONTENT_HASH);
+      assert.equal(questionAccount.unlockPrice.toNumber(), UNLOCK_PRICE.toNumber());
+      assert.equal(questionAccount.maxKeys.toNumber(), MAX_KEYS.toNumber());
+      assert.equal(questionAccount.currentKeys.toNumber(), 0);
+      assert.equal(questionAccount.isActive, true);
+
+      const updatedMarketplace = await program.account.marketplace.fetch(marketplace);
+      assert.equal(updatedMarketplace.questionCounter.toNumber(), 1);
+    });
+
+    it('Fails to create question when marketplace is paused', async () => {
       // wait for rate limit cooldown
       await sleep(1000);
 
@@ -281,8 +285,13 @@ describe('myfaq-is', function () {
         .signers([authority])
         .rpc();
 
-      const [questionPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from('question'), marketplace.toBuffer(), new anchor.BN(1).toArrayLike(Buffer, 'le', 8)],
+      const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
+      const [questionPda2] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('question'),
+          marketplace.toBuffer(),
+          new anchor.BN(marketplaceAccount.questionCounter).toArrayLike(Buffer, 'le', 8),
+        ],
         program.programId,
       );
 
@@ -290,9 +299,9 @@ describe('myfaq-is', function () {
         await program.methods
           .createQuestion(CONTENT_CID, CONTENT_HASH, UNLOCK_PRICE, MAX_KEYS)
           .accounts({
-            marketplace: marketplace,
-            userState: userStatePda,
-            question: questionPda,
+            marketplace,
+            userState,
+            question: questionPda2,
             creator: user.publicKey,
             systemProgram: SystemProgram.programId,
             rent: SYSVAR_RENT_PUBKEY,
@@ -321,253 +330,129 @@ describe('myfaq-is', function () {
   });
 
   describe('MintUnlockKey', () => {
-    const PINATA_URI = 'https://gateway.pinata.cloud/ipfs/QmT8JtG98Pu6YqHrRxiANrqjaC8ydz3F4uuQvRfQqC3T45';
-    const ENCRYPTED_KEY = Buffer.from('encrypted_key_data');
     let unlockKeyPda: PublicKey;
-    let nftMint: Keypair;
-
+    let nftMintLocal: Keypair;
     beforeEach(async () => {
-      try {
-        // airdrop SOL to buyer
-        const latestBlockhash = await provider.connection.getLatestBlockhash();
+      // airdrop SOL to buyer
+      const latestBlockhash = await provider.connection.getLatestBlockhash();
 
-        const signature = await provider.connection.requestAirdrop(
-          buyer.publicKey,
-          2 * LAMPORTS_PER_SOL, // airdrop 2 SOL to cover all fees
-        );
+      const signature = await provider.connection.requestAirdrop(buyer.publicKey, 2 * LAMPORTS_PER_SOL);
+      await provider.connection.confirmTransaction({
+        signature,
+        ...latestBlockhash,
+      });
 
-        // wait for confirmation
-        await provider.connection.confirmTransaction({
-          signature,
-          ...latestBlockhash,
-        });
-
-        // make sure marketplace is not paused
-        const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
-
-        if (marketplaceAccount.paused) {
-          await program.methods
-            .toggleMarketplace()
-            .accounts({
-              marketplace: marketplace,
-              authority: authority.publicKey,
-            })
-            .signers([authority])
-            .rpc();
-        }
-
-        // initialize user state if not already initialized
-        try {
-          await program.account.userState.fetch(userState);
-        } catch {
-          await program.methods
-            .initializeUserState()
-            .accounts({
-              userState: userState,
-              user: user.publicKey,
-              systemProgram: SystemProgram.programId,
-            })
-            .signers([user])
-            .rpc();
-        }
-
-        // get question PDA with correct seeds
-        [questionPda] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from('question'),
-            marketplace.toBuffer(),
-            marketplaceAccount.questionCounter.toArrayLike(Buffer, 'le', 8),
-          ],
-          program.programId,
-        );
-
-        // create NFT mint
-        nftMint = Keypair.generate();
-        await createMint(provider.connection, authority, mintAuthority, null, 0, nftMint);
-
-        // create the question
+      // ensure marketplace is not paused
+      const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
+      if (marketplaceAccount.paused) {
         await program.methods
-          .createQuestion(CONTENT_CID, CONTENT_HASH, UNLOCK_PRICE, MAX_KEYS)
+          .toggleMarketplace()
           .accounts({
             marketplace,
-            userState,
-            question: questionPda,
-            creator: user.publicKey,
-            systemProgram: SystemProgram.programId,
-            rent: SYSVAR_RENT_PUBKEY,
+            authority: authority.publicKey,
           })
-          .signers([user])
+          .signers([authority])
           .rpc();
-
-        // verify question was created
-        const questionAccount = await program.account.question.fetch(questionPda);
-
-        if (!questionAccount) {
-          throw new Error('Question account not initialized');
-        }
-
-        // find PDA for unlock key
-        [unlockKeyPda] = PublicKey.findProgramAddressSync(
-          [Buffer.from('unlock_key'), questionPda.toBuffer(), new anchor.BN(0).toArrayLike(Buffer, 'le', 8)],
-          program.programId,
-        );
-
-        // create token accounts if they don't exist
-        try {
-          // get ATAs
-          buyerTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, buyer.publicKey);
-
-          creatorTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, user.publicKey);
-
-          platformTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, authority.publicKey);
-
-          // create ATAs if they don't exist
-          const buyerAccountInfo = await provider.connection.getAccountInfo(buyerTokenAccount);
-          if (!buyerAccountInfo) {
-            const ix = createAssociatedTokenAccountInstruction(
-              buyer.publicKey,
-              buyerTokenAccount,
-              buyer.publicKey,
-              bonkMint.publicKey,
-            );
-            const tx = new Transaction().add(ix);
-            return await sendAndConfirmTransaction(provider.connection, tx, [buyer]);
-          }
-
-          const creatorAccountInfo = await provider.connection.getAccountInfo(creatorTokenAccount);
-          if (!creatorAccountInfo) {
-            const ix = createAssociatedTokenAccountInstruction(
-              authority.publicKey,
-              creatorTokenAccount,
-              user.publicKey,
-              bonkMint.publicKey,
-            );
-            const tx = new Transaction().add(ix);
-            return await sendAndConfirmTransaction(provider.connection, tx, [authority]);
-          }
-
-          const platformAccountInfo = await provider.connection.getAccountInfo(platformTokenAccount);
-          if (!platformAccountInfo) {
-            const ix = createAssociatedTokenAccountInstruction(
-              authority.publicKey,
-              platformTokenAccount,
-              authority.publicKey,
-              bonkMint.publicKey,
-            );
-            const tx = new Transaction().add(ix);
-            return await sendAndConfirmTransaction(provider.connection, tx, [authority]);
-          }
-
-          // mint BONK tokens to buyer
-          await mintTo(
-            provider.connection,
-            authority,
-            bonkMint.publicKey,
-            buyerTokenAccount,
-            authority,
-            UNLOCK_PRICE.toNumber() * 2, // mint extra for fees
-          );
-        } catch (error) {
-          console.error('Token account setup error:', error);
-          throw error;
-        }
-
-        // find metadata PDA
-        [metadata] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from('metadata'),
-            new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID).toBuffer(),
-            nftMint.publicKey.toBuffer(),
-          ],
-          new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID),
-        );
-      } catch (error) {
-        console.error('BeforeEach setup error:', error);
-        throw error;
       }
-    });
 
-    afterEach(async () => {
-      try {
-        // ensure marketplace is unpaused after each test
-        const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
+      const questionCounter = marketplaceAccount.questionCounter;
+      [questionPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('question'), marketplace.toBuffer(), questionCounter.toArrayLike(Buffer, 'le', 8)],
+        program.programId,
+      );
 
-        if (marketplaceAccount.paused) {
-          return await program.methods
-            .toggleMarketplace()
-            .accounts({
-              marketplace: marketplace,
-              authority: authority.publicKey,
-            })
-            .signers([authority])
-            .rpc();
-        }
-      } catch (error) {
-        console.error('AfterEach cleanup error:', error);
+      // create question for this test scenario
+      await program.methods
+        .createQuestion(CONTENT_CID, CONTENT_HASH, UNLOCK_PRICE, MAX_KEYS)
+        .accounts({
+          marketplace,
+          userState,
+          question: questionPda,
+          creator: user.publicKey,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
+        })
+        .signers([user])
+        .rpc();
+
+      const questionAccount = await program.account.question.fetch(questionPda);
+      if (!questionAccount) {
+        throw new Error('Question account not initialized');
       }
+
+      nftMintLocal = Keypair.generate();
+      await createMint(provider.connection, authority, mintAuthority, null, 0, nftMintLocal);
+
+      // find metadata for this new NFT
+      [metadata] = PublicKey.findProgramAddressSync(
+        [Buffer.from('metadata'), TOKEN_METADATA_PROGRAM_ID.toBuffer(), nftMintLocal.publicKey.toBuffer()],
+        TOKEN_METADATA_PROGRAM_ID,
+      );
+
+      // find PDA for unlock key
+      const questionData = await program.account.question.fetch(questionPda);
+      [unlockKeyPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('unlock_key'), questionPda.toBuffer(), questionData.currentKeys.toArrayLike(Buffer, 'le', 8)],
+        program.programId,
+      );
+
+      // mint BONK to buyer if needed
+      await mintTo(
+        provider.connection,
+        authority,
+        bonkMint.publicKey,
+        buyerTokenAccount,
+        authority,
+        UNLOCK_PRICE.toNumber() * 2,
+      );
     });
 
     it('Successfully mints an unlock key', async () => {
-      try {
-        await program.methods
-          .mintUnlockKey(PINATA_URI, ENCRYPTED_KEY)
-          .accounts({
-            marketplace: marketplace,
-            question: questionPda,
-            unlockKey: unlockKeyPda,
-            buyer: buyer.publicKey,
-            buyerTokenAccount: buyerTokenAccount,
-            creatorTokenAccount: creatorTokenAccount,
-            platformTokenAccount: platformTokenAccount,
-            bonkMint: bonkMint.publicKey,
-            metadata: metadata,
-            mint: nftMint.publicKey,
-            mintAuthority: mintAuthority,
-            updateAuthority: mintAuthority,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            metadataProgram: TOKEN_METADATA_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-            rent: SYSVAR_RENT_PUBKEY,
-            userState: userState,
-          })
-          .signers([buyer])
-          .rpc();
+      await program.methods
+        .mintUnlockKey(PINATA_URI, ENCRYPTED_KEY)
+        .accounts({
+          marketplace,
+          question: questionPda,
+          unlockKey: unlockKeyPda,
+          buyer: buyer.publicKey,
+          buyerTokenAccount,
+          creatorTokenAccount,
+          treasuryTokenAccount, // fees go here
+          bonkMint: bonkMint.publicKey,
+          metadata,
+          mint: nftMintLocal.publicKey, // note: using global nftMint created in before block if needed
+          mintAuthority: mintAuthority,
+          updateAuthority: mintAuthority,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          metadataProgram: TOKEN_METADATA_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
+          userState,
+        })
+        .signers([buyer])
+        .rpc();
 
-        const unlockKeyAccount = await program.account.unlockKey.fetch(unlockKeyPda);
+      const unlockKeyAccount = await program.account.unlockKey.fetch(unlockKeyPda);
 
-        // verify account data
-        assert.ok(unlockKeyAccount.owner.equals(buyer.publicKey), 'Incorrect initial owner');
-        assert.ok(unlockKeyAccount.question.equals(questionPda));
-        assert.equal(unlockKeyAccount.tokenId.toNumber(), 0);
-        assert.deepEqual(Buffer.from(unlockKeyAccount.encryptedKey), ENCRYPTED_KEY);
-        assert.equal(unlockKeyAccount.isListed, false);
-        assert.equal(unlockKeyAccount.listPrice.toNumber(), 0);
-        assert.equal(unlockKeyAccount.metadataUri, PINATA_URI);
-        assert.equal(unlockKeyAccount.discriminator, 1, 'Incorrect unlock key discriminator');
+      assert.ok(unlockKeyAccount.owner.equals(buyer.publicKey), 'Incorrect owner');
+      assert.ok(unlockKeyAccount.question.equals(questionPda));
+      assert.equal(unlockKeyAccount.tokenId.toNumber(), 0);
+      assert.deepEqual(Buffer.from(unlockKeyAccount.encryptedKey), ENCRYPTED_KEY);
+      assert.equal(unlockKeyAccount.isListed, false);
+      assert.equal(unlockKeyAccount.listPrice.toNumber(), 0);
+      assert.equal(unlockKeyAccount.metadataUri, PINATA_URI);
 
-        // verify question state
-        const questionAccount = await program.account.question.fetch(questionPda);
-        assert.equal(questionAccount.currentKeys.toNumber(), 1);
+      // verify token transfers
+      const platformFee = Math.floor(UNLOCK_PRICE.toNumber() * 0.05);
+      const creatorPayment = UNLOCK_PRICE.toNumber() - platformFee;
 
-        // verify token transfers
-        const buyerBalance = await provider.connection.getTokenAccountBalance(buyerTokenAccount);
-        const creatorBalance = await provider.connection.getTokenAccountBalance(creatorTokenAccount);
-        const platformBalance = await provider.connection.getTokenAccountBalance(platformTokenAccount);
+      const buyerBalance = await provider.connection.getTokenAccountBalance(buyerTokenAccount);
+      const creatorBalance = await provider.connection.getTokenAccountBalance(creatorTokenAccount);
+      const treasuryBalance = await provider.connection.getTokenAccountBalance(treasuryTokenAccount);
 
-        // calculate expected fees (5% platform fee, remaining to creator)
-        const platformFee = Math.floor(UNLOCK_PRICE.toNumber() * 0.05);
-        const creatorPayment = UNLOCK_PRICE.toNumber() - platformFee;
-
-        assert.equal(platformBalance.value.amount, platformFee.toString());
-        assert.equal(creatorBalance.value.amount, creatorPayment.toString());
-      } catch (error) {
-        console.error('Mint unlock key error:', error);
-        if ('logs' in error) {
-          console.error('Error logs:', error.logs);
-        }
-        throw error;
-      }
+      assert.equal(treasuryBalance.value.amount, platformFee.toString());
+      assert.equal(creatorBalance.value.amount, creatorPayment.toString());
     });
 
     it('Fails to mint when marketplace is paused', async () => {
@@ -576,53 +461,54 @@ describe('myfaq-is', function () {
         await program.methods
           .toggleMarketplace()
           .accounts({
-            marketplace: marketplace,
+            marketplace,
             authority: authority.publicKey,
           })
           .signers([authority])
           .rpc();
 
-        // wait for transaction to confirm
         await sleep(2000);
 
         // verify marketplace is paused
         const marketplaceAccount = await program.account.marketplace.fetch(marketplace);
         assert.isTrue(marketplaceAccount.paused, 'Marketplace should be paused');
 
+        // try to mint unlock key
         await program.methods
           .mintUnlockKey(PINATA_URI, ENCRYPTED_KEY)
           .accounts({
-            marketplace: marketplace,
+            marketplace,
             question: questionPda,
             unlockKey: unlockKeyPda,
             buyer: buyer.publicKey,
-            buyerTokenAccount: buyerTokenAccount,
-            creatorTokenAccount: creatorTokenAccount,
-            platformTokenAccount: platformTokenAccount,
+            buyerTokenAccount,
+            creatorTokenAccount,
+            treasuryTokenAccount,
             bonkMint: bonkMint.publicKey,
-            metadata: metadata,
+            metadata,
             mint: nftMint.publicKey,
-            mintAuthority: mintAuthority,
+            mintAuthority,
             updateAuthority: mintAuthority,
             tokenProgram: TOKEN_PROGRAM_ID,
-            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            metadataProgram: TOKEN_METADATA_PROGRAM_ID,
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
             rent: SYSVAR_RENT_PUBKEY,
-            userState: userState,
+            userState,
           })
           .signers([buyer])
           .rpc();
+
         assert.fail('Expected transaction to fail');
       } catch (error: any) {
         const errorMessage = error.error?.errorMessage || error.message;
         assert.include(errorMessage, 'Marketplace is paused');
       } finally {
-        // cleanup - unpause marketplace
+        // unpause marketplace
         await program.methods
           .toggleMarketplace()
           .accounts({
-            marketplace: marketplace,
+            marketplace,
             authority: authority.publicKey,
           })
           .signers([authority])
@@ -646,8 +532,8 @@ describe('myfaq-is', function () {
         await program.methods
           .createQuestion(CONTENT_CID, CONTENT_HASH, UNLOCK_PRICE, new anchor.BN(1))
           .accounts({
-            marketplace: marketplace,
-            userState: userState,
+            marketplace,
+            userState,
             question: questionPdaLimited,
             creator: user.publicKey,
             systemProgram: SystemProgram.programId,
@@ -681,24 +567,24 @@ describe('myfaq-is', function () {
         await program.methods
           .mintUnlockKey(PINATA_URI, ENCRYPTED_KEY)
           .accounts({
-            marketplace: marketplace,
+            marketplace,
             question: questionPdaLimited,
             unlockKey: firstKeyPda,
             buyer: buyer.publicKey,
-            buyerTokenAccount: buyerTokenAccount,
-            creatorTokenAccount: creatorTokenAccount,
-            platformTokenAccount: platformTokenAccount,
+            buyerTokenAccount,
+            creatorTokenAccount,
+            treasuryTokenAccount, // Use treasuryTokenAccount instead of platformTokenAccount
             bonkMint: bonkMint.publicKey,
             metadata: firstMetadata,
             mint: firstNftMint.publicKey,
             mintAuthority: mintAuthority,
             updateAuthority: mintAuthority,
             tokenProgram: TOKEN_PROGRAM_ID,
-            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            metadataProgram: TOKEN_METADATA_PROGRAM_ID, // Use TOKEN_METADATA_PROGRAM_ID
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
             rent: SYSVAR_RENT_PUBKEY,
-            userState: userState,
+            userState,
           })
           .signers([buyer])
           .rpc();
@@ -729,24 +615,24 @@ describe('myfaq-is', function () {
         await program.methods
           .mintUnlockKey(PINATA_URI, ENCRYPTED_KEY)
           .accounts({
-            marketplace: marketplace,
+            marketplace,
             question: questionPdaLimited,
             unlockKey: secondKeyPda,
             buyer: buyer.publicKey,
-            buyerTokenAccount: buyerTokenAccount,
-            creatorTokenAccount: creatorTokenAccount,
-            platformTokenAccount: platformTokenAccount,
+            buyerTokenAccount,
+            creatorTokenAccount,
+            treasuryTokenAccount, // Use treasuryTokenAccount instead of platformTokenAccount
             bonkMint: bonkMint.publicKey,
             metadata: secondMetadata,
             mint: secondNftMint.publicKey,
             mintAuthority: mintAuthority,
             updateAuthority: mintAuthority,
             tokenProgram: TOKEN_PROGRAM_ID,
-            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            metadataProgram: TOKEN_METADATA_PROGRAM_ID, // Use TOKEN_METADATA_PROGRAM_ID
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
             rent: SYSVAR_RENT_PUBKEY,
-            userState: userState,
+            userState,
           })
           .signers([buyer])
           .rpc();
@@ -763,28 +649,29 @@ describe('myfaq-is', function () {
 
     it('Prevents duplicate minting of the same token ID', async () => {
       try {
-        // first mint - this should succeed
+        // first mint - this should succeed (use nftMintLocal and its metadata)
         await program.methods
           .mintUnlockKey(PINATA_URI, ENCRYPTED_KEY)
           .accounts({
-            marketplace: marketplace,
+            marketplace,
             question: questionPda,
             unlockKey: unlockKeyPda,
             buyer: buyer.publicKey,
-            buyerTokenAccount: buyerTokenAccount,
-            creatorTokenAccount: creatorTokenAccount,
-            platformTokenAccount: platformTokenAccount,
+            buyerTokenAccount,
+            creatorTokenAccount,
+            treasuryTokenAccount,
             bonkMint: bonkMint.publicKey,
-            metadata: metadata,
-            mint: nftMint.publicKey,
-            mintAuthority: mintAuthority,
+            // Use the metadata and mint derived from nftMintLocal
+            metadata,
+            mint: nftMintLocal.publicKey,
+            mintAuthority,
             updateAuthority: mintAuthority,
             tokenProgram: TOKEN_PROGRAM_ID,
-            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            metadataProgram: TOKEN_METADATA_PROGRAM_ID,
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
             rent: SYSVAR_RENT_PUBKEY,
-            userState: userState,
+            userState,
           })
           .signers([buyer])
           .rpc();
@@ -803,7 +690,6 @@ describe('myfaq-is', function () {
         );
 
         // try to mint again with the same PDA seeds
-        // note: we're using the same seeds as the first mint to test duplicate prevention
         const [duplicateUnlockKeyPda] = PublicKey.findProgramAddressSync(
           [Buffer.from('unlock_key'), questionPda.toBuffer(), new anchor.BN(0).toArrayLike(Buffer, 'le', 8)],
           program.programId,
@@ -812,38 +698,37 @@ describe('myfaq-is', function () {
         await program.methods
           .mintUnlockKey(PINATA_URI, ENCRYPTED_KEY)
           .accounts({
-            marketplace: marketplace,
+            marketplace,
             question: questionPda,
             unlockKey: duplicateUnlockKeyPda,
             buyer: buyer.publicKey,
-            buyerTokenAccount: buyerTokenAccount,
-            creatorTokenAccount: creatorTokenAccount,
-            platformTokenAccount: platformTokenAccount,
+            buyerTokenAccount,
+            creatorTokenAccount,
+            treasuryTokenAccount, // use treasuryTokenAccount
             bonkMint: bonkMint.publicKey,
             metadata: secondMetadata,
             mint: secondNftMint.publicKey,
-            mintAuthority: mintAuthority,
+            mintAuthority,
             updateAuthority: mintAuthority,
             tokenProgram: TOKEN_PROGRAM_ID,
-            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            metadataProgram: TOKEN_METADATA_PROGRAM_ID, // Use TOKEN_METADATA_PROGRAM_ID
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
             rent: SYSVAR_RENT_PUBKEY,
-            userState: userState,
+            userState,
           })
           .signers([buyer])
           .rpc();
 
         assert.fail('Expected transaction to fail');
       } catch (error: any) {
-        // check for account already initialized error
         const errorMessage = error.toString();
         assert.ok(
-          errorMessage.includes('custom program error: 0x0') || // Anchor account already initialized error
-            errorMessage.includes('failed to send transaction') || // Transaction simulation failure
-            errorMessage.includes('Account already initialized') || // Explicit error message
-            errorMessage.includes('Error Code: AccountAlreadyInitialized') || // Anchor specific error
-            errorMessage.includes('Error Code: ConstraintSeeds'), // Seeds constraint violation
+          errorMessage.includes('custom program error: 0x0') ||
+            errorMessage.includes('failed to send transaction') ||
+            errorMessage.includes('Account already initialized') ||
+            errorMessage.includes('Error Code: AccountAlreadyInitialized') ||
+            errorMessage.includes('Error Code: ConstraintSeeds'),
           `Got unexpected error: ${errorMessage}`,
         );
       }
@@ -962,7 +847,7 @@ describe('myfaq-is', function () {
 
         const creatorATA = await getAssociatedTokenAddress(bonkMint.publicKey, user.publicKey);
 
-        const platformATA = await getAssociatedTokenAddress(bonkMint.publicKey, authority.publicKey);
+        const treasuryTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, treasury.publicKey);
 
         // create ATAs if they don't exist
         try {
@@ -978,9 +863,9 @@ describe('myfaq-is', function () {
         }
 
         try {
-          await getAccount(provider.connection, platformATA);
+          await getAccount(provider.connection, treasuryTokenAccount);
         } catch {
-          await createAssociatedTokenAccount(provider.connection, authority, bonkMint.publicKey, authority.publicKey);
+          await createAssociatedTokenAccount(provider.connection, authority, bonkMint.publicKey, treasury.publicKey);
         }
 
         await sleep(1000);
@@ -1007,7 +892,7 @@ describe('myfaq-is', function () {
             buyer: buyer.publicKey,
             buyerTokenAccount: buyerATA,
             creatorTokenAccount: creatorATA,
-            platformTokenAccount: platformATA,
+            treasuryTokenAccount: treasuryTokenAccount,
             bonkMint: bonkMint.publicKey,
             metadata,
             mint: nftMint.publicKey,
@@ -1261,10 +1146,10 @@ describe('myfaq-is', function () {
         let newBuyerTokenAccount: PublicKey;
         let buyerTokenAccount: PublicKey;
         let creatorTokenAccount: PublicKey;
-        let platformTokenAccount: PublicKey;
+        let treasuryTokenAccount: PublicKey;
 
         // initialize token accounts
-        platformTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, authority.publicKey);
+        treasuryTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, treasury.publicKey);
         buyerTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, buyer.publicKey);
         creatorTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, user.publicKey);
         newBuyerTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, newBuyer.publicKey);
@@ -1274,7 +1159,7 @@ describe('myfaq-is', function () {
           [newBuyerTokenAccount, newBuyer.publicKey],
           [buyerTokenAccount, buyer.publicKey],
           [creatorTokenAccount, user.publicKey],
-          [platformTokenAccount, authority.publicKey],
+          [treasuryTokenAccount, treasury.publicKey],
         ]) {
           try {
             await getAccount(provider.connection, account);
@@ -1349,7 +1234,7 @@ describe('myfaq-is', function () {
             buyer: buyer.publicKey,
             buyerTokenAccount,
             creatorTokenAccount,
-            platformTokenAccount,
+            treasuryTokenAccount,
             bonkMint: bonkMint.publicKey,
             metadata,
             mint: nftMint.publicKey,
@@ -1426,15 +1311,15 @@ describe('myfaq-is', function () {
         // initialize newBuyerTokenAccount
         newBuyerTokenAccount = await getAssociatedTokenAddress(bonkMint.publicKey, newBuyer.publicKey);
 
-        // create ATA for new buyer
+        // create ATA for new buyer if needed
         try {
           await getAccount(provider.connection, newBuyerTokenAccount);
         } catch {
-          await createAssociatedTokenAccount(provider.connection, newBuyer, bonkMint.publicKey, newBuyer.publicKey);
+          await createAssociatedTokenAccount(provider.connection, authority, bonkMint.publicKey, newBuyer.publicKey);
           await sleep(1000);
         }
 
-        // mint tokens to buyer
+        // mint tokens to new buyer
         await mintTo(
           provider.connection,
           authority,
@@ -1461,7 +1346,7 @@ describe('myfaq-is', function () {
             buyerTokenAccount: newBuyerTokenAccount,
             sellerTokenAccount: buyerTokenAccount,
             creatorTokenAccount,
-            platformTokenAccount,
+            treasuryTokenAccount, // Use treasuryTokenAccount instead of platformTokenAccount
             bonkMint: bonkMint.publicKey,
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
@@ -1489,6 +1374,7 @@ describe('myfaq-is', function () {
         throw error;
       }
     });
+
     it('Fails to buy when marketplace is paused', async () => {
       try {
         // initialize newBuyerTokenAccount if not already done
@@ -1557,7 +1443,7 @@ describe('myfaq-is', function () {
             buyerTokenAccount: newBuyerTokenAccount,
             sellerTokenAccount: buyerTokenAccount,
             creatorTokenAccount,
-            platformTokenAccount,
+            treasuryTokenAccount, // replaced platformTokenAccount with treasuryTokenAccount
             bonkMint: bonkMint.publicKey,
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
@@ -1599,7 +1485,7 @@ describe('myfaq-is', function () {
             buyerTokenAccount,
             sellerTokenAccount: buyerTokenAccount,
             creatorTokenAccount,
-            platformTokenAccount,
+            treasuryTokenAccount, // replaced platformTokenAccount with treasuryTokenAccount
             bonkMint: bonkMint.publicKey,
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
@@ -1668,7 +1554,7 @@ describe('myfaq-is', function () {
               buyerTokenAccount: poorBuyerTokenAccount,
               sellerTokenAccount: buyerTokenAccount,
               creatorTokenAccount,
-              platformTokenAccount,
+              treasuryTokenAccount, // replaced platformTokenAccount with treasuryTokenAccount
               bonkMint: bonkMint.publicKey,
               tokenProgram: TOKEN_PROGRAM_ID,
               systemProgram: SystemProgram.programId,
@@ -1682,10 +1568,10 @@ describe('myfaq-is', function () {
           // handle both custom program errors and token program errors
           const errorMessage = error.toString();
           assert.ok(
-            errorMessage.includes('0x1') || // anchor error code
-              errorMessage.includes('insufficient funds') || // SPL token error
-              errorMessage.includes('InsufficientFunds') || // our custom error
-              errorMessage.includes('custom program error: 0x1'), // alternative error format
+            errorMessage.includes('0x1') ||
+              errorMessage.includes('insufficient funds') ||
+              errorMessage.includes('InsufficientFunds') ||
+              errorMessage.includes('custom program error: 0x1'),
             `Got unexpected error: ${errorMessage}`,
           );
         }

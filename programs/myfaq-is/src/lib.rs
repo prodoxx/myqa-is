@@ -68,6 +68,7 @@ pub mod myfaq_is {
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         let marketplace = &mut ctx.accounts.marketplace;
         marketplace.authority = ctx.accounts.authority.key();
+        marketplace.treasury = ctx.accounts.treasury.key();
         marketplace.question_counter = 0;
         marketplace.platform_fee_bps = INITIAL_PLATFORM_FEE_BPS;
         marketplace.creator_royalty_bps = INITIAL_CREATOR_ROYALTY_BPS;
@@ -83,6 +84,19 @@ pub mod myfaq_is {
             bonk_mint: marketplace.bonk_mint,
         });
 
+        Ok(())
+    }
+
+    pub fn update_treasury(ctx: Context<UpdateTreasury>, new_treasury: Pubkey) -> Result<()> {
+        let marketplace = &mut ctx.accounts.marketplace;
+        
+        emit!(TreasuryUpdated {
+            previous_treasury: marketplace.treasury,
+            new_treasury,
+            timestamp: Clock::get()?.unix_timestamp,
+        });
+        
+        marketplace.treasury = new_treasury;
         Ok(())
     }
 
@@ -279,7 +293,7 @@ pub mod myfaq_is {
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
                     from: ctx.accounts.buyer_token_account.to_account_info(),
-                    to: ctx.accounts.platform_token_account.to_account_info(),
+                    to: ctx.accounts.treasury_token_account.to_account_info(),
                     authority: ctx.accounts.buyer.to_account_info(),
                 },
             ),
@@ -492,7 +506,7 @@ pub mod myfaq_is {
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
                     from: ctx.accounts.buyer_token_account.to_account_info(),
-                    to: ctx.accounts.platform_token_account.to_account_info(),
+                    to: ctx.accounts.treasury_token_account.to_account_info(),
                     authority: ctx.accounts.buyer.to_account_info(),
                 },
             ),
@@ -646,6 +660,7 @@ pub struct Initialize<'info> {
         payer = authority,
         space = 8 + // discriminator
         32 + // authority: Pubkey
+        32 + // treasury: Pubkey
         8 + // question_counter: u64
         2 + // platform_fee_bps: u16
         2 + // creator_royalty_bps: u16
@@ -659,6 +674,8 @@ pub struct Initialize<'info> {
     pub marketplace: Account<'info, Marketplace>,
     /// CHECK: Validated in instruction
     pub bonk_mint: UncheckedAccount<'info>,
+    /// CHECK: Treasury account
+    pub treasury: UncheckedAccount<'info>,
     #[account(mut)]
     pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -732,6 +749,12 @@ pub struct MintUnlockKey<'info> {
     #[account(mut)]
     pub question: Account<'info, Question>,
     #[account(
+        mut,
+        constraint = treasury_token_account.owner == marketplace.treasury,
+        token::mint = bonk_mint
+    )]
+    pub treasury_token_account: Account<'info, TokenAccount>,
+    #[account(
         init,
         payer = buyer,
         space = MIN_ACCOUNT_SPACE +   // discriminator
@@ -772,13 +795,6 @@ pub struct MintUnlockKey<'info> {
         token::mint = bonk_mint
     )]
     pub creator_token_account: Account<'info, TokenAccount>,
-    
-    #[account(
-        mut,
-        constraint = platform_token_account.owner == marketplace.authority,
-        token::mint = bonk_mint
-    )]
-    pub platform_token_account: Account<'info, TokenAccount>,
     
     pub bonk_mint: Account<'info, Mint>,
     
@@ -854,6 +870,12 @@ pub struct BuyListedKey<'info> {
     pub question: Account<'info, Question>,
     #[account(
         mut,
+        constraint = treasury_token_account.owner == marketplace.treasury,
+        token::mint = bonk_mint
+    )]
+    pub treasury_token_account: Account<'info, TokenAccount>,
+    #[account(
+        mut,
         seeds = [
             b"unlock_key",
             question.key().as_ref(),
@@ -894,13 +916,6 @@ pub struct BuyListedKey<'info> {
     )]
     pub creator_token_account: Account<'info, TokenAccount>,
     
-    #[account(
-        mut,
-        constraint = platform_token_account.owner == marketplace.authority,
-        token::mint = bonk_mint
-    )]
-    pub platform_token_account: Account<'info, TokenAccount>,
-    
     pub bonk_mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
@@ -917,6 +932,7 @@ pub struct ToggleMarketplace<'info> {
 
 #[account]
 pub struct Marketplace {
+    pub treasury: Pubkey,
     pub authority: Pubkey,
     pub question_counter: u64,
     pub platform_fee_bps: u16,
@@ -1102,6 +1118,13 @@ pub struct BlacklistUser<'info> {
     pub authority: Signer<'info>,
 }
 
+#[derive(Accounts)]
+pub struct UpdateTreasury<'info> {
+    #[account(mut, has_one = authority)]
+    pub marketplace: Account<'info, Marketplace>,
+    pub authority: Signer<'info>,
+}
+
 #[event]
 pub struct FeeUpdateEvent {
     pub platform_fee_bps: u16,
@@ -1178,5 +1201,12 @@ pub struct AuthorityTransferred {
 pub struct UserUnblacklisted {
     pub user: Pubkey,
     pub authority: Pubkey,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct TreasuryUpdated {
+    pub previous_treasury: Pubkey,
+    pub new_treasury: Pubkey,
     pub timestamp: i64,
 }

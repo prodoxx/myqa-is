@@ -230,11 +230,30 @@ async function deploy() {
       program.programId,
     );
 
+    let treasuryKeypair: web3.Keypair;
+
+    // add this after payerKeypair initialization
+    const treasuryKeypairFile = path.join(configDir, 'localnet-treasury-keypair.json');
+
+    if (fs.existsSync(treasuryKeypairFile)) {
+      console.log('Using existing treasury keypair...');
+      const secretKey = Buffer.from(JSON.parse(fs.readFileSync(treasuryKeypairFile, 'utf-8')));
+      treasuryKeypair = web3.Keypair.fromSecretKey(secretKey);
+    } else {
+      console.log('Creating new treasury keypair...');
+      treasuryKeypair = web3.Keypair.generate();
+      fs.writeFileSync(treasuryKeypairFile, JSON.stringify(Array.from(treasuryKeypair.secretKey)), 'utf-8');
+    }
+
+    await ensureAccountFunded(connection, treasuryKeypair.publicKey, 5 * web3.LAMPORTS_PER_SOL);
+
+    // Update the program initialization to include treasury
     await program.methods
       .initialize()
       .accounts({
         marketplace: marketplacePDA,
         bonkMint: testBonkMint,
+        treasury: treasuryKeypair.publicKey, // Add treasury account
         authority: provider.wallet.publicKey,
         systemProgram: web3.SystemProgram.programId,
         rent: web3.SYSVAR_RENT_PUBKEY,
@@ -250,6 +269,8 @@ async function deploy() {
       version: JSON.parse(fs.readFileSync('package.json', 'utf-8')).version,
       payerKeypairPath: 'config/localnet-payer-keypair.json',
       bonkMintAuthorityPath: 'config/localnet-bonk-mint-authority-keypair.json',
+      treasury: treasuryKeypair.publicKey.toString(),
+      treasuryKeypairPath: 'config/localnet-treasury-keypair.json',
     };
 
     fs.writeFileSync('config/localnet-deployment-info.json', JSON.stringify(deployInfo, null, 2));
@@ -261,6 +282,7 @@ async function deploy() {
     console.log('✓ Deployment info: ./config/localnet-deployment-info.json');
     console.log('✓ Payer keypair: ./config/localnet-payer-keypair.json');
     console.log('✓ BONK mint authority: ./config/localnet-bonk-mint-authority-keypair.json');
+    console.log('✓ Treasury keypair: ./config/localnet-treasury-keypair.json');
     console.log('\nPress Ctrl+C to stop the validator and cleanup...\n');
 
     return deployInfo;
