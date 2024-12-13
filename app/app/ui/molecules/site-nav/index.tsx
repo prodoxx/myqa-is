@@ -28,11 +28,6 @@ export const SiteNav = ({
   const { isConnected, walletAddress } = useWalletState();
   const [showWarning, setShowWarning] = React.useState(false);
 
-  // Check if user is in onboarding or has completed it
-  const isOnboarding = user?.UserProfile?.onboarding !== undefined;
-  const hasCompletedOnboarding = user?.UserProfile?.onboarding === 'DONE';
-  const shouldShowWallet = isOnboarding || hasCompletedOnboarding;
-
   return (
     <nav className={`flex h-[96px] w-full flex-row items-center ${className}`}>
       <div className="mr-auto">
@@ -42,18 +37,14 @@ export const SiteNav = ({
       <div className="ml-auto hidden items-center gap-4 sm:flex">
         {user ? (
           <>
-            {shouldShowWallet && (
-              <>
-                {isConnected ? (
-                  <code className="rounded-md border border-input bg-background px-4 py-2 font-mono text-sm font-medium text-foreground">
-                    {`${walletAddress?.slice(0, 4)}...${walletAddress?.slice(-4)}`}
-                  </code>
-                ) : (
-                  <WalletMultiButton className="!bg-primary hover:!bg-primary/90">
-                    Connect Wallet
-                  </WalletMultiButton>
-                )}
-              </>
+            {isConnected ? (
+              <code className="rounded-md border border-input bg-background px-4 py-2 font-mono text-sm font-medium text-foreground">
+                {`${walletAddress?.slice(0, 4)}...${walletAddress?.slice(-4)}`}
+              </code>
+            ) : (
+              <WalletMultiButton className="!bg-primary hover:!bg-primary/90">
+                Connect Wallet
+              </WalletMultiButton>
             )}
             <LogoutForm />
           </>

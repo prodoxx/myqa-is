@@ -20,11 +20,15 @@ const WalletContext = createContext<WalletContextType>({
 });
 
 export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
-  const { publicKey, connected, connecting, disconnect } = useWallet();
+  const { publicKey, connected, connecting, disconnect, connect } = useWallet();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
 
   useEffect(() => {
+    console.log('Wallet state:', {
+      connected,
+      publicKey: publicKey?.toString(),
+    });
     if (connected && publicKey) {
       setWalletAddress(publicKey.toString());
       setHasPermission(true);
@@ -34,10 +38,12 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [connected, publicKey]);
 
-  const connectWallet = () => {
-    // Reset states for fresh connection
-    setWalletAddress(null);
-    setHasPermission(false);
+  const connectWallet = async () => {
+    try {
+      await connect();
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
+    }
   };
 
   const disconnectWallet = () => {

@@ -40,8 +40,8 @@ export const action: ActionFunction = async ({ request }) => {
     return typedjson({ error: 'Method not allowed' }, { status: 405 });
   }
 
-  const user = await authenticator.isAuthenticated(request);
-  if (!user) {
+  const userSession = await authenticator.isAuthenticated(request);
+  if (!userSession) {
     return typedjson({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -61,6 +61,12 @@ export const action: ActionFunction = async ({ request }) => {
       return typedjson({ error: 'Answer too long' }, { status: 400 });
     }
 
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userSession.id,
+      },
+    });
+
     const symmetricKey = generateSymmetricKey();
     const encryptedAnswer = encryptContent(answer, symmetricKey);
     const hashedAnswer = hashContent(answer);
@@ -77,6 +83,8 @@ export const action: ActionFunction = async ({ request }) => {
       },
     };
 
+    console.log('ipfsContent', ipfsContent);
+
     const contentHash = hashContent(JSON.stringify(ipfsContent));
     const questionHash = hashContent(question);
 
@@ -84,7 +92,7 @@ export const action: ActionFunction = async ({ request }) => {
       metadata: {
         name: `MyFAQ-${Date.now()}`,
         keyValues: {
-          creatorAddress: user.walletPublicKey!,
+          creatorAddress: String(user?.walletPublicKey),
           questionHash: questionHash.toString('hex'),
         },
       },
@@ -110,7 +118,7 @@ export const action: ActionFunction = async ({ request }) => {
         status: 'PINNED',
         User: {
           connect: {
-            id: user.id,
+            id: userSession.id,
           },
         },
       },
