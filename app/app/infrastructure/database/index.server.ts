@@ -19,7 +19,11 @@ const prisma =
         url: process.env.DATABASE_URL as string,
       },
     },
-  }).$extends(fieldEncryptionExtension());
+  }).$extends(
+    fieldEncryptionExtension({
+      encryptionKey: process.env.ENCRYPTION_KEY as string,
+    })
+  );
 
 if (process.env.NODE_ENV === 'development') global.prisma = prisma;
 
