@@ -76,6 +76,7 @@ export class MarketplaceClient {
 
         this.marketplaceState = {
           authority: marketplaceAccount.authority,
+          treasury: marketplaceAccount.treasury,
           questionCounter: marketplaceAccount.questionCounter,
           platformFeeBps: marketplaceAccount.platformFeeBps,
           creatorRoyaltyBps: marketplaceAccount.creatorRoyaltyBps,
@@ -364,9 +365,9 @@ export class MarketplaceClient {
         questionAccount.creator
       );
 
-      const platformTokenAccount = await getAssociatedTokenAddress(
+      const treasuryTokenAccount = await getAssociatedTokenAddress(
         marketplaceState.bonkMint,
-        marketplaceState.authority
+        marketplaceState.treasury
       );
 
       // create NFT mint
@@ -403,7 +404,7 @@ export class MarketplaceClient {
           buyer: publicKey,
           buyerTokenAccount,
           creatorTokenAccount,
-          platformTokenAccount,
+          treasuryTokenAccount,
           bonkMint: marketplaceState.bonkMint,
           metadata,
           mint: nftMint.publicKey,
