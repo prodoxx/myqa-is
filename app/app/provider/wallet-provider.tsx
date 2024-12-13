@@ -25,10 +25,6 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
   const [hasPermission, setHasPermission] = useState(false);
 
   useEffect(() => {
-    console.log('Wallet state:', {
-      connected,
-      publicKey: publicKey?.toString(),
-    });
     if (connected && publicKey) {
       setWalletAddress(publicKey.toString());
       setHasPermission(true);
