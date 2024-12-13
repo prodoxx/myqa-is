@@ -440,12 +440,11 @@ export class MarketplaceClient {
           rent: web3.SYSVAR_RENT_PUBKEY,
           userState: userStatePda,
         })
+        .signers([nftMint])
         .transaction();
 
       // sign and send transaction
-      const signature = await wallet.sendTransaction(tx, this.connection, {
-        signers: [nftMint],
-      });
+      const signature = await wallet.sendTransaction(tx, this.connection);
 
       // wait for confirmation
       await this.confirmTx(signature);
