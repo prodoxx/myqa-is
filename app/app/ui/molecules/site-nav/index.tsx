@@ -14,6 +14,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from '../dialog';
+import { ArrowLongRightIcon } from '@heroicons/react/24/outline';
 
 export const SiteNav = ({
   className,
@@ -51,7 +52,11 @@ export const SiteNav = ({
             )}
             <LogoutForm />
           </>
-        ) : null}
+        ) : (
+          <Button onClick={() => navigate('/login')} size="lg" variant="ghost">
+            Log in <ArrowLongRightIcon className="text-white h-8 w-10" />
+          </Button>
+        )}
       </div>
 
       <Dialog open={showWarning} onOpenChange={setShowWarning}>

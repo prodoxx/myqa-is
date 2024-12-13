@@ -82,23 +82,25 @@ export const QuestionsList = ({
             key={question.id}
             className="p-6 bg-gradient-to-r transition-all duration-300 border border-purple-500/20"
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 flex-col md:flex-row">
               <div className="space-y-4 flex-1 flex-col flex">
-                <h3 className="text-xl font-bold text-gradient bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
+                <h3 className="text-xl inline-flex items-center font-bold text-gradient bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
                   {question.question}{' '}
+                  {isDemo ? (
+                    <Badge variant="outline" className="ml-1">
+                      Demo
+                    </Badge>
+                  ) : null}
                 </h3>
 
                 {isDemo && 'author' in question && 'field' in question ? (
                   <div>
                     <span>Asked to {String(question?.author)} in </span>
                     <span className="font-bold">{String(question.field)} </span>
-                    <Badge variant="outline" className="ml-2">
-                      Demo
-                    </Badge>
                   </div>
                 ) : null}
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-start md:items-center gap-4 flex-col md:flex-row">
                   {cryptoPrice ? (
                     <BonkPricing
                       toUsd={Intl.NumberFormat('en-US').format(
@@ -109,7 +111,7 @@ export const QuestionsList = ({
                     </BonkPricing>
                   ) : null}
 
-                  <div className="h-4 w-px bg-gray-300 dark:bg-gray-700" />
+                  <div className="h-4 w-px bg-gray-300 dark:bg-gray-700 hidden md:flex" />
 
                   <AvailableKeys
                     maxKeys={question.maxKeys}
