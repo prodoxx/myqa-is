@@ -9,6 +9,8 @@ import path from 'path';
 const DEVNET_BONK_MINT = new web3.PublicKey('Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr');
 const DEVNET_URL = 'https://api.devnet.solana.com';
 
+const PROGRAM_ID = new web3.PublicKey('9JAQRjJrrADocbboPiaRNRNpkbGKZKgxoJpsEkJEDn2e');
+
 async function checkAccountFunding(
   connection: web3.Connection,
   account: web3.PublicKey,
@@ -28,11 +30,21 @@ async function checkAccountFunding(
   }
 }
 
-async function verifyProgramDeployment(connection: web3.Connection, programId: web3.PublicKey): Promise<void> {
-  const verifyProgramInfo = await connection.getAccountInfo(programId);
-  if (!verifyProgramInfo || !verifyProgramInfo.executable) {
-    throw new Error('Program deployment verification failed');
+async function verifyProgramDeploymentWithRetry(
+  connection: web3.Connection,
+  programId: web3.PublicKey,
+  retries = 10,
+  waitTimeMs = 10000,
+) {
+  for (let i = 0; i < retries; i++) {
+    const info = await connection.getAccountInfo(programId);
+    if (info && info.executable) {
+      return;
+    }
+    console.log(`Attempt ${i + 1}/${retries}: Waiting for program to be fully finalized...`);
+    await new Promise((resolve) => setTimeout(resolve, waitTimeMs));
   }
+  throw new Error('Program not verified after multiple retries');
 }
 
 async function deployProgram({
@@ -65,12 +77,12 @@ async function deployProgram({
       await executeCommand(
         `anchor upgrade ${programSoPath} --program-id ${programId.toString()} --provider.cluster devnet`,
       );
-      await verifyProgramDeployment(connection, programId);
+      await verifyProgramDeploymentWithRetry(connection, programId);
       console.log('Program upgraded successfully');
     } else {
       console.log('Deploying new program...');
-      await executeCommand('anchor deploy --provider.cluster devnet');
-      await verifyProgramDeployment(connection, programId);
+      await executeCommand(`anchor deploy --provider.cluster devnet`);
+      await verifyProgramDeploymentWithRetry(connection, programId);
       console.log(`Program deployed to ${programId.toString()}`);
     }
 
@@ -110,28 +122,23 @@ async function deploy() {
 
     const connection = new web3.Connection(DEVNET_URL, 'confirmed');
 
-    // Load the deployed program ID
-    const programIdKeypair = web3.Keypair.fromSecretKey(
-      Buffer.from(JSON.parse(fs.readFileSync(`target/deploy/${PROGRAM_NAME}-keypair.json`, 'utf-8'))),
-    );
-    const programId = programIdKeypair.publicKey;
-
-    // Check funding for critical accounts
-    console.log('\nChecking account balances...');
-    await checkAccountFunding(connection, treasuryKeypair.publicKey, 'Treasury');
-    await checkAccountFunding(connection, programId, 'Program ID');
-
     // Use default provider (from Solana CLI wallet) for program deployment
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
     console.log(`Using Program Authority from Solana CLI config: ${provider.wallet.publicKey.toString()}`);
+
+    // Check funding for critical accounts
+    console.log('\nChecking account balances...');
+    await checkAccountFunding(connection, treasuryKeypair.publicKey, 'Treasury');
     await checkAccountFunding(connection, provider.wallet.publicKey, 'Program Authority (Solana CLI wallet)');
 
-    const deployed = await deployProgram({ connection, programId, provider });
+    await checkAccountFunding(connection, provider.wallet.publicKey, 'Program Authority (Solana CLI wallet)');
+
+    const deployed = await deployProgram({ connection, programId: PROGRAM_ID, provider });
     if (!deployed) throw new Error('Program deployment failed');
 
     // Initialize the program
-    const program = new anchor.Program(require(`../target/idl/${PROGRAM_NAME}.json`), programId, provider);
+    const program = new anchor.Program(require(`../target/idl/${PROGRAM_NAME}.json`), PROGRAM_ID, provider);
 
     // Derive the marketplace PDA from program authority
     const [marketplacePDA] = web3.PublicKey.findProgramAddressSync(
@@ -153,7 +160,7 @@ async function deploy() {
       .rpc();
 
     const deployInfo = {
-      programId: programId.toString(),
+      programId: PROGRAM_ID.toString(),
       programAuthority: provider.wallet.publicKey.toString(),
       bonkMint: DEVNET_BONK_MINT.toString(),
       marketplace: marketplacePDA.toString(),
@@ -172,7 +179,7 @@ async function deploy() {
     fs.writeFileSync(path.join(devnetConfigDir, 'deployment-info.json'), JSON.stringify(deployInfo, null, 2));
 
     console.log('\n=== Deployment Summary ===');
-    console.log(`✓ Program deployed to: ${programId.toString()}`);
+    console.log(`✓ Program deployed to: ${PROGRAM_ID.toString()}`);
     console.log(`✓ Program authority: ${provider.wallet.publicKey.toString()}`);
     console.log(`✓ Network: Devnet`);
     console.log(`✓ RPC URL: ${DEVNET_URL}`);

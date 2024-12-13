@@ -9,7 +9,6 @@ import {
   Transaction,
   sendAndConfirmTransaction,
   LAMPORTS_PER_SOL,
-  Connection,
 } from '@solana/web3.js';
 import {
   createMint,
@@ -68,8 +67,6 @@ describe('myqa', function () {
   const MAX_KEYS = new anchor.BN(10);
   const PINATA_URI = 'https://gateway.pinata.cloud/ipfs/QmT8JtG98Pu6YqHrRxiANrqjaC8ydz3F4uuQvRfQqC3T45';
   const ENCRYPTED_KEY = Buffer.from('encrypted_key_data');
-  const LIST_PRICE = new anchor.BN(2_000_000); // 2 BONK (6 decimals)
-  const UPDATED_PRICE = new anchor.BN(3_000_000); // 3 BONK (6 decimals)
 
   before(async () => {
     // airdrop SOL
