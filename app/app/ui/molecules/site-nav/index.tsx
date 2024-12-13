@@ -28,9 +28,10 @@ export const SiteNav = ({
   const { publicKey, connected, disconnect, connecting, select, ...rest } =
     useWallet();
 
-  // TODO: We need to log the user out of their wallet if it doesn't match
-  // the one that the originally linked to their profile
   const [showWarning, setShowWarning] = React.useState(false);
+
+  // Check if user has completed onboarding
+  const hasCompletedOnboarding = user?.UserProfile?.onboarding === 'DONE';
 
   return (
     <nav className={`flex h-[96px] w-full flex-row items-center ${className}`}>
@@ -41,14 +42,18 @@ export const SiteNav = ({
       <div className="ml-auto hidden items-center gap-4 sm:flex">
         {user ? (
           <>
-            {publicKey ? (
-              <span className="rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground">
-                {publicKey.toString()}
-              </span>
-            ) : (
-              <span className="pointer-events-none text-xs text-gray-400">
-                <WalletMultiButton />
-              </span>
+            {hasCompletedOnboarding && (
+              <>
+                {publicKey ? (
+                  <span className="rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground">
+                    {publicKey.toString()}
+                  </span>
+                ) : (
+                  <span className="pointer-events-none text-xs text-gray-400">
+                    <WalletMultiButton />
+                  </span>
+                )}
+              </>
             )}
             <LogoutForm />
           </>

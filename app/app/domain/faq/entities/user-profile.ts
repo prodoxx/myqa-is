@@ -102,4 +102,5 @@ export type UserProfileDTO = Omit<
   ExternalLinks: ExternalLinkDTO[];
   Avatar: AssetDTO;
   QAs: QaDTO[];
+  onboarding: OnboardingStepORM;
 };
