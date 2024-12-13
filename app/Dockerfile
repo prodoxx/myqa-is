@@ -11,14 +11,10 @@ RUN apk add --no-cache \
     libc6-compat \
     && rm -rf /var/cache/apk/*
 
-ENV SHELL=/bin/sh
 ENV PORT=80
 
-# Install pnpm
-RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL=/bin/sh sh - \
-    && SHELL=/bin/sh /root/.local/share/pnpm/pnpm setup
-ENV PNPM_HOME="/root/.local/share/pnpm"
-ENV PATH="${PNPM_HOME}:${PATH}"
+# Install pnpm globally using npm
+RUN npm install -g pnpm
 
 # Set working directory
 WORKDIR /app
