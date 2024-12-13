@@ -34,6 +34,7 @@ const createPrismaClient = () => {
 let prisma: ReturnType<typeof createPrismaClient>;
 
 if (process.env.NODE_ENV === 'production') {
+  console.log('DBURL', process.env.DATABASE_URL);
   prisma = createPrismaClient();
 } else {
   prisma = global.prisma;
