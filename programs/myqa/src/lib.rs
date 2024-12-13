@@ -7,7 +7,7 @@ use anchor_spl::{
 
 use mpl_token_metadata::types::DataV2;
 
-declare_id!("9JAQRjJrrADocbboPiaRNRNpkbGKZKgxoJpsEkJEDn2e");
+declare_id!("EsXaHoxZzsBAmMGKVWrNgysfs2Rv1XasV1JTHdyvwskM");
 
 // Fee constants as basis points (1 basis point = 0.01%)
 const INITIAL_PLATFORM_FEE_BPS: u16 = 500;  // 5%

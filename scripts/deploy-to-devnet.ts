@@ -9,7 +9,7 @@ import path from 'path';
 const DEVNET_BONK_MINT = new web3.PublicKey('Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr');
 const DEVNET_URL = 'https://api.devnet.solana.com';
 
-const PROGRAM_ID = new web3.PublicKey('9JAQRjJrrADocbboPiaRNRNpkbGKZKgxoJpsEkJEDn2e');
+const PROGRAM_ID = new web3.PublicKey('EsXaHoxZzsBAmMGKVWrNgysfs2Rv1XasV1JTHdyvwskM');
 
 async function checkAccountFunding(
   connection: web3.Connection,
@@ -37,7 +37,7 @@ async function verifyProgramDeploymentWithRetry(
   waitTimeMs = 10000,
 ) {
   for (let i = 0; i < retries; i++) {
-    const info = await connection.getAccountInfo(programId);
+    const info = await connection.getAccountInfo(programId, 'confirmed');
     if (info && info.executable) {
       return;
     }
