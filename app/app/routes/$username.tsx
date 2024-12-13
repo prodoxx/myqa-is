@@ -46,21 +46,24 @@ export const loader = async (args: LoaderFunctionArgs) => {
     return redirect('/404');
   }
 
+  const isCreator = user?.id === session?.id;
   const [bonkPrice, totalAvailableQuestions, decryptedQuestions] =
     await Promise.all([
       getCryptoPrice(SupportedCoins.BONKUSDT, process.env.BINANCE_API_KEY),
       prisma.qA.count({ where: { userId: user?.id } }),
-      user.UserProfile.QAs?.map((c) => ({
-        id: c.id,
-        decryptedAnswer:
-          decryptContent(c.encryptedAnswer, c.IpfsPin?.symmetricKey!) ?? '',
-      })) ?? [],
+      isCreator
+        ? user.UserProfile.QAs?.map((c) => ({
+            id: c.id,
+            decryptedAnswer:
+              decryptContent(c.encryptedAnswer, c.IpfsPin?.symmetricKey!) ?? '',
+          })) ?? []
+        : [],
     ]);
 
   return typedjson({
     decryptedQuestions,
     bonkPrice,
-    isCreator: user?.id === session?.id,
+    isCreator,
     user: user?.json(),
     totalAvailableQuestions,
     pagination: {
