@@ -11,8 +11,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+
+ENV SHELL=/bin/bash
+ENV PORT=80
+
 # Install pnpm
-RUN curl -fsSL https://get.pnpm.io/install.sh | sh -
+RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL=/bin/bash sh - \
+    && SHELL=/bin/bash /root/.local/share/pnpm/pnpm setup
 ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="${PNPM_HOME}:${PATH}"
 
