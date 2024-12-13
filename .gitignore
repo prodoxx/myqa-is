@@ -27,5 +27,6 @@ test-ledger
 
 *.log
 *.json
+!railway.json
 
 !app/app/lib/idl/*
