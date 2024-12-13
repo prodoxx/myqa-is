@@ -58,14 +58,14 @@ export const SocialLinksForm = ({
       encType="multipart/form-data"
     >
       <Card className="max-w-4xl mx-auto">
-        <CardHeader>
+        <CardHeader className="space-y-3">
           <CardTitle className="text-2xl">Social Links</CardTitle>
-          <span>
+          <span className="text-muted-foreground">
             Add your social links to personalize your profile and make it easier
             for others to connect with you
           </span>
         </CardHeader>
-        <CardContent className="flex flex-col space-y-4">
+        <CardContent className="flex flex-col space-y-6">
           {errorMessage ? (
             <Alert variant="destructive">
               <AlertTitle>Failed to complete step</AlertTitle>
@@ -73,7 +73,7 @@ export const SocialLinksForm = ({
             </Alert>
           ) : null}
 
-          <ul className="flex flex-col space-y-4">
+          <ul className="flex flex-col space-y-6">
             <input
               hidden
               name="onboarding"
@@ -90,11 +90,11 @@ export const SocialLinksForm = ({
             {socialLinks.map((link, index) => (
               <li
                 key={`${link.type}${index}`}
-                className="grid grid-cols-4 gap-4"
+                className="grid grid-cols-4 gap-6"
               >
-                <div className="flex flex-col col-span-3">
+                <div className="flex flex-col col-span-3 space-y-3">
                   <Label
-                    className="text-xs"
+                    className="text-sm font-medium"
                     htmlFor={`pending-externalLinks.${index}.url`}
                   >
                     Username
@@ -102,6 +102,7 @@ export const SocialLinksForm = ({
                   <Input
                     name={`pending-externalLinks[${index}].url`}
                     placeholder="i.e. johnsmith"
+                    className="h-11"
                     onChange={(e) =>
                       setSocialLinks(
                         socialLinks.map((c, currentIndex) =>
@@ -133,8 +134,9 @@ export const SocialLinksForm = ({
                     disabled={socialLinks.length === 1}
                     variant="ghost"
                     onClick={() => onRemoveLink(index)}
+                    className="hover:bg-destructive/10"
                   >
-                    <CircleXIcon className="h-4 w-4" />
+                    <CircleXIcon className="h-5 w-5 text-destructive" />
                   </Button>
                 </div>
               </li>
