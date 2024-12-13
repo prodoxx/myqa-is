@@ -35,7 +35,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
     return redirect(url.pathname);
   }
 
-  const user = await UserRepository.findByUsername(username!, {
+  const user = await UserRepository.findByUsername(username?.toLowerCase()!, {
     questions: {
       page: paginationResult.data.page,
       size: paginationResult.data.size,
@@ -43,11 +43,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
   });
 
   if (!user) {
-    return redirect('/dashboard');
-  }
-
-  if (user?.username !== username?.toLowerCase()) {
-    return redirect(`/${user?.username?.toLowerCase()}`);
+    return redirect('/404');
   }
 
   const [bonkPrice, totalAvailableQuestions, decryptedQuestions] =
