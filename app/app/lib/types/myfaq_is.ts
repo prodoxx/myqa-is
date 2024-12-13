@@ -37,6 +37,11 @@ export type MyfaqIs = {
           "isSigner": false
         },
         {
+          "name": "treasury",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -53,6 +58,27 @@ export type MyfaqIs = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "updateTreasury",
+      "accounts": [
+        {
+          "name": "marketplace",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newTreasury",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "updateFees",
@@ -151,6 +177,11 @@ export type MyfaqIs = {
           "isSigner": false
         },
         {
+          "name": "treasuryTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "unlockKey",
           "isMut": true,
           "isSigner": false
@@ -167,11 +198,6 @@ export type MyfaqIs = {
         },
         {
           "name": "creatorTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "platformTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -334,6 +360,11 @@ export type MyfaqIs = {
           "isSigner": false
         },
         {
+          "name": "treasuryTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "unlockKey",
           "isMut": true,
           "isSigner": false
@@ -355,11 +386,6 @@ export type MyfaqIs = {
         },
         {
           "name": "creatorTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "platformTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -511,6 +537,10 @@ export type MyfaqIs = {
         "kind": "struct",
         "fields": [
           {
+            "name": "treasury",
+            "type": "publicKey"
+          },
+          {
             "name": "authority",
             "type": "publicKey"
           },
@@ -609,6 +639,10 @@ export type MyfaqIs = {
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "discriminator",
+            "type": "u8"
+          },
           {
             "name": "owner",
             "type": "publicKey"
@@ -976,6 +1010,26 @@ export type MyfaqIs = {
         },
         {
           "name": "creationTime",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "TreasuryUpdated",
+      "fields": [
+        {
+          "name": "previousTreasury",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newTreasury",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
           "type": "i64",
           "index": false
         }
@@ -1215,6 +1269,11 @@ export const IDL: MyfaqIs = {
           "isSigner": false
         },
         {
+          "name": "treasury",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -1231,6 +1290,27 @@ export const IDL: MyfaqIs = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "updateTreasury",
+      "accounts": [
+        {
+          "name": "marketplace",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newTreasury",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "updateFees",
@@ -1329,6 +1409,11 @@ export const IDL: MyfaqIs = {
           "isSigner": false
         },
         {
+          "name": "treasuryTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "unlockKey",
           "isMut": true,
           "isSigner": false
@@ -1345,11 +1430,6 @@ export const IDL: MyfaqIs = {
         },
         {
           "name": "creatorTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "platformTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -1512,6 +1592,11 @@ export const IDL: MyfaqIs = {
           "isSigner": false
         },
         {
+          "name": "treasuryTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "unlockKey",
           "isMut": true,
           "isSigner": false
@@ -1533,11 +1618,6 @@ export const IDL: MyfaqIs = {
         },
         {
           "name": "creatorTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "platformTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -1689,6 +1769,10 @@ export const IDL: MyfaqIs = {
         "kind": "struct",
         "fields": [
           {
+            "name": "treasury",
+            "type": "publicKey"
+          },
+          {
             "name": "authority",
             "type": "publicKey"
           },
@@ -1787,6 +1871,10 @@ export const IDL: MyfaqIs = {
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "discriminator",
+            "type": "u8"
+          },
           {
             "name": "owner",
             "type": "publicKey"
@@ -2154,6 +2242,26 @@ export const IDL: MyfaqIs = {
         },
         {
           "name": "creationTime",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "TreasuryUpdated",
+      "fields": [
+        {
+          "name": "previousTreasury",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newTreasury",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
           "type": "i64",
           "index": false
         }
