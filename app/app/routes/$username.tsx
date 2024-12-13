@@ -83,8 +83,8 @@ const UserProfile = () => {
     <MainLayout disableSiteNav className="items-center space-y-4">
       <div className="max-w-4xl w-full 2xl:w-[1080px] border-slate-300">
         <div className="flex flex-col p-4 space-y-8">
-          <div className="flex flex-row justify-between items-center">
-            <Wallet />
+          <div className="flex flex-row items-center">
+            <Wallet className="ml-auto" />
             <LoginRegisterDialog
               username={data?.user?.username?.toLowerCase()!}
             />
@@ -98,7 +98,7 @@ const UserProfile = () => {
             />
             <h1 className="font-bold text-xl">{data?.user?.username}</h1>
             <span className="text-gray-500 font-lg">
-              {data?.user?.UserProfile?.about ?? 'No description available'}
+              {data?.user?.UserProfile?.about ?? 'No bio available'}
             </span>
 
             <ExternalLinkList links={data?.user?.UserProfile?.ExternalLinks} />

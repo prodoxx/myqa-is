@@ -229,7 +229,6 @@ const LandingPage = () => {
 
       <JoinCommunity />
       <FeaturedQuestions
-        isDemo
         questions={data.questions}
         cryptoPrice={data.bonkPrice!}
       />

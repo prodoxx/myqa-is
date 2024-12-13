@@ -13,17 +13,22 @@ import {
 } from '~/ui/atoms/card';
 import { Dialog, DialogContent } from '~/ui/molecules/dialog';
 import { LogoutForm } from './logout-form';
+import { cn } from '~/lib/utils';
 
 interface LoginRegisterDialogProps {
   username: string;
+  className?: string;
 }
 
-export function LoginRegisterDialog({ username }: LoginRegisterDialogProps) {
+export function LoginRegisterDialog({
+  username,
+  className,
+}: LoginRegisterDialogProps) {
   const { user } = useUser();
   const [showView, setShowView] = useState(false);
 
   return (
-    <div className="space-y-4 ml-auto">
+    <div className={cn('space-y-4', className)}>
       <Button
         variant="ghost"
         onClick={() => setShowView(true)}
