@@ -138,7 +138,6 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async (args: LoaderFunctionArgs) => {
-  console.log('Env', process.env);
   const [questions, creators, bonkPrice] = await Promise.all([
     prisma.qA.findMany({ take: 5 }),
     prisma.user.findMany({ take: 5, include: { UserProfile: true } }),
