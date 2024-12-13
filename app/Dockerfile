@@ -1,23 +1,22 @@
-# Use Node.js LTS (20.x) as the base image
+# Use Node.js LTS (18.x) as the base image
 FROM node:18-alpine
 
 # Install build dependencies and tools
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libusb-1.0-0-dev \
+RUN apk add --no-cache \
+    build-base \
     python3 \
     make \
     g++ \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    libc6-compat \
+    && rm -rf /var/cache/apk/*
 
-
-ENV SHELL=/bin/bash
+ENV SHELL=/bin/sh
 ENV PORT=80
 
 # Install pnpm
-RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL=/bin/bash sh - \
-    && SHELL=/bin/bash /root/.local/share/pnpm/pnpm setup
+RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL=/bin/sh sh - \
+    && SHELL=/bin/sh /root/.local/share/pnpm/pnpm setup
 ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="${PNPM_HOME}:${PATH}"
 
