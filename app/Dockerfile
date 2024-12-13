@@ -37,7 +37,7 @@ COPY . .
 RUN pnpm prisma generate
 
 # Build the application
-RUN pnpm run build:remix && npm prune --omit=dev
+RUN pnpm run build:remix && pnpm prune --prod
 
 # Start the server
 CMD ["pnpm", "start"]
