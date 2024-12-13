@@ -4,7 +4,7 @@
     "builder": "NIXPACKS",
     "buildCommand": "npm run build:remix",
     "watchPatterns": ["/app/**", "/public/**"],
-    "nixpacksConfigPath": "../nixpacks.toml"
+    "nixpacksConfigPath": "nixpacks.toml"
   },
   "deploy": {
     "startCommand": "npm run start",
