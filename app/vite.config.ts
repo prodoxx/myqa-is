@@ -9,10 +9,6 @@ import { vercelPreset } from '@vercel/remix/vite';
 installGlobals({ nativeFetch: true });
 
 export default ({ mode }) => {
-  process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
-
-  console.log(process.env);
-
   return defineConfig({
     ssr: {
       noExternal:
@@ -82,9 +78,6 @@ export default ({ mode }) => {
       supported: {
         'top-level-await': true, //browsers can handle top-level-await features
       },
-    },
-    define: {
-      ...process.env,
     },
   });
 };
