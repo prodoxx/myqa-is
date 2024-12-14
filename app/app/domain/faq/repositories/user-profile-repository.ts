@@ -1,6 +1,6 @@
 import prisma from '~/infrastructure/database/index.server';
 import { ExternalLinkDTO } from '../entities/external-link';
-import { QaDTO } from '../entities/question';
+import { QaDTO } from '../entities/qa';
 import { UserProfileEntity } from '../entities/user-profile';
 import { AssetRepository } from './asset-repository';
 import { ExternalLinkRepository } from './external-link-repository';
@@ -37,7 +37,7 @@ export class UserProfileRepository {
     updates: Partial<
       Pick<
         UserProfileEntity,
-        'Avatar' | 'about' | 'ExternalLinks' | 'onboarding' | 'Wallet'
+        'Avatar' | 'about' | 'ExternalLinks' | 'onboarding'
       > & { username?: string }
     >
   ) {
@@ -54,9 +54,6 @@ export class UserProfileRepository {
                 createMany: { data: updates!.ExternalLinks },
               },
             }
-          : {}),
-        ...(updates?.Wallet
-          ? { Wallet: { connect: { id: updates?.Wallet?.id } } }
           : {}),
       },
       where: {

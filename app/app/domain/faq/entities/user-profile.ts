@@ -95,7 +95,7 @@ export class UserProfileEntity {
 
 export type UserProfileDTO = Omit<
   UserProfileEntity,
-  'createdAt' | 'updatedAt' | 'ExternalLinks' | 'Avatar' | 'Wallet' | 'QAs'
+  'createdAt' | 'updatedAt' | 'ExternalLinks' | 'Avatar' | 'QAs'
 > & {
   createdAt?: string;
   updatedAt?: string;
