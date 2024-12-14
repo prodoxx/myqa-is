@@ -173,7 +173,10 @@ const LandingPage = () => {
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-20 pb-16 min-h-[720px] flex items-center justify-center">
         <div className="text-center my-auto space-y-8">
-          <Badge variant="outline" className="px-8 py-4 text-2xl">
+          <Badge
+            variant="outline"
+            className="px-12 py-2 text-base border-purple-500"
+          >
             DEMO
           </Badge>
           <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black text-white mb-6">
