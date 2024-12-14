@@ -13,6 +13,7 @@ import { MainLayout } from '~/ui/layouts/main';
 import FeaturedQuestions from '~/ui/organisms/home/features-questions';
 import JoinCommunity from '~/ui/organisms/home/join-community';
 import { useWalletState } from '~/provider/wallet-provider';
+import { Badge } from '~/ui/atoms/badge';
 
 const exampleCreators = [
   {
@@ -171,7 +172,10 @@ const LandingPage = () => {
     <MainLayout>
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-20 pb-16 min-h-[720px] flex items-center justify-center">
-        <div className="text-center my-auto">
+        <div className="text-center my-auto space-y-8">
+          <Badge variant="outline" className="px-8 py-4 text-2xl">
+            DEMO
+          </Badge>
           <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black text-white mb-6">
             Unlock Exclusive Access to Your{' '}
             <span className="bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
