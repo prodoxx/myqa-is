@@ -107,8 +107,7 @@ export const QuestionsList = ({
                   {cryptoPrice ? (
                     <BonkPricing
                       toUsd={Intl.NumberFormat('en-US').format(
-                        Number(question.unlockPriceInBonk) *
-                          (cryptoPrice?.price ?? 0.000039)
+                        Number(question.unlockPriceInBonk) * cryptoPrice?.price
                       )}
                     >
                       {question.unlockPriceInBonk.toLocaleString()}
@@ -145,8 +144,7 @@ export const QuestionsList = ({
                     question={question.question}
                     priceInBonk={Number(question.unlockPriceInBonk)}
                     priceInDollar={Intl.NumberFormat('en-US').format(
-                      Number(question.unlockPriceInBonk) *
-                        (cryptoPrice?.price ?? 0.000039)
+                      Number(question.unlockPriceInBonk) * cryptoPrice?.price!
                     )}
                   />
                 )

@@ -17,7 +17,10 @@ export const getCryptoPrice = async (symbol: string, apiKey?: string) => {
     return { price: Number(response.data.price), date: currentDate };
   } catch (error) {
     console.error('Error fetching price:', error);
-    return null;
+    return {
+      date: new Date().getTime(),
+      price: 0.000039,
+    };
   }
 };
 
