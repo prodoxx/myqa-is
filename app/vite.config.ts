@@ -9,14 +9,6 @@ import { vercelPreset } from '@vercel/remix/vite';
 installGlobals({ nativeFetch: true });
 
 export default defineConfig({
-  test: {
-    threads: false,
-    coverage: {
-      all: true,
-    },
-    environment: 'node',
-    setupFiles: ['./test/setup.ts'],
-  },
   ssr: {
     noExternal:
       process.env.NODE_ENV === 'production'

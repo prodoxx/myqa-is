@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { CountryCode, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import bycrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
 import { differenceInYears } from 'date-fns';
@@ -42,7 +42,6 @@ const seed = async () => {
         password,
         UserProfile: {
           create: {
-            country: CountryCode.US,
             dateOfBirth: new Date(differenceInYears(new Date(), new Date(1997, 10, 10))),
           }
         }
