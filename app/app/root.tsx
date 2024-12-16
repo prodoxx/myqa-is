@@ -9,11 +9,11 @@ import {
   useLocation,
   useRouteError,
 } from '@remix-run/react';
-import type {
-  LinksFunction,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@vercel/remix';
+// import type {
+//   LinksFunction,
+//   LoaderFunctionArgs,
+//   MetaFunction,
+// } from '@vercel/remix';
 import { typedjson, useTypedLoaderData } from 'remix-typedjson';
 import '~/assets/styles/app.css';
 import { authenticator } from './auth.server';
@@ -26,6 +26,8 @@ import { useEffect } from 'react';
 import { posthog } from './infrastructure/analytics/index.client';
 import sonnerStyles from 'sonner/dist/styles.css?url';
 import { WalletProvider } from './provider/wallet-provider';
+import { LinksFunction, MetaFunction } from '@remix-run/node';
+import { LoaderFunctionArgs } from '@remix-run/node';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: sonnerStyles },

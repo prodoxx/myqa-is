@@ -1,5 +1,5 @@
-import { createCookieSessionStorage } from '@vercel/remix';
-
+// import { createCookieSessionStorage } from '@vercel/remix';
+import { createCookieSessionStorage } from '@remix-run/node';
 export let sessionStorage = createCookieSessionStorage({
   cookie: {
     name: '_session',

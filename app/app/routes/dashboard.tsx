@@ -1,4 +1,6 @@
-import { type LoaderFunctionArgs, type MetaFunction } from '@vercel/remix';
+// import { type LoaderFunctionArgs, type MetaFunction } from '@vercel/remix';
+import { MetaFunction } from '@remix-run/node';
+import { LoaderFunctionArgs } from '@remix-run/node';
 import { redirect } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';

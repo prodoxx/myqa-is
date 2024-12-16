@@ -1,5 +1,5 @@
-import { type LoaderFunctionArgs, type MetaFunction } from '@vercel/remix';
-import { Link } from '@remix-run/react';
+// import { type LoaderFunctionArgs, type MetaFunction } from '@vercel/remix';
+import { Link, MetaFunction } from '@remix-run/react';
 import { ChevronRight, Coins, Key, Lock, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTypedLoaderData } from 'remix-typedjson';
@@ -14,6 +14,7 @@ import FeaturedQuestions from '~/ui/organisms/home/features-questions';
 import JoinCommunity from '~/ui/organisms/home/join-community';
 import { useWalletState } from '~/provider/wallet-provider';
 import { Badge } from '~/ui/atoms/badge';
+import { LoaderFunctionArgs } from '@remix-run/node';
 
 const exampleCreators = [
   {

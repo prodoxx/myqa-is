@@ -1,4 +1,5 @@
-import type { ActionFunction } from '@vercel/remix';
+// import type { ActionFunction } from '@vercel/remix';
+import { ActionFunction } from '@remix-run/node';
 import { typedjson } from 'remix-typedjson';
 import { z, ZodError } from 'zod';
 import { authenticator } from '~/auth.server';

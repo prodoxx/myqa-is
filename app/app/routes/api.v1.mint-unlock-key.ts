@@ -1,4 +1,5 @@
-import type { ActionFunction } from '@vercel/remix';
+// import type { ActionFunction } from '@vercel/remix';
+import { ActionFunction } from '@remix-run/node';
 import { PinataSDK } from 'pinata-web3';
 import { typedjson } from 'remix-typedjson';
 import { z } from 'zod';

@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
+// import { LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
 import { typedjson } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
 import { UserRepository } from '~/domain/faq/repositories/user-repository';
@@ -8,6 +8,8 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { Spinner } from '~/ui/atoms/spinner';
 import React from 'react';
 import { initializeMarketplace } from '~/config/marketplace.client';
+import { MetaFunction } from '@remix-run/node';
+import { LoaderFunctionArgs } from '@remix-run/node';
 
 export const meta: MetaFunction = () => {
   return [

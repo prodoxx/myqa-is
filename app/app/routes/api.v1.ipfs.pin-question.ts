@@ -1,4 +1,4 @@
-import type { ActionFunction } from '@vercel/remix';
+// import type { ActionFunction } from '@vercel/remix';
 import { PinataSDK } from 'pinata-web3';
 import { typedjson } from 'remix-typedjson';
 import { authenticator } from '~/auth.server';
@@ -9,6 +9,7 @@ import {
 } from '~/utils/encryption.server';
 import {} from '~/utils/encryption.server';
 import prisma from '~/infrastructure/database/index.server';
+import { ActionFunction } from '@remix-run/node';
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,

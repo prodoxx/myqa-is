@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from '@vercel/remix';
+// import { ActionFunctionArgs, LoaderFunctionArgs } from '@vercel/remix';
 import { authenticator } from '~/auth.server';
 import { getErrorMessage } from '~/lib/error-messages';
 import { MainLayout } from '~/ui/layouts/main';
@@ -12,6 +12,7 @@ import {
   useSearchParams,
 } from '@remix-run/react';
 import prisma from '~/infrastructure/database/index.server';
+import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 
 export const loader = async (args: LoaderFunctionArgs) => {
   const searchParams = new URL(args.request.url).searchParams;

@@ -1,4 +1,6 @@
-import { redirect, type ActionFunctionArgs } from '@vercel/remix';
+// import { redirect, type ActionFunctionArgs } from '@vercel/remix';
+import { ActionFunctionArgs } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { authenticator } from '~/auth.server';
 
 export let loader = () => redirect('/login');

@@ -1,4 +1,5 @@
-import { ActionFunctionArgs } from '@vercel/remix';
+// import { ActionFunctionArgs } from '@vercel/remix';
+import { ActionFunctionArgs } from '@remix-run/node';
 import { redirect } from 'remix-typedjson';
 import { destroySession, getSession } from '~/session.server';
 

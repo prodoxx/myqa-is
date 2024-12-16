@@ -1,8 +1,8 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from '@vercel/remix';
+// import type {
+//   ActionFunctionArgs,
+//   LoaderFunctionArgs,
+//   MetaFunction,
+// } from '@vercel/remix';
 import { redirect } from '@vercel/remix';
 import { Link, useNavigation } from '@remix-run/react';
 import { AuthorizationError } from 'remix-auth';
@@ -22,7 +22,11 @@ import { Separator } from '~/ui/atoms/separator';
 import { MainLayout } from '~/ui/layouts/main';
 import { GoogleLoginForm } from '~/ui/organisms/auth/google-form';
 import { LoginForm } from '~/ui/organisms/auth/login-form';
-
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node';
 const getValuesFromRequest = async (request: Request) => {
   const formData = await request.formData();
   const values = Object.fromEntries(formData);
