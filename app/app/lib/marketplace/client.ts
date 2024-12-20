@@ -468,7 +468,7 @@ export class MarketplaceClient {
     }
   }
 
-  public async currentKeysCount(onChainId: number) {
+  public async currentKeysCount(onChainId: number): Promise<string> {
     try {
       const marketplacePda = await this.getMarketplacePda();
 
@@ -488,8 +488,8 @@ export class MarketplaceClient {
 
       return questionAccount.currentKeys.toString();
     } catch (error) {
-      console.error('Failed to find question current keys:', error);
-      throw error;
+      console.warn('Failed to find question current keys:', error);
+      return '0';
     }
   }
 }
